@@ -1,0 +1,33 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+
+description: an entry in the sample sheet
+
+# columns that the config/samples.tsv file can have and which type they should be
+properties:
+  date:
+    type: string
+    description: date of the sample
+  folder:
+    type: string
+    description: folder where is stored the sample  
+  condition:
+    type: string
+    description: sample condition that will be compared during differential analysis (e.g. a treatment, a tissue time, a disease)
+  rna_fragment_name:
+    type: string
+    description: name of the dna fragment 
+
+# columns that the config/samples.tsv file must have to pass schema validation
+required:
+  - date
+  - folder
+  - rna_fragment_name
+  - purification
+  - tp
+  - reagent
+  - primer
+  - ddntp
+  - ref
+  - plus_reaction_filename
+  - minus_reaction_filename 
+  - condition

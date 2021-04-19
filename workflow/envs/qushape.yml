@@ -1,0 +1,11 @@
+name: qushape
+channels:
+  - bioconda
+  - conda-forge
+  - free 
+dependencies:
+    - python = 2.7
+    - pyqt = 4
+    - numpy
+    - matplotlib
+    - scipy
