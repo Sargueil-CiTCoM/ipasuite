@@ -13,9 +13,9 @@ properties:
   condition:
     type: string
     description: sample condition that will be compared during differential analysis (e.g. a treatment, a tissue time, a disease)
-  rna_fragment_name:
-    type: string
-    description: name of the dna fragment 
+#  rna_fragment_id:
+#    type: float
+#    description: name of the dna fragment 
 
 # columns that the config/samples.tsv file must have to pass schema validation
 required:
@@ -28,6 +28,6 @@ required:
   - primer
   - ddntp
   - ref
-  - plus_reaction_filename
-  - minus_reaction_filename 
-  - condition
+  - sample_filename
+  - control_filename 
+    #  - condition

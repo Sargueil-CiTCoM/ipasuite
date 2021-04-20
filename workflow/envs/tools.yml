@@ -1,0 +1,8 @@
+name: qushape
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+    - python
+    - fire
+    - pandas

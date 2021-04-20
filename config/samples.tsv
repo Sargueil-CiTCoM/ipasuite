@@ -1,4 +1,4 @@
-date	folder	rna_fragment_name	purification	tp	reagent	pimer	ddntp	ref	plus_reaction_filename	minus_reaction_filename	sequence	comment	Output	Reactivity  condition
+date	folder	rna_fragment_name	purification	tp	reagent	primer	ddntp	ref	sample_filename	control_filename	sequence	comment	Output	Reactivity  condition
 2019-12-04	20191204_R	343	B7	sans Mg	1M7	5UTR	ddATP	1	1+.txt	1-.txt		ok signal faible	ok	ok
 2019-12-04	20191204_R	343	B11	sans Mg	1M7	5UTR	ddATP	2	2+.txt	2-.txt		ok	ok	ok
 2019-12-04	20191204_R	343	B2	5 mM	1M7	5UTR	ddATP	3	3+.txt	3-.txt		ok	ok	ok
@@ -67,6 +67,9 @@ date	folder	rna_fragment_name	purification	tp	reagent	pimer	ddntp	ref	plus_react
 2020-03-02	20200302_R2	1636	Precipit	DD+Mg	1M7	5UTR	ddTTP					nope		
 2020-06-24	20200624_R	343	precipit	DD+Mg	1M7 new	UTR	ddTTP	343UTR	343UTR+.txt	343UTR-.txt		ok	ok	ok
 2020-06-24	20200624_R	343	precipit	DD+Mg	1M7 new	HIV1-0	ddTTP	3431-0	3431-0+.txt	3431-0-.txt		bof		
+include: "rules/common.smk"
+include: "rules/tools.smk"
+include: "rules/other.smk"
 2020-06-24	20200624_R	416	precipit	DD+Mg	1M7 new	UTR	ddTTP	416UTR	416UTR+.txt	416UTR-.txt		ok avant TAR	ok	ok
 2020-06-24	20200624_R	416	precipit	DD+Mg	1M7 new	HIV1-3	ddTTP	4161-3	4161-3+.txt	4161-3-.txt		pb seq	ok	ok
 2020-06-24	20200624_R	540	precipit	DD+Mg	1M7 new	UTR	ddTTP	540UTR	540UTR+.txt	540UTR-.txt		ok avant TAR	ok	ok
