@@ -16,9 +16,15 @@ samples = samples[samples.ref.notnull()]
 #samples.index.names = ["sample_id"]
 validate(samples, schema="../schemas/samples.schema.yaml")
 
-def get_final_outputs():
-    exppath = "resources/ceq8000/{folder}/{sample_filename}.tsv"
-    outputs = expand(exppath, sample_filename=samples["sample_filename"].apply(lambda x: os.path.splitext(x)[0]), folder=samples["folder"])
-    outputs.append(expand(exppath, sample_filename=samples["control_filename"].apply(lambda x: os.path.splitext(x)[0]), folder=samples["folder"]))
 
+
+
+def get_final_outputs():
+    exppath = "resources/ceq8000/{folder}/{sample}.tsv"
+    outputs = []
+    print(samples)
+    for row in samples.itertuples(name="Sample"):
+        folder = row.folder
+        sample = exppath.format(folder=folder,sample=os.path.splitext(row.sample_filename)[0])
+        control = exppath.format(folder=folder,sample=os.path.splitext(row.control_filename)[0])
     return outputs
