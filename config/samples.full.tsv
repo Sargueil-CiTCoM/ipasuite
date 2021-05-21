@@ -1,0 +1,120 @@
+date	folder	rna_fragment_name	purification	tp	reagent	primer	ddntp	ref	sample_filename	control_filename	sequence	comment	Output	Reactivity  condition
+2019-12-04	20191204_R	343	B11	sans Mg	1M7	5UTR	ddATP	2	2+.txt	2-.txt		ok	ok	ok
+2019-12-04	20191204_R	343	B2	5 mM	1M7	5UTR	ddATP	3	3+.txt	3-.txt		ok	ok	ok
+2019-12-13	20191213_R	343	Precipit	DD + Mg	1M7	5UTR	ddATP	343	343+.txt	343-.txt		ok	ok	ok
+2019-12-13	20191213_R	416	Precipit	DD + Mg	1M7	HIV2b	ddATP	416	416+.txt	416-.txt		ok	ok	ok
+2019-12-13	20191213_R	540	Precipit	DD + Mg	1M7	HIV2b	ddATP	540	540+.txt	540-.txt		ok	ok	ok
+2019-12-13	20191213_R	851	Precipit	DD + Mg	1M7	HIV2b	ddATP	851	851+.txt	851-.txt		ok	ok	ok
+2020-02-12	20200212_R	343	Precipit	DD+Mg	1M7	5UTR	ddATP	1UTR	1UTR+.txt	1UTR-.txt		ok	ok	ok
+2020-02-12	20200212_R	343	Precipit	DD+Mg	1M7	HIV0	ddATP	1-0	1-0+.txt	1-0-.txt		ok	ok	ok
+2020-02-12	20200212_R	540	Precipit	DD+Mg	1M7	HIV0	ddATP	3-0	3-0+.txt	3-0-.txt		ok	ok	ok
+2020-02-12	20200212_R	851	Precipit	DD+Mg	1M7	HIV0	ddATP	4-0	4-0+.txt	4-0-.txt		ok	ok	ok
+2020-02-12	20200212_R	1074	Precipit	DD+Mg	1M7	5UTR	ddATP	5UTR	5UTR+.txt	5UTR-.txt		ok	ok	ok
+2020-02-12	20200212_R	1074	Precipit	DD+Mg	1M7	HIV0	ddATP	5-0	5-0+.txt	5-0-.txt		ok	ok	ok
+2020-02-12	20200212_R	1396	Precipit	DD+Mg	1M7	HIV0	ddATP	6-0	6-0+.txt	6-0-.txt		ok	ok	ok
+2020-02-12	20200212_R	1636	Precipit	DD+Mg	1M7	HIV0	ddATP	7-0	7-0+.txt	7-0-.txt		ok	ok	ok
+2020-03-02	20200302_R1	1396	Precipit	DD+Mg	1M7	5UTR	ddTTP	1396	1396+.txt	1396-.txt		ok	ok	ok
+2020-06-24	20200624_R	343	precipit	DD+Mg	1M7 new	UTR	ddTTP	343UTR	343UTR+.txt	343UTR-.txt		ok	ok	ok
+2020-06-24	20200624_R	540	precipit	DD+Mg	1M7 new	HIV1-3	ddTTP	540_1-3	540_1-3+.txt	540_1-3-.txt		ok	ok	ok
+2020-06-24	20200624_R	851	precipit	DD+Mg	1M7 new	HIV1-4	ddTTP	851_1-4	851_1-4+.txt	851_1-4-.txt		ok	ok	ok
+2020-06-24	20200624_R	851	precipit	DD+Mg	1M7 new	HIV1-7	ddTTP	851_1-7	851_1-7+.txt	851_1-7-.txt		ok	ok	ok
+2020-07-02	20200702_R	416	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	416	416+.txt	416-.txt		ok	ok	ok
+2020-07-02	20200702_R	540	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	540	540+.txt	540-.txt		ok	ok	ok
+2020-07-02	20200702_R	851	precipit	DD+Mg	1M7 new	HIV1-4	ddTTP	851	851+.txt	851-.txt		ok	ok	ok
+2020-07-05	20200705_R	343	precipit	DD+Mg	1M7 new	HIV1-0	ddCTP	343_HIV1-0_0507	343_HIV1-0_0507+.txt	343_HIV1-0_0507-.txt		ok	ok	ok
+2020-07-05	20200705_R	416	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	416_HIV1-3_0507	416_HIV1-3_0507+.txt	416_HIV1-3_0507-.txt		ok	ok	ok
+2020-07-05	20200705_R	540	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	540_HIV1-3_0507	540_HIV1-3_0507+.txt	540_HIV1-3_0507-.txt		ok	ok	ok
+2020-07-05	20200705_R	851	precipit	DD+Mg	1M7 new	HIV1-4	ddCTP	851_HIV1-4_0507	851_HIV1-4_0507+.txt	851_HIV1-4_0507-.txt		ok	ok	ok
+2020-07-05	20200705_R	1636	precipit	DD+Mg	1M7 new	HIV1-4	ddCTP	1636_HIV1-4_0507	1636_HIV1-4_0507+.txt	1636_HIV1-4_0507-.txt		ok	ok	ok
+2020-07-05	20200705_R	1636	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1636_HIV1-7_0507	1636_HIV1-7_0507+.txt	1636_HIV1-7_0507-.txt		ok	ok	ok
+2020-07-22	20200722_R	851	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	851_1-3_2207inv	851_1-3_2207inv+.txt	851_1-3_2207inv-.txt		ok	ok	ok
+2020-07-22	20200722_R	851	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	851_1-3_2207inv2	851_1-3_2207inv2+.txt	851_1-3_2207inv2-.txt		ok	ok	ok
+2020-07-22	20200722_R	1396	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	1396_1-3_2207inv	1396_1-3_2207inv+.txt	1396_1-3_2207inv-.txt		ok	ok	ok
+2020-07-22	20200722_R	1396	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	1396_1-3_2207inv2	1396_1-3_2207inv2+.txt	1396_1-3_2207inv2-.txt		ok	ok	ok
+2020-07-22	20200722_R	1636	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	1636_1-3_2207inv	1636_1-3_2207inv+.txt	1636_1-3_2207inv-.txt		ok	ok	ok
+2020-11-23	20201123_R	540	precipit	DD+Mg	1M7 new	UTR	ddATP	540-1	540-1+.txt	540-1-.txt		ok	ok	ok
+2020-11-23	20201123_R	540	precipit	DD+Mg	1M7 new	UTR	ddATP	540-2	540-2+.txt	540-2-.txt		ok	ok	ok
+2020-11-23	20201123_R	851	precipit	DD+Mg	1M7 new	UTR	ddATP	851-1	851-1+.txt	851-1-.txt		ok	ok	ok
+2020-11-23	20201123_R	851	precipit	DD+Mg	1M7 new	UTR	ddATP	851-2	851-2+.txt	851-2-.txt		ok	ok	ok
+2020-11-23	20201123_R	1074	precipit	DD+Mg	1M7 new	UTR	ddATP	1074-1	1074-1+.txt	1074-1-.txt		ok	ok	ok
+2020-11-23	20201123_R	1074	precipit	DD+Mg	1M7 new	UTR	ddATP	1074-2	1074-2+.txt	1074-2-.txt		ok	ok	ok
+2020-11-23	20201123_R	1396	precipit	DD+Mg	1M7 new	UTR	ddATP	1396-2	1396-2+.txt	1396-2-.txt		ok sans signal decay	ok	ok
+2020-11-30	20201130_R	343	precipit	DD+Mg	1M7 new	UTR	ddATP	343-4	343-4+.txt	343-4-.txt		ok	ok	ok
+2020-11-30	20201130_R	540	precipit	DD+Mg	1M7 new	UTR	ddATP	540_3	540_3+.txt	540_3-.txt		ok	ok	ok
+2020-11-30	20201130_R	416	precipit	DD+Mg	1M7 new	UTR	ddATP	416_1	416_1+.txt	416_1-.txt		ok	ok	ok
+2020-11-30	20201130_R	416	precipit	DD+Mg	1M7 new	UTR	ddATP	416_2	416_2+.txt	416_2-.txt		ok	ok	ok
+2020-11-30	20201130_R	1396	precipit	DD+Mg	1M7 new	UTR	ddATP	1396_1	1396_1+.txt	1396_1-.txt		ok	ok	ok
+2020-11-30	20201130_R	1636	precipit	DD+Mg	1M7 new	UTR	ddATP	1636_2	1636_2+.txt	1636_2-.txt		ok	ok	ok
+2020-12-09	20201209_R	851	precipit	DD+Mg	1M7 new	UTR	ddATP	851_UTR_2	851_UTR_2+.txt	851_UTR_2-.txt		ok	ok	ok
+2020-12-09	20201209_R	1636	precipit	DD+Mg	1M7 new	UTR	ddATP	1636_UTR1	1636_UTR1+.txt	1636_UTR1-.txt		ok	ok	ok
+2020-12-09	20201209_R	1636	precipit	DD+Mg	1M7 new	UTR	ddATP	1636_UTR2	1636_UTR2+.txt	1636_UTR2-.txt		ok	ok	ok
+2020-12-09	20201209_R	343	precipit	DD+Mg	1M7 new	HIV1-0	ddATP	343_HIV0_1	343_HIV0_1+.txt	343_HIV0_1-.txt		ok	ok	ok
+2020-12-09	20201209_R	1074	precipit	DD+Mg	1M7 new	HIV1-0	ddATP	1074_HIV0_1	1074_HIV0_1+.txt	1074_HIV0_1-.txt		ok	ok	ok
+2020-12-09	20201209_R	1074	precipit	DD+Mg	1M7 new	HIV1-0	ddATP	1074_HIV0_2	1074_HIV0_2+.txt	1074_HIV0_2-.txt		ok	ok	ok
+2020-12-09	20201209_R	416	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	416_13_1	416_13_1+.txt	416_13_1-.txt		ok	ok	ok
+2020-12-09	20201209_R	1074	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	1074_13_3	1074_13_3+.txt	1074_13_3-.txt		ok	ok	ok
+2020-12-09	20201209_R	1636	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	1636_13	1636_13+.txt	1636_13-.txt		ok	ok	ok
+2020-12-14	20201214_R	540	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	540_1	540_1+.txt	540_1-.txt		ok	ok	ok
+2020-12-14	20201214_R	540	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	540_2	540_2+.txt	540_2-.txt		ok	ok	ok
+2020-12-14	20201214_R	540	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	540_3	540_3+.txt	540_3-.txt		ok	ok	ok
+2020-12-14	20201214_R	540	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	540_4	540_4+.txt	540_4-.txt		ok	ok	ok
+2020-12-14	20201214_R	738	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	738_1	738_1+.txt	738_1-.txt		ok	ok	ok
+2020-12-14	20201214_R	738	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	738_2	738_2+.txt	738_2-.txt		ok	ok	ok
+2020-12-14	20201214_R	738	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	738_3	738_3+.txt	738_3-.txt		ok	ok	ok
+2020-12-14	20201214_R	738	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	738_4	738_4+.txt	738_4-.txt		ok	ok	ok
+2020-12-14	20201214_R	1060	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1060_1	1060_1+.txt	1060_1-.txt		ok	ok	ok
+2020-12-14	20201214_R	1060	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1060_2	1060_2+.txt	1060_2-.txt		ok	ok	ok
+2020-12-14	20201214_R	1060	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1060_3	1060_3+.txt	1060_3-.txt		ok	ok	ok
+2020-12-14	20201214_R	1301	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1301_1	1301_1+.txt	1301_1-.txt		ok	ok	ok
+2020-12-14	20201214_R	1301	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1301_2	1301_2+.txt	1301_2-.txt		ok	ok	ok
+2020-12-14	20201214_R	1301	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1301_3	1301_3+.txt	1301_3-.txt		ok	ok	ok
+2020-12-14	20201214_R	1301	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	1301_4	1301_4+.txt	1301_4-.txt		ok	ok	ok
+2021-01-07	20210107_serie1	204	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	204_3	204_3+.txt	204_3-.txt		ok	ok	ok
+2021-01-07	20210107_serie1	204	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	204_4	204_4+.txt	204_4-.txt		ok	ok	ok
+2021-01-07	20210107_serie1	516	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	516_1	516_1+.txt	516_1-.txt		ok	ok	ok
+2021-01-07	20210107_serie1	516	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	516_2	516_2+.txt	516_2-.txt		ok	ok	ok
+2021-01-07	20210107_serie1	516	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	516_3	516_3+.txt	516_3-.txt		ok	ok	ok
+2021-01-07	20210107_serie1	516	precipit	DD+Mg	1M7 new	HIV1-3b	ddCTP	516_4	516_4+.txt	516_4-.txt		ok	ok	ok
+2021-01-10	20210110_serie2	738	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	738_1	738_1+.txt	738_1-.txt		super	ok	ok
+2021-01-10	20210110_serie2	738	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	738_2	738_2+.txt	738_2-.txt		magnifique	ok	ok
+2021-01-10	20210110_serie2	738	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	738_3	738_3+.txt	738_3-.txt		super	ok	ok
+2021-01-10	20210110_serie2	1074	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	1074_1	1074_1+.txt	1074_1-.txt		super	ok	ok
+2021-01-10	20210110_serie3	1060	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	1060_1	1060_1+.txt	1060_1-.txt		ok	ok	ok
+2021-01-10	20210110_serie3	1060	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	1060_2	1060_2+.txt	1060_2-.txt		ok	ok	ok
+2021-01-10	20210110_serie3	1060	precipit	DD+Mg	1M7 new	HIV1-6	ddCTP	1060_3	1060_3+.txt	1060_3-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1636	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1636_1	1636_1+.txt	1636_1-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1636	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1636_2	1636_2+.txt	1636_2-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1636	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1636_3	1636_3+.txt	1636_3-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1301	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1301_1	1301_1+.txt	1301_1-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1301	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1301_3	1301_3+.txt	1301_3-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1074	precipit	DD+Mg	1M7 new	HIV1-8	ddCTP	1074_2	1074_2+.txt	1074_2-.txt		ok	ok	ok
+2021-01-11	20210111_serie4	1074	precipit	DD+Mg	1M7 new	HIV1-8	ddCTP	1074_3	1074_3+.txt	1074_3-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	738	precipit	DD+Mg	1M7 new	HIV1-8	ddCTP	738_4	738_4+.txt	738_4-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	1636	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1636_1	1636_1+.txt	1636_1-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	1636	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1636_2	1636_2+.txt	1636_2-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	1636	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1636_3	1636_3+.txt	1636_3-.txt		good	ok	ok
+2021-01-11	20210111_serie5	1636	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1636_4	1636_4+.txt	1636_4-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	1301	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1301_1	1301_1+.txt	1301_1-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	1301	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1301_2	1301_2+.txt	1301_2-.txt		ok	ok	ok
+2021-01-11	20210111_serie5	1301	precipit	DD+Mg	1M7 new	HIV1-10	ddCTP	1301_4	1301_4+.txt	1301_4-.txt		good	ok	ok
+2021-01-19	20210119_R	343	precipit	DD+Mg	1M7 new	HIV1-0	ddCTP	343_1	343_1+.txt	343_1-.txt		ok	ok	ok
+2021-01-19	20210119_R	343	precipit	DD+Mg	1M7 new	HIV1-0	ddCTP	343_2	343_2+.txt	343_2-.txt		ok	ok	ok
+2021-01-19	20210119_R	416	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	416_1	416_1+.txt	416_1-.txt		ok	ok	ok
+2021-01-19	20210119_R	416	precipit	DD+Mg	1M7 new	HIV1-3	ddCTP	416_2	416_2+.txt	416_2-.txt		ok	ok	ok
+2021-01-19	20210119_R	1074	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1074_1	1074_1+.txt	1074_1-.txt		ok	ok	ok
+2021-01-19	20210119_R	1074	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	1074_2	1074_2+.txt	1074_2-.txt		ok	ok	ok
+2021-01-19	20210119_R	738	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	738_1	738_1+.txt	738_1-.txt		ok	ok	ok
+2021-01-19	20210119_R	738	precipit	DD+Mg	1M7 new	HIV1-7	ddCTP	738_2	738_2+.txt	738_2-.txt		ok	ok	ok
+2021-02-11	20210211_R	1301	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1301_1	1301_1+.txt	1301_1-.txt		ok	ok	ok
+2021-02-11	20210211_R	1396	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1396_1	1396_1+.txt	1396_1-.txt		ok	ok	ok
+2021-02-11	20210211_R	1636	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1636_1	1636_1+.txt	1636_1-.txt		ok	ok	ok
+2021-02-15	20210215_R	1396	precipit	DD+Mg	1M7new	HIV1-3	ddCTP	1396_13	1396_13+.txt	1396_13-.txt		ok	ok	ok
+2021-02-15	20210215_R	1636	precipit	DD+Mg	1M7new	HIV1-3	ddCTP	1636_13	1636_13+.txt	1636_13-.txt		ok	ok	ok
+2021-02-15	20210215_R	1060	precipit	DD+Mg	1M7new	HIV1-7	ddCTP	1060_17_1	1060_17_1+.txt	1060_17_1-.txt		ok	ok	ok
+2021-02-15	20210215_R	1060	precipit	DD+Mg	1M7new	HIV1-7	ddCTP	1060_17_2	1060_17_2+.txt	1060_17_2-.txt		ok	ok	ok
+2021-02-15	20210215_R	1396	precipit	DD+Mg	1M7new	HIV1-7	ddCTP	1396_17	1396_17+.txt	1396_17-.txt		ok	ok	ok
+2021-02-15	20210215_R	1060	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1060_18	1060_18+.txt	1060_18-.txt		ok	ok	ok
+2021-02-15	20210215_R	1301	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1301_18_1	1301_18_1+.txt	1301_18_1-.txt		ok	ok	ok
+2021-02-15	20210215_R	1301	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1301_18_2	1301_18_2+.txt	1301_18_2-.txt		ok	ok	ok
+2021-02-15	20210215_R	1396	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1396_18	1396_18+.txt	1396_18-.txt		ok	ok	ok
+2021-02-15	20210215_R	1636	precipit	DD+Mg	1M7new	HIV1-8	ddCTP	1636_18	1636_18+.txt	1636_18-.txt		ok	ok	ok
