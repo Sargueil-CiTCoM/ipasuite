@@ -1,5 +1,25 @@
 # This file should contain everything to configure the workflow on a global scale.
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
-samples: "resources/didymium/samples.tsv"
+samples: "config/samples.tsv"
+
+format:
+  condition: "_{probe}_{temperature}C_{magnesium}"
+  control_condition: "_{control}_of_{probe}_{temperature}C_{magnesium}"
+
+rawdata:
+  path_prefix: "../../Nextcloud/data/didymium/"
+  type: "fluo-ce" # ["fluo-ceq8000", "fluo-ce"]
+  control: "DMSO"
+
+folders:
+    fluo-ceq8000: 1.1-fluo-ceq8000
+    fluo-ce: 1.2-fluo-ce
+    qushape: 2-qushape
+    reactivity: 3.1-reactivity
+    normreact: 3.2-normreact
+    aggreact: 4.1-aggreact
+    aggreact-ipanemap: 4.2-aggreact-ipanemap
+    ipanemap: 5-ipanemap
+
 
