@@ -19,26 +19,39 @@ samples = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnes
 # TODO : Activate before prod
 #validate(samples, schema="../schemas/samples.schema.yaml")
 
+def get_sample(wildcards):
+    return samples.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium, int(wildcards.replicate))]
+
+
 def get_raw_probe_input(wildcards):
-    print(samples.index)
-    file = samples.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium, int(wildcards.replicate))].dropna()
-    print(file)
-    return os.path.join(config["rawdata"]["path_prefix"], file["probe_file"]) 
+    sample = get_sample(wildcards) 
+    return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"]) 
 
 def get_raw_control_input(wildcards):
-    file = samples.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium, int(wildcards.replicate))].dropna()
-    return os.path.join(config["rawdata"]["path_prefix"] + file["control_file"])
+    sample = get_sample(wildcards)
+    return os.path.join(config["rawdata"]["path_prefix"] + sample["control_file"])
+    
 
 def get_qushape_refseq(wildcards):
-    return None
+    sample = get_sample(wildcards)
+    path = os.path.join(config["rawdata"]["path_prefix"] + sample["reference_sequence_file"])
+    if os.path.exists(path):
+        print(path)
+        return path
+    return []
 
 def get_qushape_refproj(wildcards):
-    return None
+    sample = get_sample(wildcards)
+    path = None
+    if isinstance(sample["reference_qushape_file"], str):
+        path = os.path.join(config["rawdata"]["path_prefix"] + sample["reference_qushape_file"])
+    if not path is None and os.path.exists(path):
+        return path
+    return []
 
 def get_all_raw_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        print(row)
         sample = ("resources/{fluodir}/{rna_id}" + config["format"]["condition"] + "_{replicate}.{fluoext}.tsv").format(fluodir = config["folders"][config["rawdata"]["type"]],
                 fluoext=config["rawdata"]["type"],
                 **row)
@@ -48,6 +61,13 @@ def get_all_raw_outputs():
         
         outputs.append(sample)
         outputs.append(control)
+    return outputs
+
+def get_all_qushape_outputs():
+    outputs = []
+    for idx,row in samples.reset_index().iterrows():
+        sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
+        outputs.append(sample)
     return outputs
         
 #def get_ceq8000_input():

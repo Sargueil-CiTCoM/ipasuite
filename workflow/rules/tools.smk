@@ -19,15 +19,15 @@ rule fluo_ceq8000:
         "python scripts/tools/ceq8000_to_tsv.py {input} {output}"
 
 rule generate_project_qushape:
-    conda: "workflow/envs/tools.yml"
+    conda: "../scripts/tools/conda-env.yml"
     input:
-        rx = expand("resources/{folder}/{rna_id}" + config["condition"] + "_{replicate}.fluo-ce.tsv", folder = config["folders"]["fluo-ce"], allow_missing=True),
-        bg = expand("resources/{folder}/{rna_id}" + config["control_condition"] + "_{replicate}.fluo-ce.tsv", folder = config["folders"]["fluo-ce"], control = config["rowdata"]["control"], allow_missing=True),
+        rx = expand("resources/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.fluo-ce.tsv", folder = config["folders"]["fluo-ce"], allow_missing=True),
+        bg = expand("resources/{folder}/{rna_id}" + config["format"]["control_condition"] + "_{replicate}.fluo-ce.tsv", folder = config["folders"]["fluo-ce"], control = config["rawdata"]["control"], allow_missing=True),
         refseq = get_qushape_refseq, 
         refproj = get_qushape_refproj
     params:
-        refseq = lambda input, wildcards: '--refseq {input.refseq}' if wildcards.refseq,
-        refproj = lambda input, wildcards: '--qushape_refproj {input.refproj}' if wildcards.refproj
-    output: expand("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape.tsv", folder = config["folders"]["qushape"] , allow_missing=True)
+        refseq=lambda wildcards, input: expand('--refseq {refseq}', refseq=input.refseq) if not input.refseq is [] else "",
+        refproj=lambda wildcards, input: expand('--refproj {refproj}', refproj=input.refproj) if not input.refproj is [] else ""
+    output: expand("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape", folder = config["folders"]["qushape"] , allow_missing=True)
     shell:
-        "python scripts/tools/qushape_proj_generator.py {input.rx} {input.bg} {params.refseq} {params.refproj} --output {output}"
+        "python workflow/scripts/tools/qushape_proj_generator.py {input.rx} {input.bg} {params.refseq} {params.refproj} --output {output}"
