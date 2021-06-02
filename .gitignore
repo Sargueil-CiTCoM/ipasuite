@@ -1,0 +1,4 @@
+workflow/scripts/IPANEMAP
+workflow/scripts/tools
+results/
+.snakemake
