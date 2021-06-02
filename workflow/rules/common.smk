@@ -13,6 +13,7 @@ validate(config, schema="../schemas/config.schema.yaml")
 
 unindexed_samples = pd.read_csv(config["samples"], sep="\t")#.set_index("sample", drop=False)
 samples = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnesium", "replicate"],drop=True)
+samples_replicates = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnesium"],drop=True)
 #samples = samples[samples.ref.notnull()]
 #samples.index.names = ["sample_id"]
 
@@ -21,6 +22,12 @@ samples = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnes
 
 def get_sample(wildcards):
     return samples.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium, int(wildcards.replicate))]
+
+def construct_path(step, control = False, results_dir = True, replicate = True):
+    cond = CONDITION if not control else expand(CTRL_CONDITION, control=CONTROL, allow_missing = True)[0]
+    basedir = "results" if results_dir else "resources"
+    replicate = "_{replicate}" if replicate else ""
+    return expand(basedir + "/{folder}/{rna_id}" + cond + replicate + ".{step}.tsv", folder = FOLDERS[step], step=step, allow_missing=True)
 
 
 def get_raw_probe_input(wildcards):
@@ -36,7 +43,6 @@ def get_qushape_refseq(wildcards):
     sample = get_sample(wildcards)
     path = os.path.join(config["rawdata"]["path_prefix"] + sample["reference_sequence_file"])
     if os.path.exists(path):
-        print(path)
         return path
     return []
 
@@ -48,6 +54,14 @@ def get_qushape_refproj(wildcards):
     if not path is None and os.path.exists(path):
         return path
     return []
+
+def get_replicates(wildcards, qushape_analysed = False):
+    replicates = samples_replicates.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium)]
+    if qushape_analysed:
+        return replicates.loc[replicates["qushape_analysed"] == "yes"]["replicate"]
+    else:
+        return replicates["replicate"]
+
 
 def get_all_raw_outputs():
     outputs = []
@@ -69,7 +83,28 @@ def get_all_qushape_outputs():
         sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
         outputs.append(sample)
     return outputs
+
+def get_all_reactivity_outputs():
+    outputs = []
+    for idx,row in samples.reset_index().iterrows():
+        sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.{step}.tsv").format(folder = config["folders"]["reactivity"],step="reactivity", **row)
+        if row["qushape_analysed"] == 'yes':
+            outputs.append(sample)
+    return outputs
         
+def get_all_aggreact_outputs():
+    outputs = []
+    for idx,row in samples.reset_index().iterrows():
+        sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".{step}.tsv").format(folder = config["folders"]["aggreact"],step="aggreact", **row)
+        sampleipan = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".{step}.tsv").format(folder = config["folders"]["aggreact-ipanemap"],step="aggreact-ipanemap", **row)
+        if row["qushape_analysed"] == 'yes':
+            outputs.append(sample)
+            outputs.append(sampleipan)
+        else:
+            sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
+            outputs.append(sample)
+    return outputs
+
 #def get_ceq8000_input():
 #    if config.rawdata["type"] == "fluo-ceq8000":
         

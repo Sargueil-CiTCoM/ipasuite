@@ -5,6 +5,7 @@ samples: "config/samples.tsv"
 
 format:
   condition: "_{probe}_{temperature}C_{magnesium}"
+  message: "{wildcards.rna_id} with {wildcards.probe} at {wildcards.temperature}C {wildcards.magnesium}"
   control_condition: "_{control}_of_{probe}_{temperature}C_{magnesium}"
 
 rawdata:
@@ -19,7 +20,7 @@ folders:
     reactivity: 3.1-reactivity
     normreact: 3.2-normreact
     aggreact: 4.1-aggreact
-    aggreact-ipanemap: 4.2-aggreact-ipanemap
+    aggreact-ipanemap: 4.2-aggreact-ipanemap  
     ipanemap: 5-ipanemap
 
 
