@@ -1,3 +1,33 @@
+def generate_ipanemap_config_from_snakeconf(
+        configfile_path: str,
+        input_softdir: str,
+        input_rnaseq: str,
+        output_dir: str,
+        input_harddir: str,
+        log_file: str,
+        config):
+
+    generate_ipanemap_config(
+        configfile_path = configfile_path, 
+        input_softdir = input_softdir, 
+        input_rnaseq = input_rnaseq, 
+        output_dir = output_dir,
+        input_conditions = config["ipanemap"]["conditions"], 
+        input_harddir = input_harddir, 
+        log_file = log_file,
+        sampling= config["ipanemap"]["sampling"]["enable"],
+        sampling_nstructures = config["ipanemap"]["sampling"]["nstructures"],
+        sampling_temperature = config["ipanemap"]["sampling"]["temperature"], 
+        sampling_m = config["ipanemap"]["sampling"]["m"],
+        sampling_b = config["ipanemap"]["sampling"]["b"],
+        clustering_max_diameter_thres = config["ipanemap"]["clustering"]["max_diameter_threshold"],
+        clustering_max_avg_diameter_thres = config["ipanemap"]["clustering"]["max_avg_diameter_threshold"],
+        pareto_perc = config["ipanemap"]["pareto"]["percentage"],
+        pareto_zcutoff = config["ipanemap"]["pareto"]["zcutoff"],
+        draw_models = config["ipanemap"]["visualization"]["draw_models"],
+        draw_centroids = config["ipanemap"]["visualization"]["draw_centroids"],
+        show_probing = config["ipanemap"]["visualization"]["show_probing"]) 
+
 def generate_ipanemap_config(
         configfile_path: str
         input_softdir: str,
@@ -55,39 +85,68 @@ def generate_ipanemap_config(
     :param show_probing:
     :type show_probing: bool
     """
-    config = configparser.ConfigParser()
-    config['Input'] = {}
-    config['Input']['HardConstraintsDir'] = input_harddir
-    config['Input']['SoftConstraintsDir'] = input_softdir
-    config['Input']['Conditions'] = input_conditions 
-    config['Input']['RNA'] = input_rnaseq
+    ipanemap_conf = configparser.ConfigParser()
+    ipanemap_conf['Input'] = {}
+    ipanemap_conf['Input']['HardConstraintsDir'] = input_harddir
+    ipanemap_conf['Input']['SoftConstraintsDir'] = input_softdir
+    ipanemap_conf['Input']['Conditions'] = input_conditions 
+    ipanemap_conf['Input']['RNA'] = input_rnaseq
 
-    config['Paths'] = {}
-    config['Paths']['WorkingDir'] = output_dir
-    config['Paths']['LogFile'] = log_file
+    ipanemap_conf['Paths'] = {}
+    ipanemap_conf['Paths']['WorkingDir'] = output_dir
+    ipanemap_conf['Paths']['LogFile'] = log_file
 
-    config['Sampling'] = {}
-    config['Sampling']['DoSampling'] = sampling 
-    config['Sampling']['NumStructures'] = sampling_nstructures
-    config['Sampling']['Temperature'] = sampling_temperature
-    config['Sampling']['m'] = sampling_m 
-    config['Sampling']['b'] = sampling_b
+    ipanemap_conf['Sampling'] = {}
+    ipanemap_conf['Sampling']['DoSampling'] = sampling 
+    ipanemap_conf['Sampling']['NumStructures'] = sampling_nstructures
+    ipanemap_conf['Sampling']['Temperature'] = sampling_temperature
+    ipanemap_conf['Sampling']['m'] = sampling_m 
+    ipanemap_conf['Sampling']['b'] = sampling_b
 
-    config['Clustering'] = {}
-    config['Clustering']['MaxDiameterThreshold'] = clustering_max_diameter_thres
-    config['Clustering']['MaxAverageDiameterThreshold'] = clustering_max_avg_diameter_thres
+    ipanemap_conf['Clustering'] = {}
+    ipanemap_conf['Clustering']['MaxDiameterThreshold'] = clustering_max_diameter_thres
+    ipanemap_conf['Clustering']['MaxAverageDiameterThreshold'] = clustering_max_avg_diameter_thres
 
-    config['Pareto'] = {}
-    config['Pareto']['Percent'] = pareto_perc
-    config['Pareto']['ZCutoff'] = pareto_zcutoff 
+    ipanemap_conf['Pareto'] = {}
+    ipanemap_conf['Pareto']['Percent'] = pareto_perc
+    ipanemap_conf['Pareto']['ZCutoff'] = pareto_zcutoff 
 
-    config['Visualization'] = {}
-    config['Visualization']['DrawModels'] = draw_models 
-    config['Visualization']['DrawCentroids'] = draw_centroids 
-    config['Visualization']['ShowProbing'] = show_probing
+    ipanemap_conf['Visualization'] = {}
+    ipanemap_conf['Visualization']['DrawModels'] = draw_models 
+    ipanemap_conf['Visualization']['DrawCentroids'] = draw_centroids 
+    ipanemap_conf['Visualization']['ShowProbing'] = show_probing
     
     
     with open(configfile_path, 'w') as file:
-        config.write(file)
+        ipanemap_conf.write(file)
         return configfile_path
     return None
+
+# configfile_path: str,
+# input_softdir: str,
+# input_rnaseq: str,
+# output_dir: str,
+# input_conditions: [str],
+# input_harddir: str,
+# log_file: str,
+# config):
+
+rule configure_ipanemap:
+    output: construct_path("ipanemap-config"), replicate = False)
+    run:
+        generate_ipanemap_config_from_snakeconf(
+                configfile_path = output,
+                input_softdir = config["folders"]["aggreact-ipanemap"]
+                input_rnaseq =
+                output_dir = temp(directory("output"))
+                input_harddir = None,
+                log_file = None,
+                config)
+        
+        
+
+rule ipanemap:
+    conda: "../envs/ipanemap.yml"
+    input: 
+        config= construct_path("ipanemap-config"), replicate = False)
+    output: "python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config}"
