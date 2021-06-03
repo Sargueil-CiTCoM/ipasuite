@@ -1,7 +1,10 @@
+import configparser
+
 def generate_ipanemap_config_from_snakeconf(
         configfile_path: str,
         input_softdir: str,
         input_rnaseq: str,
+        input_conditions: [str],
         output_dir: str,
         input_harddir: str,
         log_file: str,
@@ -12,7 +15,7 @@ def generate_ipanemap_config_from_snakeconf(
         input_softdir = input_softdir, 
         input_rnaseq = input_rnaseq, 
         output_dir = output_dir,
-        input_conditions = config["ipanemap"]["conditions"], 
+        input_conditions = input_conditions, 
         input_harddir = input_harddir, 
         log_file = log_file,
         sampling= config["ipanemap"]["sampling"]["enable"],
@@ -29,13 +32,13 @@ def generate_ipanemap_config_from_snakeconf(
         show_probing = config["ipanemap"]["visualization"]["show_probing"]) 
 
 def generate_ipanemap_config(
-        configfile_path: str
+        configfile_path: str,
         input_softdir: str,
         input_rnaseq: str,
         output_dir: str,
         input_conditions: [str],
         input_harddir: str = None,
-        log_file: str = "ipanemap.log" 
+        log_file: str = "ipanemap.log", 
         sampling: bool = True,
         sampling_nstructures: int = 1000,
         sampling_temperature: float = 37,
@@ -87,9 +90,11 @@ def generate_ipanemap_config(
     """
     ipanemap_conf = configparser.ConfigParser()
     ipanemap_conf['Input'] = {}
+    if input_harddir is None:
+        input_harddir = ""
     ipanemap_conf['Input']['HardConstraintsDir'] = input_harddir
     ipanemap_conf['Input']['SoftConstraintsDir'] = input_softdir
-    ipanemap_conf['Input']['Conditions'] = input_conditions 
+    ipanemap_conf['Input']['Conditions'] = ",".join(input_conditions)
     ipanemap_conf['Input']['RNA'] = input_rnaseq
 
     ipanemap_conf['Paths'] = {}
@@ -97,24 +102,24 @@ def generate_ipanemap_config(
     ipanemap_conf['Paths']['LogFile'] = log_file
 
     ipanemap_conf['Sampling'] = {}
-    ipanemap_conf['Sampling']['DoSampling'] = sampling 
-    ipanemap_conf['Sampling']['NumStructures'] = sampling_nstructures
-    ipanemap_conf['Sampling']['Temperature'] = sampling_temperature
-    ipanemap_conf['Sampling']['m'] = sampling_m 
-    ipanemap_conf['Sampling']['b'] = sampling_b
+    ipanemap_conf['Sampling']['DoSampling'] = str(sampling)
+    ipanemap_conf['Sampling']['NumStructures'] = str(sampling_nstructures)
+    ipanemap_conf['Sampling']['Temperature'] = str(sampling_temperature)
+    ipanemap_conf['Sampling']['m'] = str(sampling_m) 
+    ipanemap_conf['Sampling']['b'] = str(sampling_b)
 
     ipanemap_conf['Clustering'] = {}
-    ipanemap_conf['Clustering']['MaxDiameterThreshold'] = clustering_max_diameter_thres
-    ipanemap_conf['Clustering']['MaxAverageDiameterThreshold'] = clustering_max_avg_diameter_thres
+    ipanemap_conf['Clustering']['MaxDiameterThreshold'] = str(clustering_max_diameter_thres)
+    ipanemap_conf['Clustering']['MaxAverageDiameterThreshold'] = str(clustering_max_avg_diameter_thres)
 
     ipanemap_conf['Pareto'] = {}
-    ipanemap_conf['Pareto']['Percent'] = pareto_perc
-    ipanemap_conf['Pareto']['ZCutoff'] = pareto_zcutoff 
+    ipanemap_conf['Pareto']['Percent'] = str(pareto_perc)
+    ipanemap_conf['Pareto']['ZCutoff'] = str(pareto_zcutoff)
 
     ipanemap_conf['Visualization'] = {}
-    ipanemap_conf['Visualization']['DrawModels'] = draw_models 
-    ipanemap_conf['Visualization']['DrawCentroids'] = draw_centroids 
-    ipanemap_conf['Visualization']['ShowProbing'] = show_probing
+    ipanemap_conf['Visualization']['DrawModels'] = str(draw_models)
+    ipanemap_conf['Visualization']['DrawCentroids'] = str(draw_centroids)
+    ipanemap_conf['Visualization']['ShowProbing'] = str(show_probing)
     
     
     with open(configfile_path, 'w') as file:
@@ -131,22 +136,41 @@ def generate_ipanemap_config(
 # log_file: str,
 # config):
 
+def generate_conditions(pool_id, config):
+    conditions = []
+    for pool in config["ipanemap"]["pools"]:
+        if pool["id"] == pool_id:
+            for cond in pool["conditions"]:
+                conditions.extend(expand("_" + config["format"]["condition"], **cond))
+            break;
+    print(conditions)
+    return conditions
+    
+
 rule configure_ipanemap:
-    output: construct_path("ipanemap-config"), replicate = False)
+    output: 
+        cfg=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True)
     run:
         generate_ipanemap_config_from_snakeconf(
-                configfile_path = output,
-                input_softdir = config["folders"]["aggreact-ipanemap"]
-                input_rnaseq =
-                output_dir = temp(directory("output"))
+                configfile_path = output.cfg[0],
+                input_softdir = "results/" + config["folders"]["aggreact-ipanemap"],
+                input_rnaseq = config["reference_sequence_path"],
+                input_conditions=generate_conditions(wildcards.pool_id,config),
+                output_dir = expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
+                    allow_missing=True)[0],
                 input_harddir = None,
-                log_file = None,
-                config)
+                log_file = "ipanemap.log",
+                config=config)
         
         
 
 rule ipanemap:
     conda: "../envs/ipanemap.yml"
     input: 
-        config= construct_path("ipanemap-config"), replicate = False)
-    output: "python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config}"
+        config=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True),
+        files= get_structure_inputs
+    output:
+        dir= directory(expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], allow_missing=True)),
+        structure= expand("results/{folder}/{rna_id}_pool_{pool_id}.varna", folder=config["folders"]["structure"], allow_missing=True)
+
+    shell:"python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config} > {output.structure}"

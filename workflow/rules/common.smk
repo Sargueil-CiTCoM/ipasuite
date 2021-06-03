@@ -23,11 +23,12 @@ samples_replicates = unindexed_samples.set_index(["rna_id", "probe", "temperatur
 def get_sample(wildcards):
     return samples.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium, int(wildcards.replicate))]
 
-def construct_path(step, control = False, results_dir = True, replicate = True):
-    cond = CONDITION if not control else expand(CTRL_CONDITION, control=CONTROL, allow_missing = True)[0]
+def construct_path(step, control = False, results_dir = True, ext = None, replicate = True):
+    cond = "_" + CONDITION if not control else expand("_" + CTRL_CONDITION, control=CONTROL, allow_missing = True)[0]
     basedir = "results" if results_dir else "resources"
     replicate = "_{replicate}" if replicate else ""
-    return expand(basedir + "/{folder}/{rna_id}" + cond + replicate + ".{step}.tsv", folder = FOLDERS[step], step=step, allow_missing=True)
+    extension = ".{step}.tsv" if ext is None else ext
+    return expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True)
 
 
 def get_raw_probe_input(wildcards):
@@ -62,6 +63,15 @@ def get_replicates(wildcards, qushape_analysed = False):
     else:
         return replicates["replicate"]
 
+def get_structure_inputs(wildcards):
+    inputs = []
+    for pool in config["ipanemap"]["pools"]:
+        if pool["id"] == wildcards.pool_id:
+            for cond in pool["conditions"]:
+                inputs.extend(expand(construct_path("aggreact-ipanemap", replicate=False, ext=".txt"),
+                        rna_id=pool["rna_id"], **cond))
+            break;
+    return inputs
 
 def get_all_raw_outputs():
     outputs = []
@@ -96,7 +106,7 @@ def get_all_aggreact_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
         sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".{step}.tsv").format(folder = config["folders"]["aggreact"],step="aggreact", **row)
-        sampleipan = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".{step}.tsv").format(folder = config["folders"]["aggreact-ipanemap"],step="aggreact-ipanemap", **row)
+        sampleipan = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".txt").format(folder = config["folders"]["aggreact-ipanemap"], **row)
         if row["qushape_analysed"] == 'yes':
             outputs.append(sample)
             outputs.append(sampleipan)
@@ -107,7 +117,18 @@ def get_all_aggreact_outputs():
 
 #def get_ceq8000_input():
 #    if config.rawdata["type"] == "fluo-ceq8000":
-        
+
+            
+
+def get_all_structure_outputs():
+    outputs = []
+    for pool in config["ipanemap"]["pools"]:
+        outputs.append(expand("results/{folder}/{rna_id}_pool_{pool_id}.varna", 
+                folder=config["folders"]["structure"],
+                rna_id=pool["rna_id"],
+                pool_id=pool["id"]))
+    return outputs 
+
 
 def get_final_outputs():
     exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"

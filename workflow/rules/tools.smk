@@ -41,7 +41,7 @@ rule generate_project_qushape:
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
-    input: expand("results/{folder}/{rna_id}" + CONDITION + "_{replicate}.qushape", folder = FOLDERS["qushape"] , allow_missing=True)
+    input: construct_path("qushape", ext=".qushape")
     output: construct_path("reactivity") 
     message: "Extracting reactivity from QuShape for" + MESSAGE + " - replicate {wildcards.replicate}"
     shell:
@@ -60,7 +60,7 @@ rule aggregate_reactivity:
     input: lambda wildcards: expand(construct_path("normreact"), replicate=get_replicates(wildcards, qushape_analysed = True), allow_missing=True)
     output: 
         full= construct_path("aggreact", replicate = False), 
-        compact = construct_path("aggreact-ipanemap", replicate=False)
+        compact = construct_path("aggreact-ipanemap", replicate=False, ext=".txt")
     message: "Aggregating normalized reactivity for " + MESSAGE
     shell:
         "python workflow/scripts/tools/aggregate_reactivity.py {input} {output.full} --ipanemap_output {output.compact}"
