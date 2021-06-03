@@ -166,6 +166,7 @@ rule configure_ipanemap:
 
 rule ipanemap:
     conda: "../envs/ipanemap.yml"
+    threads: 8
     input: 
         config=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True),
         files= get_structure_inputs
