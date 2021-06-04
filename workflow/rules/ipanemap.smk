@@ -8,6 +8,8 @@ def generate_ipanemap_config_from_snakeconf(
         output_dir: str,
         input_harddir: str,
         log_file: str,
+        output_centroid_format,
+        output_optimal_format,
         config):
 
     generate_ipanemap_config(
@@ -18,6 +20,8 @@ def generate_ipanemap_config_from_snakeconf(
         input_conditions = input_conditions, 
         input_harddir = input_harddir, 
         log_file = log_file,
+        output_centroid_format = output_centroid_format,
+        output_optimal_format = output_optimal_format,
         sampling= config["ipanemap"]["sampling"]["enable"],
         sampling_nstructures = config["ipanemap"]["sampling"]["nstructures"],
         sampling_temperature = config["ipanemap"]["sampling"]["temperature"], 
@@ -39,6 +43,8 @@ def generate_ipanemap_config(
         input_conditions: [str],
         input_harddir: str = None,
         log_file: str = "ipanemap.log", 
+        output_centroid_format = "",
+        output_optimal_format = "",
         sampling: bool = True,
         sampling_nstructures: int = 1000,
         sampling_temperature: float = 37,
@@ -101,6 +107,12 @@ def generate_ipanemap_config(
     ipanemap_conf['Paths']['WorkingDir'] = output_dir
     ipanemap_conf['Paths']['LogFile'] = log_file
 
+    
+    ipanemap_conf["Output"] = {}
+    ipanemap_conf["Output"]["CentroidStructNameFormat"] = output_centroid_format
+    ipanemap_conf["Output"]["OptimalStructNameFormat"] = output_optimal_format
+            
+
     ipanemap_conf['Sampling'] = {}
     ipanemap_conf['Sampling']['DoSampling'] = str(sampling)
     ipanemap_conf['Sampling']['NumStructures'] = str(sampling_nstructures)
@@ -160,18 +172,31 @@ rule configure_ipanemap:
                     allow_missing=True)[0],
                 input_harddir = None,
                 log_file = "ipanemap.log",
+                output_centroid_format=expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_centroid_{idx}.dbn", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
+                    allow_missing=True)[0],
+                output_optimal_format=expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx}.dbn", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
+                    allow_missing=True)[0],
                 config=config)
         
         
 
-rule ipanemap:
+checkpoint ipanemap:
     conda: "../envs/ipanemap.yml"
     threads: 8
     input: 
         config=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True),
-        files= get_structure_inputs
+        files= get_ipanemap_inputs
     output:
-        dir= directory(expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], allow_missing=True)),
-        structure= expand("results/{folder}/{rna_id}_pool_{pool_id}.varna", folder=config["folders"]["structure"], allow_missing=True)
+        directory(expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], allow_missing=True))
 
-    shell:"python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config} > {output.structure}"
+    shell:"python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config}"
+
+
+rule structure:
+    conda: "../envs/ipanemap.yml"
+    threads: 8
+    input: expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn", folder=config["folders"]["ipanemap-out"], allow_missing=True)
+    output:
+        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.dbn", folder=config["folders"]["structure"], allow_missing=True)
+    shell:"cp {input} {output}"
+

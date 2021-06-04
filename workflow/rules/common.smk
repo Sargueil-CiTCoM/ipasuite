@@ -14,6 +14,7 @@ validate(config, schema="../schemas/config.schema.yaml")
 unindexed_samples = pd.read_csv(config["samples"], sep="\t")#.set_index("sample", drop=False)
 samples = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnesium", "replicate"],drop=True)
 samples_replicates = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnesium"],drop=True)
+pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 #samples = samples[samples.ref.notnull()]
 #samples.index.names = ["sample_id"]
 
@@ -63,7 +64,7 @@ def get_replicates(wildcards, qushape_analysed = False):
     else:
         return replicates["replicate"]
 
-def get_structure_inputs(wildcards):
+def get_ipanemap_inputs(wildcards):
     inputs = []
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == wildcards.pool_id:
@@ -115,18 +116,15 @@ def get_all_aggreact_outputs():
             outputs.append(sample)
     return outputs
 
-#def get_ceq8000_input():
-#    if config.rawdata["type"] == "fluo-ceq8000":
-
-            
-
-def get_all_structure_outputs():
+## Not parallel, to be improved
+def get_all_structure_outputs(wildcards):
     outputs = []
     for pool in config["ipanemap"]["pools"]:
-        outputs.append(expand("results/{folder}/{rna_id}_pool_{pool_id}.varna", 
-                folder=config["folders"]["structure"],
-                rna_id=pool["rna_id"],
-                pool_id=pool["id"]))
+        checkpoint_output = checkpoints.ipanemap.get(rna_id=pool["rna_id"], pool_id=pool["id"]).output[0]
+        glob = glob_wildcards(os.path.join(checkpoint_output, "{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn"))
+        outputs.extend(expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn",
+                folder=config["folders"]["structure"], rna_id=pool["rna_id"], pool_id=pool["id"], idx=glob.idx))            
+
     return outputs 
 
 
