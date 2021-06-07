@@ -35,7 +35,7 @@ rule generate_project_qushape:
     params:
         refseq=lambda wildcards, input: expand('--refseq {refseq}', refseq=input.refseq) if not input.refseq is [] else "",
         refproj=lambda wildcards, input: expand('--refproj {refproj}', refproj=input.refproj) if not input.refproj is [] else ""
-    output: protected(expand("results/{folder}/{rna_id}" + CONDITION + "_{replicate}.qushape", folder = FOLDERS["qushape"] , allow_missing=True))
+    output: protected(construct_path("qushape", ext=".qushape"))
     shell:
         "python workflow/scripts/tools/qushape_proj_generator.py {input.rx} {input.bg} {params.refseq} {params.refproj} --output {output}"
 
