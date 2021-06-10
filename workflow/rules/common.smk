@@ -11,9 +11,18 @@ singularity: "docker://continuumio/miniconda3"
 configfile: "config/config.yaml"
 validate(config, schema="../schemas/config.schema.yaml")
 
+def get_indexes(replicates=True):
+    indexes = ["rna_id"]
+    indexes.extend(config["condition_names"])
+    if replicates:
+        indexes.append("replicate")
+    return indexes
+
+
 unindexed_samples = pd.read_csv(config["samples"], sep="\t")#.set_index("sample", drop=False)
-samples = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnesium", "replicate"],drop=True)
-samples_replicates = unindexed_samples.set_index(["rna_id", "probe", "temperature", "magnesium"],drop=True)
+samples = unindexed_samples.set_index(get_indexes(),drop=True)
+samples_replicates = unindexed_samples.set_index(get_indexes(replicates=False),drop=True)
+
 pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 #samples = samples[samples.ref.notnull()]
 #samples.index.names = ["sample_id"]
@@ -21,14 +30,22 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 # TODO : Activate before prod
 #validate(samples, schema="../schemas/samples.schema.yaml")
 
-def get_sample(wildcards):
-    return samples.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium, int(wildcards.replicate))]
+def get_sample(wildcards, all_replicates=False):
+    sval = [wildcards.rna_id]
+    sval.extend([wildcards[cond] for cond in config["condition_names"]])
+
+    if all_replicates:
+        return samples_replicates.loc[tuple(sval)]
+
+    sval.append(int(wildcards.replicate))
+    return samples.loc[tuple(sval)]
 
 def construct_path(step, control = False, results_dir = True, ext = None, replicate = True):
     cond = "_" + CONDITION if not control else expand("_" + CTRL_CONDITION, control=CONTROL, allow_missing = True)[0]
     basedir = "results" if results_dir else "resources"
     replicate = "_{replicate}" if replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
+    print(expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True))
     return expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True)
 
 
@@ -43,7 +60,7 @@ def get_raw_control_input(wildcards):
 
 def get_qushape_refseq(wildcards):
     sample = get_sample(wildcards)
-    path = os.path.join(config["rawdata"]["path_prefix"] + sample["reference_sequence_file"])
+    path = config["sequences"][wildcards.rna_id]
     if os.path.exists(path):
         return path
     return []
@@ -58,7 +75,7 @@ def get_qushape_refproj(wildcards):
     return []
 
 def get_replicates(wildcards, qushape_analysed = False):
-    replicates = samples_replicates.loc[(wildcards.rna_id, wildcards.probe, int(wildcards.temperature), wildcards.magnesium)]
+    replicates = get_sample(wildcards, all_replicates=True)
     if qushape_analysed:
         return replicates.loc[replicates["qushape_analysed"] == "yes"]["replicate"]
     else:
@@ -91,14 +108,14 @@ def get_all_raw_outputs():
 def get_all_qushape_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
+        sample = ("results/{folder}/{rna_id}_" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
         outputs.append(sample)
     return outputs
 
 def get_all_reactivity_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.{step}.tsv").format(folder = config["folders"]["reactivity"],step="reactivity", **row)
+        sample = ("results/{folder}/{rna_id}_" + config["format"]["condition"] + "_{replicate}.{step}.tsv").format(folder = config["folders"]["reactivity"],step="reactivity", **row)
         if row["qushape_analysed"] == 'yes':
             outputs.append(sample)
     return outputs
@@ -106,13 +123,13 @@ def get_all_reactivity_outputs():
 def get_all_aggreact_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".{step}.tsv").format(folder = config["folders"]["aggreact"],step="aggreact", **row)
-        sampleipan = ("results/{folder}/{rna_id}" + config["format"]["condition"] + ".txt").format(folder = config["folders"]["aggreact-ipanemap"], **row)
+        sample = expand(construct_path(step="aggreact", replicate=False), **row)
+        sampleipan = expand(construct_path("aggreact-ipanemap", replicate=False, ext=".txt"),**row)
         if row["qushape_analysed"] == 'yes':
             outputs.append(sample)
             outputs.append(sampleipan)
         else:
-            sample = ("results/{folder}/{rna_id}" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
+            sample = expand(construct_path("qushape", ext=".qushape"), **row)
             outputs.append(sample)
     return outputs
 
@@ -128,12 +145,12 @@ def get_all_structure_outputs(wildcards):
     return outputs 
 
 
-def get_final_outputs():
-    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"
-    outputs = []
-    print(samples)
-    for row in samples.itertuples(name="Sample"):
-        folder = row.folder
-        sample = exppath.format(folder=folder,sample=os.path.splitext(row.sample_filename)[0])
-        control = exppath.format(folder=folder,sample=os.path.splitext(row.control_filename)[0])
-    return outputs
+#def get_final_outputs():
+#    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"
+#    outputs = []
+#    print(samples)
+#    for row in samples.itertuples(name="Sample"):
+#        folder = row.folder
+#        sample = exppath.format(folder=folder,sample=os.path.splitext(row.sample_filename)[0])
+#        control = exppath.format(folder=folder,sample=os.path.splitext(row.control_filename)[0])
+#    return outputs

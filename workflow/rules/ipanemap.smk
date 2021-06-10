@@ -166,7 +166,7 @@ rule configure_ipanemap:
         generate_ipanemap_config_from_snakeconf(
                 configfile_path = output.cfg[0],
                 input_softdir = "results/" + config["folders"]["aggreact-ipanemap"],
-                input_rnaseq = config["reference_sequence_path"],
+                input_rnaseq = config["sequences"][wildcards.rna_id],
                 input_conditions=generate_conditions(wildcards.pool_id,config),
                 output_dir = expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
                     allow_missing=True)[0],

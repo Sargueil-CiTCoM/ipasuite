@@ -1,10 +1,11 @@
-
 CONDITION = config["format"]["condition"]
 CTRL_CONDITION = config["format"]["control_condition"]
 RAW_DATA_TYPE = config["rawdata"]["type"]
 CONTROL = config["rawdata"]["control"]
 FOLDERS = config["folders"]
 MESSAGE = config["format"]["message"]
+TOOLS = "workflow/scripts/tools/"
+
 
 rule import_raw_probe_data:
     input: get_raw_probe_input
@@ -19,11 +20,11 @@ rule import_raw_control_data:
         "cp {input} {output}"
 
 rule fluo_ceq8000:
-    conda: "workflow/envs/tools.yml"
-    input: expand("ressources/{folder}/{sample}.fluo-ceq8000.tsv", folder=FOLDERS["fluo-ceq8000"], allow_missing=True)
-    output: expand("resources/{folder}/{sample}.tsv", folder=FOLDERS["fluo-ce"], allow_missing=True)
+    conda: "../scripts/tools/conda-env.yml"
+    input: construct_path(step="fluo-ceq8000", results_dir=False) 
+    output: construct_path(step="fluo-ce", results_dir=False) 
     shell:
-        "python scripts/tools/ceq8000_to_tsv.py {input} {output}"
+        "python " + TOOLS + "ceq8000_to_tsv.py {input} {output}"
 
 rule generate_project_qushape:
     conda: "../scripts/tools/conda-env.yml"
@@ -34,10 +35,14 @@ rule generate_project_qushape:
         refproj = get_qushape_refproj
     params:
         refseq=lambda wildcards, input: expand('--refseq {refseq}', refseq=input.refseq) if not input.refseq is [] else "",
-        refproj=lambda wildcards, input: expand('--refproj {refproj}', refproj=input.refproj) if not input.refproj is [] else ""
-    output: protected(construct_path("qushape", ext=".qushape"))
+        refproj=lambda wildcards, input: expand('--refproj {refproj}', refproj=input.refproj) if not input.refproj is [] else "",
+        ddNTP= "--ddNTP " + config["qushape"]["ddNTP"] if "ddNTP" in config["qushape"] else ""
+        #TODO channels
+        #channels=  "--channels" + config["qushape"]["ddNTP"] if "ddNTP" in config["qushape"] else ""
+    #output: protected(construct_path("qushape", ext=".qushape"))
+    output: construct_path("qushape", ext=".qushape")
     shell:
-        "python workflow/scripts/tools/qushape_proj_generator.py {input.rx} {input.bg} {params.refseq} {params.refproj} --output {output}"
+        "python " + TOOLS + "qushape_proj_generator.py {input.rx} {input.bg} {params.refseq} {params.refproj} {params.ddNTP} --output {output}"
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -45,7 +50,7 @@ rule extract_reactivity:
     output: construct_path("reactivity") 
     message: "Extracting reactivity from QuShape for" + MESSAGE + " - replicate {wildcards.replicate}"
     shell:
-        "python workflow/scripts/tools/qushape_extract_reactivity.py {input} --output {output}"
+        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output {output}"
 
 rule normalize_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -53,7 +58,7 @@ rule normalize_reactivity:
     output: construct_path("normreact")
     message: "Normalizing reactivity for" + MESSAGE + " - replicate {wildcards.replicate}"
     shell:
-        "python workflow/scripts/tools/normalize_reactivity.py {input} {output}"
+        "python " + TOOLS + "normalize_reactivity.py {input} {output}"
 
 rule aggregate_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -63,7 +68,7 @@ rule aggregate_reactivity:
         compact = construct_path("aggreact-ipanemap", replicate=False, ext=".txt")
     message: "Aggregating normalized reactivity for " + MESSAGE
     shell:
-        "python workflow/scripts/tools/aggregate_reactivity.py {input} {output.full} --ipanemap_output {output.compact}"
+        "python "+ TOOLS + "aggregate_reactivity.py {input} {output.full} --ipanemap_output {output.compact}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"

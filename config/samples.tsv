@@ -1,33 +1,6 @@
-id	rna_id	experimenter	probe	temperature	magnesium	folding_buffer	probing_delay	primer	rna_begin	rna_end	date	replicate	qushape_analysed	reference_qushape_file	reference_sequence_file	probe_file	control_file
-1	didymium		1M7	37	Mg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_37C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_37C_Mg_1.fluo-ce.tsv
-2	didymium		1M7	37	Mg						2019-08-29	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_37C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_37C_Mg_2.fluo-ce.tsv
-3	didymium		1M7	37	Mg						2020-01-07	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_37C_Mg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_37C_Mg_3.fluo-ce.tsv
-4	didymium		BzCN	37	Mg						2020-01-08	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_BzCN_37C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_BzCN_37C_Mg_1.fluo-ce.tsv
-5	didymium		BzCN	37	Mg						2020-01-14	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_BzCN_37C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_BzCN_37C_Mg_2.fluo-ce.tsv
-6	didymium		BzCN	37	Mg						2020-01-16	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_BzCN_37C_Mg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_BzCN_37C_Mg_3.fluo-ce.tsv
-7	didymium		NMIA	37	Mg						2020-01-08	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_NMIA_37C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_NMIA_37C_Mg_1.fluo-ce.tsv
-8	didymium		NMIA	37	Mg						2020-01-14	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_NMIA_37C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_NMIA_37C_Mg_2.fluo-ce.tsv
-9	didymium		NMIA	37	Mg						2020-01-16	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_NMIA_37C_Mg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_NMIA_37C_Mg_3.fluo-ce.tsv
-10	didymium		1M7	53	Mg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_53C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_53C_Mg_1.fluo-ce.tsv
-11	didymium		1M7	53	Mg						2019-08-29	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_53C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_53C_Mg_2.fluo-ce.tsv
-12	didymium		1M7	53	Mg						2020-01-07	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_53C_Mg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_53C_Mg_3.fluo-ce.tsv
-13	didymium		1M7	65	Mg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_65C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_65C_Mg_1.fluo-ce.tsv
-14	didymium		1M7	65	Mg						2019-08-29	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_65C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_65C_Mg_2.fluo-ce.tsv
-15	didymium		1M7	65	Mg						2020-01-07	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_65C_Mg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_65C_Mg_3.fluo-ce.tsv
-16	didymium		1M7	74	Mg						2019-08-29	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_74C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_74C_Mg_1.fluo-ce.tsv
-17	didymium		1M7	74	Mg						2020-01-07	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_74C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_74C_Mg_2.fluo-ce.tsv
-18	didymium		1M7	85	Mg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_85C_Mg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_85C_Mg_1.fluo-ce.tsv
-19	didymium		1M7	85	Mg						2019-08-29	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_85C_Mg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_85C_Mg_2.fluo-ce.tsv
-20	didymium		1M7	37	noMg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_37C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_37C_noMg_1.fluo-ce.tsv
-21	didymium		1M7	37	noMg						2020-01-03	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_37C_noMg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_37C_noMg_2.fluo-ce.tsv
-22	didymium		1M7	37	noMg						2020-01-08	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_37C_noMg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_37C_noMg_3.fluo-ce.tsv
-23	didymium		BzCN	37	noMg						2020-01-08	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_BzCN_37C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_BzCN_37C_noMg_1.fluo-ce.tsv
-24	didymium		BzCN	37	noMg						2020-01-14	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_BzCN_37C_noMg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_BzCN_37C_noMg_2.fluo-ce.tsv
-25	didymium		BzCN	37	noMg						2020-01-16	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_BzCN_37C_noMg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_BzCN_37C_noMg_3.fluo-ce.tsv
-26	didymium		NMIA	37	noMg						2020-01-08	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_NMIA_37C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_NMIA_37C_noMg_1.fluo-ce.tsv
-27	didymium		NMIA	37	noMg						2020-01-14	2	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_NMIA_37C_noMg_2.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_NMIA_37C_noMg_2.fluo-ce.tsv
-28	didymium		NMIA	37	noMg						2020-01-16	3	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_NMIA_37C_noMg_3.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_NMIA_37C_noMg_3.fluo-ce.tsv
-29	didymium		1M7	53	noMg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_53C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_53C_noMg_1.fluo-ce.tsv
-30	didymium		1M7	65	noMg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_65C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_65C_noMg_1.fluo-ce.tsv
-31	didymium		1M7	74	noMg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_74C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_74C_noMg_1.fluo-ce.tsv
-32	didymium		1M7	85	noMg						2019-08-01	1	yes	2-qushape/didymium_1M7_37C_Mg_3.qushape	didymium.fa	1.2-fluo-ce/didymium_1M7_85C_noMg_1.fluo-ce.tsv	1.2-fluo-ce/didymium_DMSO_of_1M7_85C_noMg_1.fluo-ce.tsv
+id	rna_id	experimenter	probe	temperature	interaction	magnesium	folding_buffer	probing_delay	primer	rna_begin	rna_end	date	replicate	qushape_analysed	reference_qushape_file	probe_file	control_file
+1	gltB2	MP	1M7	37	none	noMg	150 mM KCl, 80 mM HEPES					4/14/2021	1	yes		1404gltb2D.txt	1404gltb2C.txt
+2	gltB2	MP	1M7	37	none	noMg	150 mM KCl, 80 mM HEPES					6/5/2021	2	no		GltB2D.txt	GltB2C.txt
+3	gltB2	MP	1M7	37	none	noMg	150 mM KCl, 80 mM HEPES					3/5/2021	3	no		gltB_MD1.txt	gltB_MC1.txt
+4	gltB2	MP	1M7	37	none	noMg	150 mM KCl, 80 mM HEPES					3/5/2021	4	no		gltB_MD2.txt	gltB_MC2.txt
+5	gltB2	MP	1M7	37	none	noMg	150 mM KCl, 80 mM HEPES					3/5/2021	5	no		gltB_MD3.txt	gltB_MC3.txt
