@@ -4,6 +4,8 @@ RAW_DATA_TYPE = config["rawdata"]["type"]
 CONTROL = config["rawdata"]["control"]
 FOLDERS = config["folders"]
 MESSAGE = config["format"]["message"]
+CNORM = config["normalization"]
+
 TOOLS = "workflow/scripts/tools/"
 
 
@@ -26,6 +28,18 @@ rule fluo_ceq8000:
     shell:
         "python " + TOOLS + "ceq8000_to_tsv.py {input} {output}"
 
+def construct_list_param(config_category, param_name):
+    arg = ""
+    if param_name in config_category and len(config_category[param_name]) > 0:
+        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
+    return arg
+
+def construct_param(config_category, param_name):
+    arg = ""
+    if param_name in config_category:
+        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
+    return arg
+
 rule generate_project_qushape:
     conda: "../scripts/tools/conda-env.yml"
     input:
@@ -34,15 +48,16 @@ rule generate_project_qushape:
         refseq = get_qushape_refseq, 
         refproj = get_qushape_refproj
     params:
-        refseq=lambda wildcards, input: expand('--refseq {refseq}', refseq=input.refseq) if not input.refseq is [] else "",
-        refproj=lambda wildcards, input: expand('--refproj {refproj}', refproj=input.refproj) if not input.refproj is [] else "",
-        ddNTP= "--ddNTP " + config["qushape"]["ddNTP"] if "ddNTP" in config["qushape"] else ""
+        refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq) if not input.refseq is [] else "",
+        refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj) if not input.refproj is [] else "",
+        ddNTP= construct_param(config["qushape"], "ddNTP"),
+        channels= construct_list_param(config["qushape"], "channels")
         #TODO channels
-        #channels=  "--channels" + config["qushape"]["ddNTP"] if "ddNTP" in config["qushape"] else ""
+        #channels=  
     #output: protected(construct_path("qushape", ext=".qushape"))
     output: construct_path("qushape", ext=".qushape")
     shell:
-        "python " + TOOLS + "qushape_proj_generator.py {input.rx} {input.bg} {params.refseq} {params.refproj} {params.ddNTP} --output {output}"
+        "python " + TOOLS + "qushape_proj_generator.py {input.rx} {input.bg} {params} --output={output}"
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -50,15 +65,36 @@ rule extract_reactivity:
     output: construct_path("reactivity") 
     message: "Extracting reactivity from QuShape for" + MESSAGE + " - replicate {wildcards.replicate}"
     shell:
-        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output {output}"
+        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output={output}"
+
+
 
 rule normalize_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
     input: construct_path("reactivity")
     output: construct_path("normreact")
     message: "Normalizing reactivity for" + MESSAGE + " - replicate {wildcards.replicate}"
+    params:
+        react_nuc = construct_list_param(CNORM, "reactive_nucleotides"),
+        st_perc = construct_param(CNORM, "stop_percentile"),
+        low_norm_reac_thres = construct_param(CNORM, "low_norm_reactivity_threshold"),
+        norm_methods = construct_list_param(CNORM, "norm_methods"),
+        snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
+        snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
     shell:
-        "python " + TOOLS + "normalize_reactivity.py {input} {output}"
+        "python " + TOOLS + "normalize_reactivity.py {params} {input} {output} "
+
+def construct_normcol():
+    arg = ""
+    if "norm_column" in config["aggregate"]:
+        arg = "--normcol=" + config["aggregate"]["normcol"]
+    elif "norm_method" in config["aggregate"]:
+        if "simple":
+            arg =  "--normcol=simple_norm_reactivity"
+        elif "interquartile":
+            arg = "--normcol=interquartile_norm_reactivity"
+    return arg
+
 
 rule aggregate_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -67,8 +103,14 @@ rule aggregate_reactivity:
         full= construct_path("aggreact", replicate = False), 
         compact = construct_path("aggreact-ipanemap", replicate=False, ext=".txt")
     message: "Aggregating normalized reactivity for " + MESSAGE
+    params:
+        norm_method= construct_normcol(),
+        minndp = construct_param(config["aggregate"], "min_ndata_perc"),
+        mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
+        maxmp = construct_param(config["aggregate"], "max_mean_perc"),
+        mind = construct_param(config["aggregate"], "min_dispersion")
     shell:
-        "python "+ TOOLS + "aggregate_reactivity.py {input} {output.full} --ipanemap_output {output.compact}"
+        "python "+ TOOLS + "aggregate_reactivity.py {input} {output.full} {params} --ipanemap_output={output.compact}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"
