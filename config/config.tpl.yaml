@@ -1,0 +1,107 @@
+# This file should contain everything to configure the workflow on a global scale.
+# In case of sample based data, it should be complemented by a samples.tsv file that contains
+# one row per sample. It can be parsed easily via pandas.
+samples: "config/samples.tsv"
+
+## General Workflow configuration ##
+
+# The full sequence of the studied RNA in fasta format
+# The fasta file should contain a description line containing the origin of the sequence (sequence database) with its unique identifier
+sequences:
+  gltB2: "resources/gltB2.fa"
+
+condition_names:
+  - probe
+  - interaction
+  - magnesium
+
+
+# filename and titles formatting 
+format:
+  # Format of the conditions, will be use to identify sample and construct filename.
+  # All variable conditions should be referenced here
+  # Name of the conditions must correspond a column header in the samples.tsv file
+  condition: "{probe}_{interaction}_{magnesium}"
+  # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content 
+  control_condition: "{control}_of_{probe}_{interaction}_{magnesium}"
+  # Format use to create comprehensible Snakemake message when running workflow. conditions must be prefixed with "wildcards."
+  message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.interaction} {wildcards.magnesium}"
+
+rawdata:
+  # Path to the folder containing Raw experimental data, it will be prefixed to "control_file" and "probe_file"
+  path_prefix: "../../Nextcloud/data/GltB2/"
+  # Type of the raw data. It will establish the starting point of the pipeline. Either from file directly from the sequencer or already converted to csv.
+  type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce"]
+  # Name of the control 
+  control: "DMSO"
+
+## Steps configurations ##
+
+### QuShape project generator & extractor###
+qushape:
+  channels:
+    RX: 0 # Channel 1
+    RXS1: 2 # Channel 3
+    BG: 0 # Channel 1
+    BGS1: 2 # Channel 3
+  ddNTP: ddA
+
+### Reactivity Normalization
+normalization:
+  reactive_nucleotides: ["A", "C", "G", "U"]
+  stop_percentile: 90.
+  low_norm_reactivity_threshold: -0.3
+  norm_methods:
+    - simple
+    - interquartile
+  simple_outlier_percentile: 98.
+  simple_norm_term_avg_percentile: 90.
+
+### Replicate Aggregation
+aggregate:
+  norm_method: simple # or interquartile
+  #norm_column: "simple_norm_reactivity"
+  min_ndata_perc: 0.5
+  min_nsubdata_perc: 0.66
+  max_mean_perc: 0.682
+  min_dispersion: 0.05
+
+### IPANEMAP ###
+ipanemap:
+  pools:
+    - id: 1M7_Mg_none
+      rna_id: gltB2
+      conditions:
+        - interaction: none
+          magnesium: noMg
+          probe: 1M7
+  sampling:
+    enable: True
+    nstructures: 1000
+    temperature: 37
+    m: 1.3
+    b: -0.4
+  clustering:
+    max_diameter_threshold: 7
+    max_avg_diameter_threshold: 7
+  pareto:
+    percentage: 20
+    zcutoff: 0.05
+  visualization:
+    draw_models: True
+    draw_centroids: True
+    show_probing: True
+
+## Others configurations ## 
+folders:
+  fluo-ceq8000: 1.1-fluo-ceq8000
+  fluo-ce: 1.2-fluo-ce
+  qushape: 2-qushape
+  reactivity: 3.1-reactivity
+  normreact: 3.2-normreact
+  aggreact: 4.1-aggreact
+  aggreact-ipanemap: 4.2-aggreact-ipanemap  
+  ipanemap-config: 5.1-ipanemap-config
+  ipanemap-out: 5.2-ipanemap-out
+  structure: 5.3-structure
+  varna: 5.4-varna
