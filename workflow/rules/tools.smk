@@ -45,11 +45,11 @@ rule generate_project_qushape:
     input:
         rx = construct_path("fluo-ce", results_dir = False),
         bg = construct_path("fluo-ce", control = True, results_dir = False),
-        refseq = get_qushape_refseq, 
+        refseq = get_refseq, 
         refproj = get_qushape_refproj
     params:
-        refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq) if not input.refseq is [] else "",
-        refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj) if not input.refproj is [] else "",
+        refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
+        refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
         ddNTP= construct_param(config["qushape"], "ddNTP"),
         channels= construct_list_param(config["qushape"], "channels")
         #TODO channels
@@ -62,10 +62,12 @@ rule generate_project_qushape:
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
     input: construct_path("qushape", ext=".qushape")
-    output: construct_path("reactivity") 
+    output: 
+        react=construct_path("reactivity")
+        #,protect = protected(construct_path("qushape", ext=".qushape")) 
     message: "Extracting reactivity from QuShape for" + MESSAGE + " - replicate {wildcards.replicate}"
     shell:
-        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output={output}"
+        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output={output.react}"
 
 
 
@@ -98,7 +100,9 @@ def construct_normcol():
 
 rule aggregate_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
-    input: lambda wildcards: expand(construct_path("normreact"), replicate=get_replicates(wildcards, qushape_analysed = True), allow_missing=True)
+    input: 
+        norm= lambda wildcards: expand(construct_path("normreact"), replicate=get_replicates(wildcards, qushape_analysed = True), allow_missing=True),
+        refseq = lambda wildcards: get_refseq(wildcards, all_replicates= True)
     output: 
         full= construct_path("aggreact", replicate = False), 
         compact = construct_path("aggreact-ipanemap", replicate=False, ext=".txt")
@@ -108,9 +112,10 @@ rule aggregate_reactivity:
         minndp = construct_param(config["aggregate"], "min_ndata_perc"),
         mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
         maxmp = construct_param(config["aggregate"], "max_mean_perc"),
-        mind = construct_param(config["aggregate"], "min_dispersion")
+        mind = construct_param(config["aggregate"], "min_dispersion"),
+        refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
-        "python "+ TOOLS + "aggregate_reactivity.py {input} {output.full} {params} --ipanemap_output={output.compact}"
+        "python "+ TOOLS + "aggregate_reactivity.py {input.norm} {output.full} {params} --ipanemap_output={output.compact}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"

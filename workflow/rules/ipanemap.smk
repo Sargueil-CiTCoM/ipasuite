@@ -195,8 +195,16 @@ checkpoint ipanemap:
 rule structure:
     conda: "../envs/ipanemap.yml"
     threads: 8
-    input: expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn", folder=config["folders"]["ipanemap-out"], allow_missing=True)
+    input: expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx}.dbn", folder=config["folders"]["ipanemap-out"], allow_missing=True)
     output:
         expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.dbn", folder=config["folders"]["structure"], allow_missing=True)
     shell:"cp {input} {output}"
 
+rule varna:
+    conda: "../envs/ipanemap.yml"
+    input:
+        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn", folder=config["folders"]["structure"], allow_missing=True)
+    output:
+        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna", folder=config["folders"]["varna"], allow_missing=True)
+    shell:
+        "java -cp workflow/scripts/IPANEMAP/VARNAv3-93.jar fr.orsay.lri.varna.applications.VARNAcmd -i {input} -o {output}"

@@ -45,8 +45,10 @@ def construct_path(step, control = False, results_dir = True, ext = None, replic
     basedir = "results" if results_dir else "resources"
     replicate = "_{replicate}" if replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
-    print(expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True))
-    return expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True)
+
+    path = expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True)
+    #print(path)
+    return path
 
 
 def get_raw_probe_input(wildcards):
@@ -58,8 +60,8 @@ def get_raw_control_input(wildcards):
     return os.path.join(config["rawdata"]["path_prefix"] + sample["control_file"])
     
 
-def get_qushape_refseq(wildcards):
-    sample = get_sample(wildcards)
+def get_refseq(wildcards, all_replicates = False):
+    sample = get_sample(wildcards, all_replicates)
     path = config["sequences"][wildcards.rna_id]
     if os.path.exists(path):
         return path
@@ -71,6 +73,7 @@ def get_qushape_refproj(wildcards):
     if isinstance(sample["reference_qushape_file"], str):
         path = os.path.join(config["rawdata"]["path_prefix"] + sample["reference_qushape_file"])
     if not path is None and os.path.exists(path):
+        print(path)
         return path
     return []
 
@@ -144,6 +147,14 @@ def get_all_structure_outputs(wildcards):
 
     return outputs 
 
+def get_all_vienna_outputs(wildcards):
+    outputs = []
+    for pool in config["ipanemap"]["pools"]:
+        checkpoint_output = checkpoints.ipanemap.get(rna_id=pool["rna_id"], pool_id=pool["id"]).output[0]
+        glob = glob_wildcards(os.path.join(checkpoint_output, "{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn"))
+        outputs.extend(expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.varna",
+                folder=config["folders"]["varna"], rna_id=pool["rna_id"], pool_id=pool["id"], idx=glob.idx))            
+    return outputs 
 
 #def get_final_outputs():
 #    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"
