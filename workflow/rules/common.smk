@@ -18,8 +18,9 @@ def get_indexes(replicates=True):
         indexes.append("replicate")
     return indexes
 
+condition_types = { name : 'str' for name in config['condition_names']}
 
-unindexed_samples = pd.read_csv(config["samples"], sep="\t")#.set_index("sample", drop=False)
+unindexed_samples = pd.read_csv(config["samples"], sep="\t", dtype = condition_types)#.set_index("sample", drop=False)
 samples = unindexed_samples.set_index(get_indexes(),drop=True)
 samples_replicates = unindexed_samples.set_index(get_indexes(replicates=False),drop=True)
 
