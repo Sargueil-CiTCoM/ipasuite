@@ -102,7 +102,7 @@ rule normalize_reactivity:
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
     shell:
-        "python " + TOOLS + "normalize_reactivity.py {params} {input} {output} "
+        "python " + TOOLS + "normalize_reactivity.py {params} {input} --output={output} "
 
 def construct_normcol():
     arg = ""
@@ -133,7 +133,7 @@ rule aggregate_reactivity:
         mind = construct_param(config["aggregate"], "min_dispersion"),
         refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
-        "python "+ TOOLS + "aggregate_reactivity.py {input.norm} {output.full} {params} --ipanemap_output={output.compact}"
+        "python "+ TOOLS + "aggregate_reactivity.py {input.norm} --output={output.full} {params} --ipanemap_output={output.compact}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"
