@@ -51,6 +51,9 @@ def construct_path(step, control = False, results_dir = True, ext = None, replic
     #print(path)
     return path
 
+def get_external_qushape(wildcards):
+    sample = get_sample(wildcards) 
+    return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"]) 
 
 def get_raw_probe_input(wildcards):
     sample = get_sample(wildcards) 

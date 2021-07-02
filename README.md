@@ -31,6 +31,8 @@ Install Snakemake using [conda](https://conda.io/projects/conda/en/latest/user-g
 
 For installation details, see the [instructions in the Snakemake documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
 
+on debian, install libdb-dev before launching snakemake
+
 ### Step 4: Execute workflow
 
 Activate the conda environment:

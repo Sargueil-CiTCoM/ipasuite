@@ -8,6 +8,18 @@ CNORM = config["normalization"]
 
 TOOLS = "workflow/scripts/tools/"
 
+def construct_list_param(config_category, param_name):
+    arg = ""
+    if param_name in config_category and len(config_category[param_name]) > 0:
+        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
+    return arg
+
+def construct_param(config_category, param_name):
+    arg = ""
+    if param_name in config_category:
+        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
+    return arg
+
 
 rule import_raw_probe_data:
     input: get_raw_probe_input
@@ -28,17 +40,23 @@ rule fluo_ceq8000:
     shell:
         "python " + TOOLS + "ceq8000_to_tsv.py {input} {output}"
 
-def construct_list_param(config_category, param_name):
-    arg = ""
-    if param_name in config_category and len(config_category[param_name]) > 0:
-        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
-    return arg
 
-def construct_param(config_category, param_name):
-    arg = ""
-    if param_name in config_category:
-        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
-    return arg
+### TODO : Enable only if qushape_file column exists and raw data type is qushape.
+rule import_external_qushape:
+    input: get_external_qushape
+    output: construct_path("qushape", ext=".qushape", results_dir = False)
+    shell:
+        "cp {input} {output}"
+
+
+# If a qushape file from outside exists
+rule import_qushape:
+    input: construct_path("qushape", ext=".qushape", results_dir=False)
+    output: construct_path("qushape", ext=".qushape", results_dir=True)
+    priority: 10
+    shell:
+        "cp {input} {output}"
+
 
 rule generate_project_qushape:
     conda: "../scripts/tools/conda-env.yml"
