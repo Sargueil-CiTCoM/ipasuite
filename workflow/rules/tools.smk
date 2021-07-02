@@ -8,6 +8,8 @@ CNORM = config["normalization"]
 
 TOOLS = "workflow/scripts/tools/"
 
+ruleorder: import_qushape > generate_project_qushape
+
 def construct_list_param(config_category, param_name):
     arg = ""
     if param_name in config_category and len(config_category[param_name]) > 0:
@@ -61,10 +63,10 @@ rule import_qushape:
 rule generate_project_qushape:
     conda: "../scripts/tools/conda-env.yml"
     input:
-        rx = construct_path("fluo-ce", results_dir = False),
-        bg = construct_path("fluo-ce", control = True, results_dir = False),
-        refseq = get_refseq, 
-        refproj = get_qushape_refproj
+        rx = ancient(construct_path("fluo-ce", results_dir = False)),
+        bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
+        refseq = ancient(get_refseq), 
+        refproj = ancient(get_qushape_refproj)
     params:
         refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
         refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
@@ -79,7 +81,7 @@ rule generate_project_qushape:
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
-    input: construct_path("qushape", ext=".qushape")
+    input: construct_path("qushape", ext=".qushape"))
     output: 
         react=construct_path("reactivity")
         #,protect = protected(construct_path("qushape", ext=".qushape")) 
