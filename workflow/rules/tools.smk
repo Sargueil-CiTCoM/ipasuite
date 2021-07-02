@@ -62,9 +62,9 @@ rule import_qushape:
 rule generate_project_qushape:
     conda: "../scripts/tools/conda-env.yml"
     input:
-        rx = ancient(construct_path("fluo-ce", results_dir = False)),
-        bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
-        refseq = ancient(get_refseq), 
+        rx = protected(ancient(construct_path("fluo-ce", results_dir = False))),
+        bg = protected(ancient(construct_path("fluo-ce", control = True, results_dir = False))),
+        refseq = protected(ancient(get_refseq)), 
         refproj = ancient(get_qushape_refproj)
     params:
         refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
