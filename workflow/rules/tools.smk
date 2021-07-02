@@ -81,7 +81,7 @@ rule generate_project_qushape:
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
-    input: construct_path("qushape", ext=".qushape"))
+    input: construct_path("qushape", ext=".qushape")
     output: 
         react=construct_path("reactivity")
         #,protect = protected(construct_path("qushape", ext=".qushape")) 
