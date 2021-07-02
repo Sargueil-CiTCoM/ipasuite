@@ -37,7 +37,7 @@ rule import_raw_control_data:
 
 rule fluo_ceq8000:
     conda: "../scripts/tools/conda-env.yml"
-    input: construct_path(step="fluo-ceq8000", results_dir=False) 
+    input: protected(construct_path(step="fluo-ceq8000", results_dir=False))
     output: construct_path(step="fluo-ce", results_dir=False) 
     shell:
         "python " + TOOLS + "ceq8000_to_tsv.py {input} {output}"
@@ -54,8 +54,7 @@ rule import_external_qushape:
 # If a qushape file from outside exists
 rule import_qushape:
     input: construct_path("qushape", ext=".qushape", results_dir=False)
-    output: construct_path("qushape", ext=".qushape", results_dir=True)
-    priority: 10
+    output: construct_path("qushape", ext=".qushape")
     shell:
         "cp {input} {output}"
 
