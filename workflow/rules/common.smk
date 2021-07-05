@@ -67,12 +67,12 @@ def get_sample(wildcards, all_replicates=False):
     sval.append(int(wildcards.replicate))
     return samples.loc[tuple(sval)]
 
-def construct_path(step, control = False, results_dir = True, ext = None, replicate = True, logpath = True):
+def construct_path(step, control = False, results_dir = True, ext = None, replicate = True, log_dir = False):
     cond = f'_{CONDITION}' if not control else expand(f'_{CTRL_CONDITION}', control=CONTROL, allow_missing = True)[0]
-    basedir = "logs" if logpath else "results" if results_dir else "resources"
+    basedir = "logs" if log_dir else ("results" if results_dir else "resources")
     replicate = "_{replicate}" if replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
-    pid = '{folder}/{rna_id}' if not logpath else '{step}-{rna_id}'
+    pid = '{folder}/{rna_id}' if not log_dir else '{step}-{rna_id}'
 
     path = expand(f'{basedir}/{pid}{cond}{replicate}{extension}', folder = FOLDERS[step], step=step, allow_missing=True)
     #print(path)
