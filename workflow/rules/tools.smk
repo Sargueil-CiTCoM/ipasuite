@@ -25,20 +25,20 @@ def construct_param(config_category, param_name):
 
 rule import_raw_probe_data:
     input: get_raw_probe_input
-    output: construct_path(RAW_DATA_TYPE, results_dir = False)
+    output: protected(construct_path(RAW_DATA_TYPE, results_dir = False))
     shell:
         "cp {input} {output}"
 
 rule import_raw_control_data:
     input: get_raw_control_input 
-    output: construct_path(RAW_DATA_TYPE, control = True, results_dir = False)
+    output: protected(construct_path(RAW_DATA_TYPE, control = True, results_dir = False))
     shell:
         "cp {input} {output}"
 
 rule fluo_ceq8000:
     conda: "../scripts/tools/conda-env.yml"
-    input: protected(construct_path(step="fluo-ceq8000", results_dir=False))
-    output: construct_path(step="fluo-ce", results_dir=False) 
+    input: construct_path(step="fluo-ceq8000", results_dir=False)
+    output: protected(construct_path(step="fluo-ce", results_dir=False)) 
     shell:
         "python " + TOOLS + "ceq8000_to_tsv.py {input} {output}"
 
@@ -46,7 +46,7 @@ rule fluo_ceq8000:
 ### TODO : Enable only if qushape_file column exists and raw data type is qushape.
 rule import_external_qushape:
     input: get_external_qushape
-    output: construct_path("qushape", ext=".qushape", results_dir = False)
+    output: protected(construct_path("qushape", ext=".qushape", results_dir = False))
     shell:
         "cp {input} {output}"
 
@@ -62,9 +62,9 @@ rule import_qushape:
 rule generate_project_qushape:
     conda: "../scripts/tools/conda-env.yml"
     input:
-        rx = protected(ancient(construct_path("fluo-ce", results_dir = False))),
-        bg = protected(ancient(construct_path("fluo-ce", control = True, results_dir = False))),
-        refseq = protected(ancient(get_refseq)), 
+        rx = ancient(construct_path("fluo-ce", results_dir = False)),
+        bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
+        refseq = ancient(get_refseq), 
         refproj = ancient(get_qushape_refproj)
     params:
         refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
