@@ -162,6 +162,7 @@ def generate_conditions(pool_id, config):
 rule configure_ipanemap:
     output: 
         cfg=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True)
+    log: "logs/ipanemap-config-{rna_id}_pool_{pool_id}.cfg"
     run:
         generate_ipanemap_config_from_snakeconf(
                 configfile_path = output.cfg[0],
@@ -188,7 +189,7 @@ checkpoint ipanemap:
         files= get_ipanemap_inputs
     output:
         directory(expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], allow_missing=True))
-
+    log: "logs/ipanemap-out-{rna_id}_pool_{pool_id}.cfg"
     shell:"python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config}"
 
 
@@ -198,6 +199,7 @@ rule structure:
     input: expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx}.dbn", folder=config["folders"]["ipanemap-out"], allow_missing=True)
     output:
         expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.dbn", folder=config["folders"]["structure"], allow_missing=True)
+    log: "logs/ipanemap-{rna_id}_pool_{pool_id}_{idx}.cfg"
     shell:"cp {input} {output}"
 
 rule varna:
@@ -206,5 +208,6 @@ rule varna:
         expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn", folder=config["folders"]["structure"], allow_missing=True)
     output:
         expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna", folder=config["folders"]["varna"], allow_missing=True)
+    log: "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg"
     shell:
         "java -cp workflow/scripts/IPANEMAP/VARNAv3-93.jar fr.orsay.lri.varna.applications.VARNAcmd -i {input} -o {output}"

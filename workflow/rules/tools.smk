@@ -10,53 +10,52 @@ TOOLS = "workflow/scripts/tools/"
 
 ruleorder: import_qushape > generate_project_qushape
 
-def construct_list_param(config_category, param_name):
-    arg = ""
-    if param_name in config_category and len(config_category[param_name]) > 0:
-        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
-    return arg
-
-def construct_param(config_category, param_name):
-    arg = ""
-    if param_name in config_category:
-        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
-    return arg
 
 
 rule import_raw_probe_data:
     input: get_raw_probe_input
     output: protected(construct_path(RAW_DATA_TYPE, results_dir = False))
+    log: construct_path(RAW_DATA_TYPE, ext=".log", logpath=True) 
+    message: "Importing raw data from external source: " + MESSAGE + " replicate {wildcards.replicate}"
     shell:
-        "cp {input} {output}"
+        "cp {input} {output} &> {log}"
 
 rule import_raw_control_data:
     input: get_raw_control_input 
     output: protected(construct_path(RAW_DATA_TYPE, control = True, results_dir = False))
+    log: construct_path(RAW_DATA_TYPE, ext=".log", logpath=True) 
+    message: "Importing raw data from external source: " + MESSAGE + " replicate {wildcards.replicate}"
     shell:
-        "cp {input} {output}"
+        "cp {input} {output} &> {log}"
 
 rule fluo_ceq8000:
     conda: "../scripts/tools/conda-env.yml"
     input: construct_path(step="fluo-ceq8000", results_dir=False)
     output: protected(construct_path(step="fluo-ce", results_dir=False)) 
+    log: construct_path('fluo-ce', ext=".log", logpath=True) 
+    message: "Converting ceq8000 data for qushape: " + MESSAGE + " replicate {wildcards.replicate}"
     shell:
-        "python " + TOOLS + "ceq8000_to_tsv.py {input} {output}"
+        "python " + TOOLS + "ceq8000_to_tsv.py {input} {output} &> {log}"
 
 
 ### TODO : Enable only if qushape_file column exists and raw data type is qushape.
 rule import_external_qushape:
     input: get_external_qushape
     output: protected(construct_path("qushape", ext=".qushape", results_dir = False))
+    log: construct_path('qushape', ext=".log", logpath=True) 
+    message: "Importing from external source: " + MESSAGE + " replicate {wildcards.replicate}"
     shell:
-        "cp {input} {output}"
+        "cp {input} {output} &> {log}"
 
 
 # If a qushape file from outside exists
 rule import_qushape:
     input: construct_path("qushape", ext=".qushape", results_dir=False)
     output: construct_path("qushape", ext=".qushape")
+    log: construct_path('qushape', ext=".log", logpath=True) 
+    message: "Importing from ressource: " + MESSAGE + " replicate {wildcards.replicate}"
     shell:
-        "cp {input} {output}"
+        "cp {input} {output} &> {log}"
 
 
 rule generate_project_qushape:
@@ -74,9 +73,11 @@ rule generate_project_qushape:
         #TODO channels
         #channels=  
     #output: protected(construct_path("qushape", ext=".qushape"))
+
+    log: construct_path('qushape', ext=".log", logpath=True) 
     output: construct_path("qushape", ext=".qushape")
     shell:
-        "python " + TOOLS + "qushape_proj_generator.py {input.rx} {input.bg} {params} --output={output}"
+        "python " + TOOLS + "qushape_proj_generator.py {input.rx} {input.bg} {params} --output={output} &> {log}"
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -85,8 +86,9 @@ rule extract_reactivity:
         react=construct_path("reactivity")
         #,protect = protected(construct_path("qushape", ext=".qushape")) 
     message: "Extracting reactivity from QuShape for" + MESSAGE + " - replicate {wildcards.replicate}"
+    log: construct_path('reactivity', ext=".log", logpath=True) 
     shell:
-        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output={output.react}"
+        "python " + TOOLS + "qushape_extract_reactivity.py {input} --output={output.react} &> {log}"
 
 
 
@@ -95,6 +97,7 @@ rule normalize_reactivity:
     input: construct_path("reactivity")
     output: construct_path("normreact")
     message: "Normalizing reactivity for" + MESSAGE + " - replicate {wildcards.replicate}"
+    log: construct_path('normreact', ext=".log", logpath=True) 
     params:
         react_nuc = construct_list_param(CNORM, "reactive_nucleotides"),
         st_perc = construct_param(CNORM, "stop_percentile"),
@@ -103,18 +106,8 @@ rule normalize_reactivity:
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
     shell:
-        "python " + TOOLS + "normalize_reactivity.py {params} {input} --output={output} "
+        "python " + TOOLS + "normalize_reactivity.py {params} {input} --output={output} &> {log}"
 
-def construct_normcol():
-    arg = ""
-    if "norm_column" in config["aggregate"]:
-        arg = "--normcol=" + config["aggregate"]["normcol"]
-    elif "norm_method" in config["aggregate"]:
-        if "simple":
-            arg =  "--normcol=simple_norm_reactivity"
-        elif "interquartile":
-            arg = "--normcol=interquartile_norm_reactivity"
-    return arg
 
 
 rule aggregate_reactivity:
@@ -126,6 +119,7 @@ rule aggregate_reactivity:
         full= construct_path("aggreact", replicate = False), 
         compact = construct_path("aggreact-ipanemap", replicate=False, ext=".txt")
     message: "Aggregating normalized reactivity for " + MESSAGE
+    log: construct_path('aggreact', ext=".log", logpath=True, replicate=False) 
     params:
         norm_method= construct_normcol(),
         minndp = construct_param(config["aggregate"], "min_ndata_perc"),
@@ -134,7 +128,7 @@ rule aggregate_reactivity:
         mind = construct_param(config["aggregate"], "min_dispersion"),
         refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
-        "python "+ TOOLS + "aggregate_reactivity.py {input.norm} --output={output.full} {params} --ipanemap_output={output.compact}"
+        "python "+ TOOLS + "aggregate_reactivity.py {input.norm} --output={output.full} {params} --ipanemap_output={output.compact} &> {log}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"

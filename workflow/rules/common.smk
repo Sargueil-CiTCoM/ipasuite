@@ -4,7 +4,7 @@ import os
 
 # this container defines the underlying OS for each job when using the workflow
 # with --use-conda --use-singularity
-singularity: "docker://continuumio/miniconda3"
+container: "docker://continuumio/miniconda3"
 
 ##### load config and sample sheets #####
 
@@ -31,6 +31,32 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 # TODO : Activate before prod
 #validate(samples, schema="../schemas/samples.schema.yaml")
 
+
+def construct_list_param(config_category, param_name):
+    arg = ""
+    if param_name in config_category and len(config_category[param_name]) > 0:
+        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
+    return arg
+
+def construct_param(config_category, param_name):
+    arg = ""
+    if param_name in config_category:
+        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
+    return arg
+
+## Relative to tools/normalize_reactivity
+def construct_normcol():
+    arg = ""
+    if "norm_column" in config["aggregate"]:
+        arg = "--normcol=" + config["aggregate"]["normcol"]
+    elif "norm_method" in config["aggregate"]:
+        if "simple":
+            arg =  "--normcol=simple_norm_reactivity"
+        elif "interquartile":
+            arg = "--normcol=interquartile_norm_reactivity"
+    return arg
+
+
 def get_sample(wildcards, all_replicates=False):
     sval = [wildcards.rna_id]
     sval.extend([wildcards[cond] for cond in config["condition_names"]])
@@ -41,13 +67,14 @@ def get_sample(wildcards, all_replicates=False):
     sval.append(int(wildcards.replicate))
     return samples.loc[tuple(sval)]
 
-def construct_path(step, control = False, results_dir = True, ext = None, replicate = True):
-    cond = "_" + CONDITION if not control else expand("_" + CTRL_CONDITION, control=CONTROL, allow_missing = True)[0]
-    basedir = "results" if results_dir else "resources"
+def construct_path(step, control = False, results_dir = True, ext = None, replicate = True, logpath = True):
+    cond = f'_{CONDITION}' if not control else expand(f'_{CTRL_CONDITION}', control=CONTROL, allow_missing = True)[0]
+    basedir = "logs" if logpath else "results" if results_dir else "resources"
     replicate = "_{replicate}" if replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
+    pid = '{folder}/{rna_id}' if not logpath else '{step}-{rna_id}'
 
-    path = expand(basedir + "/{folder}/{rna_id}" + cond + replicate + extension, folder = FOLDERS[step], step=step, allow_missing=True)
+    path = expand(f'{basedir}/{pid}{cond}{replicate}{extension}', folder = FOLDERS[step], step=step, allow_missing=True)
     #print(path)
     return path
 
