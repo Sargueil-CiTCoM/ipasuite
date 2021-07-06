@@ -1,4 +1,4 @@
 workflow/scripts/IPANEMAP
 workflow/scripts/tools
-results/
+results/5.2-ipanemap-out
 .snakemake
