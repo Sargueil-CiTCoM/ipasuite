@@ -11,7 +11,7 @@ include: "rules/common.smk"
 include: "rules/tools.smk"
 include: "rules/other.smk"
 include: "rules/ipanemap.smk"
-
+include: "rules/importation.smk"
 rule all:
     input:
         #get_final_outputs()

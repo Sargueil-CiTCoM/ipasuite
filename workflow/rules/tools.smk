@@ -8,54 +8,28 @@ CNORM = config["normalization"]
 
 TOOLS = "workflow/scripts/tools/"
 
-ruleorder: import_qushape > generate_project_qushape
 
+if RAW_DATA_TYPE == "fluo_ceq8000":
 
+    rule fluo_ceq8000:
+        conda: "../scripts/tools/conda-env.yml"
+        input: construct_path(step="fluo-ceq8000", results_dir=False)
+        output: protected(construct_path(step="fluo-ce", results_dir=False)) 
+        log: construct_path('fluo-ce', ext=".log", log_dir=True) 
+        message: "Converting ceq8000 data for qushape: " + MESSAGE + " replicate {wildcards.replicate}"
+        shell:
+            "python " + TOOLS + "ceq8000_to_tsv.py {input} {output} &> {log}"
 
-rule import_raw_probe_data:
-    input: get_raw_probe_input
-    output: protected(construct_path(RAW_DATA_TYPE, results_dir = False))
-    log: construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True) 
-    message: "Importing raw data from external source: " + MESSAGE + " replicate {wildcards.replicate}"
-    shell:
-        "cp {input} {output} &> {log}"
-
-rule import_raw_control_data:
-    input: get_raw_control_input 
-    output: protected(construct_path(RAW_DATA_TYPE, control = True, results_dir = False))
-    log: construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True) 
-    message: "Importing raw data from external source: " + MESSAGE + " replicate {wildcards.replicate}"
-    shell:
-        "cp {input} {output} &> {log}"
-
-rule fluo_ceq8000:
-    conda: "../scripts/tools/conda-env.yml"
-    input: construct_path(step="fluo-ceq8000", results_dir=False)
-    output: protected(construct_path(step="fluo-ce", results_dir=False)) 
-    log: construct_path('fluo-ce', ext=".log", log_dir=True) 
-    message: "Converting ceq8000 data for qushape: " + MESSAGE + " replicate {wildcards.replicate}"
-    shell:
-        "python " + TOOLS + "ceq8000_to_tsv.py {input} {output} &> {log}"
-
-
-### TODO : Enable only if qushape_file column exists and raw data type is qushape.
-rule import_external_qushape:
-    input: get_external_qushape
-    output: protected(construct_path("qushape", ext=".qushape", results_dir = False))
-    log: construct_path('qushape', ext=".log", log_dir=True) 
-    message: "Importing from external source: " + MESSAGE + " replicate {wildcards.replicate}"
-    shell:
-        "cp {input} {output} &> {log}"
 
 
 # If a qushape file from outside exists
-rule import_qushape:
-    input: construct_path("qushape", ext=".qushape", results_dir=False)
-    output: construct_path("qushape", ext=".qushape")
-    log: construct_path('qushape', ext=".log", log_dir=True) 
-    message: "Importing from ressource: " + MESSAGE + " replicate {wildcards.replicate}"
-    shell:
-        "cp {input} {output} &> {log}"
+#rule import_qushape:
+#    input: construct_path("qushape", ext=".qushape", results_dir=False)
+#    output: construct_path("qushape", ext=".qushape")
+#    log: construct_path('qushape', ext=".log", log_dir=True) 
+#    message: "Importing from ressource: " + MESSAGE + " replicate {wildcards.replicate}"
+#    shell:
+#        "cp {input} {output} &> {log}"
 
 
 rule generate_project_qushape:
@@ -90,8 +64,6 @@ rule extract_reactivity:
     shell:
         "python " + TOOLS + "qushape_extract_reactivity.py {input} --output={output.react} &> {log}"
 
-
-
 rule normalize_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
     input: construct_path("reactivity")
@@ -107,8 +79,6 @@ rule normalize_reactivity:
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
     shell:
         "python " + TOOLS + "normalize_reactivity.py {params} {input} --output={output} &> {log}"
-
-
 
 rule aggregate_reactivity:
     conda:  "../scripts/tools/conda-env.yml"

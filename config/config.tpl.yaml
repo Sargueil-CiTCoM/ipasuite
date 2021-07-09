@@ -16,6 +16,8 @@ condition_names:
   - magnesium
 
 
+allow_auto_import: True
+
 # filename and titles formatting 
 format:
   # Format of the conditions, will be use to identify sample and construct filename.

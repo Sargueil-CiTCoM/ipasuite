@@ -68,12 +68,11 @@ def get_sample(wildcards, all_replicates=False):
     return samples.loc[tuple(sval)]
 
 def construct_path(step, control = False, results_dir = True, ext = None, replicate = True, log_dir = False):
-    cond = f'_{CONDITION}' if not control else expand(f'_{CTRL_CONDITION}', control=CONTROL, allow_missing = True)[0]
+    cond = f'_{CONDITION}' if not control else expand(f'_{CTRL_CONDITION}', control= CONTROL, allow_missing = True)[0]
     basedir = "logs" if log_dir else ("results" if results_dir else "resources")
     replicate = "_{replicate}" if replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = '{folder}/{rna_id}' if not log_dir else '{step}-{rna_id}'
-
     path = expand(f'{basedir}/{pid}{cond}{replicate}{extension}', folder = FOLDERS[step], step=step, allow_missing=True)
     #print(path)
     return path
@@ -128,13 +127,8 @@ def get_ipanemap_inputs(wildcards):
 def get_all_raw_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        sample = ("resources/{fluodir}/{rna_id}" + config["format"]["condition"] + "_{replicate}.{fluoext}.tsv").format(fluodir = config["folders"][config["rawdata"]["type"]],
-                fluoext=config["rawdata"]["type"],
-                **row)
-        control = ("resources/{fluodir}/{rna_id}" + config["format"]["control_condition"] + "_{replicate}.{fluoext}.tsv").format(control = config["rawdata"]["control"], fluodir =
-                config["folders"][config["rawdata"]["type"]], fluoext=config["rawdata"]["type"],
-                **row)
-        
+        sample = construct_path(results_dir=False, step=RAW_DATA_TYPE)[0].format(**row)
+        control = construct_path(results_dir=False, step=RAW_DATA_TYPE, control=True)[0].format(**row)
         outputs.append(sample)
         outputs.append(control)
     return outputs
@@ -142,7 +136,7 @@ def get_all_raw_outputs():
 def get_all_qushape_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        sample = ("results/{folder}/{rna_id}_" + config["format"]["condition"] + "_{replicate}.qushape").format(folder = config["folders"]["qushape"], **row)
+        sample = construct_path(step="qushape", ext=".qushape")[0].format(**row)
         outputs.append(sample)
     return outputs
 
