@@ -24,6 +24,19 @@ Data will be organized using a `config/samples.tsv` and configured using `config
 
 # Preparation
 
+## Operating System
+
+The pipeline should work on any system suporting Conda. 
+However, some packages (ViennaRNA, scikit-bio) are not available in Windows using conda, you will have install them manually.
+
+Tested Operating system :
+- Archlinux
+- Debian 11 (Bulleyes)
+- Ubuntu 16.4 to 20.4
+- Windows 10
+
+
+
 ## Install Conda environnement
 
 - Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
@@ -45,9 +58,11 @@ Data will be organized using a `config/samples.tsv` and configured using `config
 │   ├── config.yaml
 │   └── samples.tsv
 ├── resources # Contains input files
-│   ├── 1.1-fluo-ceq8015 # SHAPE data from ceq8015
+│   ├── 1.1-fluo-ceq8000 # SHAPE data from ceq8015
 │   ├── 1.2-fluo-ce # SHAPE data in a tsv format readable by QuShape
-│   ├── sequence.fa # Reference sequence of the studied RNA
+│   ├── sequence1.fa # Reference sequences of the studied RNA
+│   ├── ... 
+│   └── sequenceN.fa
 ├── results # Intermediary and analysied data
 │   ├── 2-qushape
 │   ├── 3.1-reactivity
@@ -56,7 +71,8 @@ Data will be organized using a `config/samples.tsv` and configured using `config
 │   ├── 4.2-aggreact-ipanemap
 │   ├── 5.1-ipanemap-config
 │   ├── 5.2-ipanemap-out
-│   └── 5.3-structure
+│   ├── 5.3-structure
+│   └── 5.4-varna 
 └── workflow # Scripts used for data treatement
 ```
 
@@ -95,6 +111,20 @@ Mandatory columns  :
 | --- | -------- | ------------ | ----- | ----------- | --------- | -------------- | ------------- | ------ | --------- | ------- | ---------- | --------- | ---------------- | --------------------------------------- | ----------------------- | --------------------------------------- | ----------------------------------------------- |
 | 1   | didymium |              | 1M7   | 37C         | Mg        |                |               |        |           |         | 2019-08-01 | 1         | yes              | 2-qushape/didymium_1M7_37C_Mg_3.qushape | didymium.fa             | input/didymium_1M7_37C_Mg_1.fluo-ce.tsv | input/didymium_DMSO_of_1M7_37C_Mg_1.fluo-ce.tsv |
 
+### Config.yaml
+
+`config.yaml` contains all informations necessary to execute the workflow
+
+
+``` yaml
+
+
+```
+
+
+
+
+
 
 
 ```{toctree}
@@ -106,5 +136,5 @@ Indices and tables
 ==================
 
 * {ref}`genindex`
-* {ref}`modindex`
+Ê* {ref}`modindex`
 * {ref}`search`

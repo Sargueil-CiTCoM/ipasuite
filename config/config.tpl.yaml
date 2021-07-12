@@ -5,17 +5,21 @@ samples: "config/samples.tsv"
 
 ## General Workflow configuration ##
 
-# The full sequence of the studied RNA in fasta format
+# List of studied RNA, with an identifier, and the corresponding fasta file
 # The fasta file should contain a description line containing the origin of the sequence (sequence database) with its unique identifier
+# all "rna_id" column value in samples.tsv must have a corresponding line in this section.
 sequences:
   gltB2: "resources/gltB2.fa"
 
+
+# List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also putted into format -> condition
 condition_names:
   - probe
   - interaction
   - magnesium
 
 
+# Allow snakemake to import automatically external files
 allow_auto_import: True
 
 # filename and titles formatting 
@@ -31,7 +35,7 @@ format:
 
 rawdata:
   # Path to the folder containing Raw experimental data, it will be prefixed to "control_file" and "probe_file"
-  path_prefix: "../../Nextcloud/data/GltB2/"
+  path_prefix: "../../biodata"
   # Type of the raw data. It will establish the starting point of the pipeline. Either from file directly from the sequencer or already converted to csv.
   type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce"]
   # Name of the control 
@@ -39,30 +43,38 @@ rawdata:
 
 ## Steps configurations ##
 
-### QuShape project generator & extractor###
+### QuShape project generator & extractor ###
 qushape:
   channels:
     RX: 0 # Channel 1
     RXS1: 2 # Channel 3
     BG: 0 # Channel 1
     BGS1: 2 # Channel 3
-  ddNTP: ddA
+  ddNTP: ddA ## Used ddNTP 
 
-### Reactivity Normalization
+### Reactivity Normalization ###
 normalization:
+  # Which nucleotide are reactive to the shape probe
   reactive_nucleotides: ["A", "C", "G", "U"]
-  stop_percentile: 90.
+  # All value above this percentile are considered as outliers, preliminarly to all other treatments.
+  stop_percentile: 90. 
+  # Value below this threshold are considered non-reactive (0.0)
   low_norm_reactivity_threshold: -0.3
+  # Which normalizations methods will be used, several are accepted. Autorized values are : simple, interquartile
   norm_methods:
     - simple
     - interquartile
+  # oulier threshold for simple normalization method
   simple_outlier_percentile: 98.
+  # percentile of values averaged to create the normalization term
   simple_norm_term_avg_percentile: 90.
 
 ### Replicate Aggregation
 aggregate:
-  norm_method: simple # or interquartile
-  #norm_column: "simple_norm_reactivity"
+  norm_method: simple # or interquartile 
+  
+  # You can specify the name of the column used for normalization instead of the normalization method 
+  #norm_column: "simple_norm_reactivity" #  
   min_ndata_perc: 0.5
   min_nsubdata_perc: 0.66
   max_mean_perc: 0.682
