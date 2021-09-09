@@ -87,6 +87,9 @@ The workflow contains 2 configuration files
 
 This file contains each experiment with related information. One line per experiment.
 
+A `config/samples.tpl.tsv` is available, and can be used as a model for your project
+
+
 Mandatory columns  :
 
 | name                    | description                                                                                                                                                                                                         |
@@ -115,11 +118,8 @@ Mandatory columns  :
 
 `config.yaml` contains all informations necessary to execute the workflow
 
+A fully commented 
 
-``` yaml
-
-
-```
 
 
 

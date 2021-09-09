@@ -107,6 +107,8 @@ ipanemap:
     show_probing: True
 
 ## Others configurations ## 
+
+# Folder names 
 folders:
   fluo-ceq8000: 1.1-fluo-ceq8000
   fluo-ce: 1.2-fluo-ce
