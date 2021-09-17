@@ -4,6 +4,8 @@ workflow:
 
 pages:
   script:
+    - conda env create --file workflow/envs/doc.yml --name shape-ce-doc || 0
+    - conda activate shape-ce-doc
     - cd workflow/docs
     - make html
     - mv build/html ../../public
