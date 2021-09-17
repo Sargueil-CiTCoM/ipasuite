@@ -1,5 +1,6 @@
 import configparser
-
+IPANEMAP="workflow/scripts/IPANEMAP/IPANEMAP.py"
+VARNA="workflow/scripts/IPANEMAP/VARNAv3-93.jar"
 def generate_ipanemap_config_from_snakeconf(
         configfile_path: str,
         input_softdir: str,
@@ -161,22 +162,39 @@ def generate_conditions(pool_id, config):
 
 rule configure_ipanemap:
     output: 
-        cfg=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True)
+        cfg=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg",
+                   folder=config["folders"]["ipanemap-config"],
+                   allow_missing=True)
     log: "logs/ipanemap-config-{rna_id}_pool_{pool_id}.cfg"
     run:
         generate_ipanemap_config_from_snakeconf(
                 configfile_path = output.cfg[0],
-                input_softdir = "results/" + config["folders"]["aggreact-ipanemap"],
+                input_softdir = 
+                    f"results/{config['folders']['aggreact-ipanemap']}",
                 input_rnaseq = config["sequences"][wildcards.rna_id],
                 input_conditions=generate_conditions(wildcards.pool_id,config),
-                output_dir = expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
-                    allow_missing=True)[0],
+                output_dir = expand("results/{folder}/{rna_id}_pool_{pool_id}", 
+                                    folder=config["folders"]["ipanemap-out"], 
+                                    rna_id=wildcards.rna_id,
+                                    pool_id=wildcards.pool_id,
+                                    allow_missing=True)[0],
                 input_harddir = None,
                 log_file = "ipanemap.log",
-                output_centroid_format=expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_centroid_{idx}.dbn", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
-                    allow_missing=True)[0],
-                output_optimal_format=expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx}.dbn", folder=config["folders"]["ipanemap-out"], rna_id=wildcards.rna_id,pool_id=wildcards.pool_id,
-                    allow_missing=True)[0],
+                output_centroid_format=
+                    expand("results/{folder}/{rna_id}_pool_{pool_id}/"
+                           "{rna_id}_pool_{pool_id}_centroid_{idx}.dbn", 
+                           folder=config["folders"]["ipanemap-out"], 
+                           rna_id=wildcards.rna_id,
+                           pool_id=wildcards.pool_id,
+                           allow_missing=True)[0],
+                output_optimal_format=
+                expand("results/{folder}/"
+                       "{rna_id}_pool_{pool_id}/"
+                       "{rna_id}_pool_{pool_id}_optimal_{idx}.dbn", 
+                       folder=config["folders"]["ipanemap-out"],
+                       rna_id=wildcards.rna_id,
+                       pool_id=wildcards.pool_id,
+                       allow_missing=True)[0],
                 config=config)
         
         
@@ -185,29 +203,44 @@ checkpoint ipanemap:
     conda: "../envs/ipanemap.yml"
     threads: 8
     input: 
-        config=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", folder=config["folders"]["ipanemap-config"], allow_missing=True),
+        config=expand("results/{folder}/{rna_id}_pool_{pool_id}.cfg", 
+                folder=config["folders"]["ipanemap-config"],
+                allow_missing=True),
         files= get_ipanemap_inputs
     output:
-        directory(expand("results/{folder}/{rna_id}_pool_{pool_id}", folder=config["folders"]["ipanemap-out"], allow_missing=True))
+        directory(expand("results/{folder}/{rna_id}_pool_{pool_id}",
+            folder=config["folders"]["ipanemap-out"],
+            allow_missing=True))
     log: "logs/ipanemap-out-{rna_id}_pool_{pool_id}.cfg"
-    shell:"python workflow/scripts/IPANEMAP/IPANEMAP.py --config {input.config}"
+    shell:f"python {IPANEMAP} --config {{input.config}}"
 
 
 rule structure:
     conda: "../envs/ipanemap.yml"
     threads: 8
-    input: expand("results/{folder}/{rna_id}_pool_{pool_id}/{rna_id}_pool_{pool_id}_optimal_{idx}.dbn", folder=config["folders"]["ipanemap-out"], allow_missing=True)
+    input: 
+        expand("results/{folder}/{rna_id}_pool_{pool_id}/"
+                  "{rna_id}_pool_{pool_id}_optimal_{idx}.dbn",
+                  folder=config["folders"]["ipanemap-out"],
+                  allow_missing=True)
     output:
-        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.dbn", folder=config["folders"]["structure"], allow_missing=True)
+        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.dbn", 
+               folder=config["folders"]["structure"],
+               allow_missing=True)
     log: "logs/ipanemap-{rna_id}_pool_{pool_id}_{idx}.cfg"
     shell:"cp {input} {output}"
 
 rule varna:
     conda: "../envs/ipanemap.yml"
     input:
-        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn", folder=config["folders"]["structure"], allow_missing=True)
+        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn", 
+                folder=config["folders"]["structure"], 
+                allow_missing=True)
     output:
-        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna", folder=config["folders"]["varna"], allow_missing=True)
+        expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna", 
+                folder=config["folders"]["varna"],
+                allow_missing=True)
     log: "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg"
     shell:
-        "java -cp workflow/scripts/IPANEMAP/VARNAv3-93.jar fr.orsay.lri.varna.applications.VARNAcmd -i {input} -o {output}"
+        f"java -cp {VARNA} fr.orsay.lri.varna.applications.VARNAcmd"
+        " -i {{input}} -o {{output}}"

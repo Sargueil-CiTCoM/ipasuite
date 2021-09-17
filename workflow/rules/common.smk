@@ -33,22 +33,20 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 
 
 def construct_list_param(config_category, param_name):
-    arg = ""
     if param_name in config_category and len(config_category[param_name]) > 0:
-        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
-    return arg
+        return f"--{param_name}='{str(config_category[param_name])}'"
+    return ""
 
 def construct_param(config_category, param_name):
-    arg = ""
     if param_name in config_category:
-        arg = "--" + param_name + "='" + str(config_category[param_name]) + "'"
-    return arg
+        return f"--{param_name}='{str(config_category[param_name])}'"
+    return ""
 
 ## Relative to tools/normalize_reactivity
 def construct_normcol():
     arg = ""
     if "norm_column" in config["aggregate"]:
-        arg = "--normcol=" + config["aggregate"]["normcol"]
+        arg = f"--normcol={config['aggregate']['normcol']}"
     elif "norm_method" in config["aggregate"]:
         if "simple":
             arg =  "--normcol=simple_norm_reactivity"
@@ -78,17 +76,17 @@ def construct_path(step, control = False, results_dir = True, ext = None, replic
     return path
 
 def get_external_qushape(wildcards):
-    sample = get_sample(wildcards) 
-    return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"]) 
+    sample = get_sample(wildcards)
+    return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
 
 def get_raw_probe_input(wildcards):
-    sample = get_sample(wildcards) 
-    return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"]) 
+    sample = get_sample(wildcards)
+    return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
 
 def get_raw_control_input(wildcards):
     sample = get_sample(wildcards)
-    return os.path.join(config["rawdata"]["path_prefix"] + sample["control_file"])
-    
+    return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
+
 
 def get_refseq(wildcards, all_replicates = False):
     sample = get_sample(wildcards, all_replicates)
@@ -101,7 +99,7 @@ def get_qushape_refproj(wildcards):
     sample = get_sample(wildcards)
     path = None
     if isinstance(sample["reference_qushape_file"], str):
-        path = os.path.join(config["rawdata"]["path_prefix"] + sample["reference_qushape_file"])
+        path = os.path.join(config["rawdata"]["path_prefix"], sample["reference_qushape_file"])
     if not path is None and os.path.exists(path):
         print(path)
         return path
@@ -120,7 +118,7 @@ def get_ipanemap_inputs(wildcards):
         if pool["id"] == wildcards.pool_id:
             for cond in pool["conditions"]:
                 inputs.extend(expand(construct_path("aggreact-ipanemap", replicate=False, ext=".txt"),
-                        rna_id=pool["rna_id"], **cond))
+                    rna_id=pool["rna_id"], **cond))
             break;
     return inputs
 
@@ -143,11 +141,16 @@ def get_all_qushape_outputs():
 def get_all_reactivity_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
-        sample = ("results/{folder}/{rna_id}_" + config["format"]["condition"] + "_{replicate}.{step}.tsv").format(folder = config["folders"]["reactivity"],step="reactivity", **row)
+        sample = ("results/{folder}/{rna_id}_" + 
+                  config["format"]["condition"] + 
+                  "_{replicate}.{step}.tsv").format(
+                          folder = config["folders"]["reactivity"],
+                          step="reactivity",
+                          **row)
         if row["qushape_analysed"] == 'yes':
             outputs.append(sample)
     return outputs
-        
+
 def get_all_aggreact_outputs():
     outputs = []
     for idx,row in samples.reset_index().iterrows():
@@ -168,9 +171,9 @@ def get_all_structure_outputs(wildcards):
         checkpoint_output = checkpoints.ipanemap.get(rna_id=pool["rna_id"], pool_id=pool["id"]).output[0]
         glob = glob_wildcards(os.path.join(checkpoint_output, "{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn"))
         outputs.extend(expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn",
-                folder=config["folders"]["structure"], rna_id=pool["rna_id"], pool_id=pool["id"], idx=glob.idx))            
+            folder=config["folders"]["structure"], rna_id=pool["rna_id"], pool_id=pool["id"], idx=glob.idx))
 
-    return outputs 
+    return outputs
 
 def get_all_vienna_outputs(wildcards):
     outputs = []
@@ -178,8 +181,8 @@ def get_all_vienna_outputs(wildcards):
         checkpoint_output = checkpoints.ipanemap.get(rna_id=pool["rna_id"], pool_id=pool["id"]).output[0]
         glob = glob_wildcards(os.path.join(checkpoint_output, "{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn"))
         outputs.extend(expand("results/{folder}/{rna_id}_pool_{pool_id}_{idx}.varna",
-                folder=config["folders"]["varna"], rna_id=pool["rna_id"], pool_id=pool["id"], idx=glob.idx))            
-    return outputs 
+            folder=config["folders"]["varna"], rna_id=pool["rna_id"], pool_id=pool["id"], idx=glob.idx))
+    return outputs
 
 #def get_final_outputs():
 #    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"
