@@ -243,4 +243,4 @@ rule varna:
     log: "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg"
     shell:
         f"java -cp {VARNA} fr.orsay.lri.varna.applications.VARNAcmd"
-        " -i {{input}} -o {{output}}"
+        f" -i {{input}} -o {{output}}"

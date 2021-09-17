@@ -18,7 +18,7 @@ if RAW_DATA_TYPE == "fluo_ceq8000":
         message: f"Converting ceq8000 data for qushape: {MESSAGE} replicate"
                  " {{wildcards.replicate}}"
         shell:
-            f"python {TOOLS} ceq8000_to_tsv.py {{input}} {{output}} &> {{log}}"
+            f"python {TOOLS}/ceq8000_to_tsv.py {{input}} {{output}} &> {{log}}"
 
 
 
@@ -52,8 +52,8 @@ rule generate_project_qushape:
     log: construct_path('qushape', ext=".log", log_dir=True) 
     output: construct_path("qushape", ext=".qushape")
     shell:
-        f"python {TOOLS} qushape_proj_generator.py {{input.rx}} {{input.bg}}"
-        " {{params}} --output={{output}} &> {{log}}"
+        f"python {TOOLS}/qushape_proj_generator.py {{input.rx}} {{input.bg}}"
+        f" {{params}} --output={{output}} &> {{log}}"
 
 rule extract_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -65,8 +65,8 @@ rule extract_reactivity:
              "- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True) 
     shell:
-        f"python {TOOLS} qushape_extract_reactivity.py {{input}}"
-        " --output={{output.react}} &> {{log}}"
+        f"python {TOOLS}/qushape_extract_reactivity.py {{input}}"
+        f" --output={{output.react}} &> {{log}}"
 
 rule normalize_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -83,8 +83,8 @@ rule normalize_reactivity:
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
     shell:
-        f"python {TOOLS} normalize_reactivity.py {{params}} {{input}}"
-        " --output={{output}} &> {{log}}"
+        f"python {TOOLS}/normalize_reactivity.py {{params}} {{input}}"
+        f" --output={{output}} &> {{log}}"
 
 rule aggregate_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
@@ -104,9 +104,9 @@ rule aggregate_reactivity:
         mind = construct_param(config["aggregate"], "min_dispersion"),
         refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
-        f"python {TOOLS} aggregate_reactivity.py {{input.norm}}"
-        " --output={{output.full}} {{params}}"
-        " --ipanemap_output={{output.compact}} &> {{log}}"
+        f"python {TOOLS}/aggregate_reactivity.py {{input.norm}}"
+        f" --output={{output.full}} {{params}}"
+        f" --ipanemap_output={{output.compact}} &> {{log}}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"
