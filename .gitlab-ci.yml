@@ -1,11 +1,17 @@
+image: continuumio/miniconda3:latest
+
+
 workflow:
   rules:
     - if: '$CI_COMMIT_BRANCH'
 
+before_script:
+  - conda env create --file workflow/envs/doc.yml --name shape-ce-doc || true
+  - source activate shape-ce-doc
+
+
 pages:
   script:
-    - conda env create --file workflow/envs/doc.yml --name shape-ce-doc || 0
-    - conda activate shape-ce-doc
     - cd workflow/docs
     - make html
     - mv build/html ../../public
