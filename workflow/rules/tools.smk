@@ -16,7 +16,7 @@ if RAW_DATA_TYPE == "fluo_ceq8000":
         output: protected(construct_path(step="fluo-ce", results_dir=False)) 
         log: construct_path('fluo-ce', ext=".log", log_dir=True) 
         message: f"Converting ceq8000 data for qushape: {MESSAGE} replicate"
-                 " {{wildcards.replicate}}"
+                 f" {{wildcards.replicate}}"
         shell:
             f"python {TOOLS}/ceq8000_to_tsv.py {{input}} {{output}} &> {{log}}"
 
@@ -28,7 +28,7 @@ if RAW_DATA_TYPE == "fluo_ceq8000":
 #    output: construct_path("qushape", ext=".qushape")
 #    log: construct_path('qushape', ext=".log", log_dir=True) 
 #    message: f"Importing from ressource: {MESSAGE} replicate"
-#             "{{wildcards.replicate}}"
+#             f"{{wildcards.replicate}}"
 #    shell:
 #        "cp {input} {output} &> {log}"
 
@@ -40,6 +40,8 @@ rule generate_project_qushape:
         bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
         refseq = ancient(get_refseq), 
         refproj = ancient(get_qushape_refproj)
+    message: f"Generate QuShape project for {MESSAGE}"
+             f"- replicate {{wildcards.replicate}}"
     params:
         refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
         refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
@@ -61,8 +63,8 @@ rule extract_reactivity:
     output: 
         react=construct_path("reactivity")
         #,protect = protected(construct_path("qushape", ext=".qushape")) 
-    message: "Extracting reactivity from QuShape for {MESSAGE}"
-             "- replicate {{wildcards.replicate}}"
+    message: f"Extracting reactivity from QuShape for {MESSAGE}"
+             f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True) 
     shell:
         f"python {TOOLS}/qushape_extract_reactivity.py {{input}}"
@@ -73,7 +75,7 @@ rule normalize_reactivity:
     input: construct_path("reactivity")
     output: construct_path("normreact")
     message: f"Normalizing reactivity for {MESSAGE}"
-             " - replicate {{wildcards.replicate}}"
+             f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True) 
     params:
         react_nuc = construct_list_param(CNORM, "reactive_nucleotides"),
@@ -94,7 +96,7 @@ rule aggregate_reactivity:
     output: 
         full= construct_path("aggreact", replicate = False), 
         compact = construct_path("aggreact-ipanemap", replicate=False, ext=".txt")
-    message: "Aggregating normalized reactivity for " + MESSAGE
+    message: f"Aggregating normalized reactivity for {MESSAGE}"
     log: construct_path('aggreact', ext=".log", log_dir=True, replicate=False) 
     params:
         norm_method= construct_normcol(),
