@@ -4,3 +4,4 @@ channels:
 dependencies:
   - sphinx
   - myst-parser
+  - make
