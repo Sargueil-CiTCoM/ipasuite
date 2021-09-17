@@ -5,8 +5,8 @@ workflow:
 pages:
   script:
     - cd workflow/docs
-    - make
-    - mv build ../../public
+    - make html
+    - mv build/html ../../public
   artifacts:
     paths:
       - public
