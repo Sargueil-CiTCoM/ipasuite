@@ -4,8 +4,9 @@ workflow:
 
 pages:
   script:
-    - mkdir public
-    - cp -r workflow/docs/build/html public  
+    - cd workflow/docs
+    - make
+    - mv build ../../public
   artifacts:
     paths:
       - public
