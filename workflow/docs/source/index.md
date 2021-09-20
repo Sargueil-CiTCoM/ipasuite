@@ -20,6 +20,7 @@ quickstart
 requirements
 install
 configuration
+folders
 ```
 
 Indices and tables
