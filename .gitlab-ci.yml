@@ -12,7 +12,7 @@ workflow:
 pages:
   image : sphinxdoc/sphinx
   before_script:
-    - pip install myst-parser sphinx-book-theme
+    - pip install myst-parser sphinx-book-theme sphinx_rtd_theme
   script:
     - cd workflow/docs
     - make html
