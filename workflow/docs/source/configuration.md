@@ -5,11 +5,16 @@ The workflow contains 2 configuration files
 - `config/config.yml` Which contains general configuration for the workflow
 - `config/samples.tsv` That contains informations about samples and replicates
 
-## Configure Pipeline
+## Quickstart Workflow configuration 
 
-`config.yaml` contains all informations necessary to execute the workflow
+`config.yaml` contains all informations necessary to execute the workflow. 
+In this section we will discuss the main configurations
 
-[TODO]
+
+### 
+sequences
+: 
+
 
 ## Declare samples 
 
@@ -19,17 +24,13 @@ This file contains each experiment with related information. One line per experi
 
 A `config/samples.tpl.tsv` is available, and can be used as a model for your project
 
-
 ### Mandatory columns
 
 id (string)
 : a unique number to identity experiment
 
 rna_id (string)
-: The identifier for RNA fragment used in this experiment
-
-probe (string)
-: Which probe has been use for this experiment (1M7, NMIA, BzCN, etc.)
+: The identifier for RNA fragment used in this experiment, as declare in the `sequences` section of `config.yaml`
 
 date (date)
 : Date of the experiment. use ISO 8601 format YYYY-MM-DD 
@@ -38,10 +39,26 @@ replicate (integer)
 : Replicate number for the given experiment
 
 
-### Special columns
+### Conditions columns
+For each type of experimental condition, you must declare it in the `condition_names` of `config.yaml` file the name declared in the config file must be the same as the on in `samples.tsv`
+In order to generate unambiguous file name, you must also add the conditions in the `format` section
 
-condition column (string)
-: One column per experimental condition ( temperature, magnesium, probing delay, folding buffer) The value in those column will be use to construct filename 
+
+
+
+#### Examples :
+
+probe (string)
+: Which probe was used in this sample (1M7, BzCN, NMIA, etc.)
+
+temperature (int)
+: At which temperature was made the probing
+
+magnesium (string)
+: Did the sample buffer contained Magnesium during probing (Mg / noMg)?
+
+interaction (string)
+: What other molecule/RNA was present with the probed RNA during the probing step.
 
 ### Optional columns
 
@@ -55,21 +72,10 @@ reference_qushape_file (file path)
 : Reference QuShape project : will be used in QuShape to pre-generate peak calling and alignment
 
 ### Other columns
-You can add as many columns to your `samples.tsv` as you wish  
-
-All other column are optionaluseful for the experimenter, but not mandatory to perform data treatement.
-
-### Example columns :
-
-| id  | rna_id   | experimenter | probe | temperature | magnesium | folding_buffer | probing_delay | primer | rna_begin | rna_end | date       | replicate | qushape_analysed | reference_qushape_file                  | reference_sequence_file | probe_file                              | control_file                                    |
-| --- | -------- | ------------ | ----- | ----------- | --------- | -------------- | ------------- | ------ | --------- | ------- | ---------- | --------- | ---------------- | --------------------------------------- | ----------------------- | --------------------------------------- | ----------------------------------------------- |
-| 1   | didymium |              | 1M7   | 37C         | Mg        |                |               |        |           |         | 2019-08-01 | 1         | yes              | 2-qushape/didymium_1M7_37C_Mg_3.qushape | didymium.fa             | input/didymium_1M7_37C_Mg_1.fluo-ce.tsv | input/didymium_DMSO_of_1M7_37C_Mg_1.fluo-ce.tsv |
+You can add as many columns to your `samples.tsv` as you wish, to help you classify and caracterize your data. Each column must have un unique name.
 
 
+#### Examples
 
-
-
-
-
-
-
+experimenter
+: Who performed the sample acquisition
