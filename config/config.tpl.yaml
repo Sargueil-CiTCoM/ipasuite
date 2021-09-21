@@ -1,56 +1,76 @@
 # This file should contain everything to configure the workflow on a global scale.
-# In case of sample based data, it should be complemented by a samples.tsv file that contains
-# one row per sample. It can be parsed easily via pandas.
+
+###
+# path to the samples.tsv file that contains
+# one row per sample. It can be parsed easily via pandas and opened by
+# libreoffice and excel
 samples: "config/samples.tsv"
 
 ## General Workflow configuration ##
 
+### 
 # List of studied RNA, with an identifier, and the corresponding fasta file
 # The fasta file should contain a description line containing the origin of the sequence (sequence database) with its unique identifier
 # all "rna_id" column value in samples.tsv must have a corresponding line in this section.
 sequences:
   gltB2: "resources/gltB2.fa"
 
-
+###
 # List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also putted into format -> condition
-condition_names:
+conditions:
   - probe
   - interaction
   - magnesium
 
 
+###
 # Allow snakemake to import automatically external files
+# Not fully tested yet
 allow_auto_import: True
 
+###
 # filename and titles formatting 
 format:
+  ###
   # Format of the conditions, will be use to identify sample and construct filename.
   # All variable conditions should be referenced here
   # Name of the conditions must correspond a column header in the samples.tsv file
   condition: "{probe}_{interaction}_{magnesium}"
+  ###   
   # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content 
   control_condition: "{control}_of_{probe}_{interaction}_{magnesium}"
+  ###
   # Format use to create comprehensible Snakemake message when running workflow. conditions must be prefixed with "wildcards."
   message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.interaction} {wildcards.magnesium}"
 
+###
+# Information concerning raw datas
 rawdata:
+  ###
   # Path to the folder containing Raw experimental data, it will be prefixed to "control_file" and "probe_file"
   path_prefix: "../../biodata"
+  ###
   # Type of the raw data. It will establish the starting point of the pipeline. Either from file directly from the sequencer or already converted to csv.
   type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce"]
+  ###
   # Name of the control 
   control: "DMSO"
 
 ## Steps configurations ##
 
-### QuShape project generator & extractor ###
+###
+# QuShape project generator & extractor
 qushape:
+  ###
+  # Definition of sequencer channels used for this project
   channels:
     RX: 0 # Channel 1
     RXS1: 2 # Channel 3
     BG: 0 # Channel 1
     BGS1: 2 # Channel 3
-  ddNTP: ddA ## Used ddNTP 
+  ###
+  # Used ddNTP 
+  ddNTP: ddA
 
 ### Reactivity Normalization ###
 normalization:

@@ -13,12 +13,12 @@ validate(config, schema="../schemas/config.schema.yaml")
 
 def get_indexes(replicates=True):
     indexes = ["rna_id"]
-    indexes.extend(config["condition_names"])
+    indexes.extend(config["conditions"])
     if replicates:
         indexes.append("replicate")
     return indexes
 
-condition_types = { name : 'str' for name in config['condition_names']}
+condition_types = { name : 'str' for name in config['conditions']}
 
 unindexed_samples = pd.read_csv(config["samples"], sep="\t", dtype = condition_types)#.set_index("sample", drop=False)
 samples = unindexed_samples.set_index(get_indexes(),drop=True)
@@ -57,7 +57,7 @@ def construct_normcol():
 
 def get_sample(wildcards, all_replicates=False):
     sval = [wildcards.rna_id]
-    sval.extend([wildcards[cond] for cond in config["condition_names"]])
+    sval.extend([wildcards[cond] for cond in config["conditions"]])
 
     if all_replicates:
         return samples_replicates.loc[tuple(sval)]
