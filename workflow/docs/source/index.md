@@ -14,7 +14,7 @@ The workflow will enable you to generate structure data for a RNA fragment analy
 
 ```{toctree}
 :maxdepth: 2
-:caption: Contents
+:caption: Getting started
 
 quickstart
 requirements
@@ -22,9 +22,17 @@ install
 configuration
 run
 troubleshooting
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Go further
+
+config_yaml_ref
 folders
 modules
 ```
+
 
 Indices and tables
 ==================

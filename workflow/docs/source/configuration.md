@@ -6,10 +6,19 @@ The workflow contains 2 configuration files
 - `config/samples.tsv` That contains informations about samples and replicates
 
 ## Workflow configuration 
-### Quickstart
-`config.yaml` contains all informations necessary to execute the workflow. 
+`config/config.yaml` contains all informations necessary to execute the workflow. 
 
-In order to start with your project, you might look at thoses sections:
+To get started, copy `config/config.tpl.yaml` into `config/config.yaml`
+
+```bash
+cp config/config.tpl.yaml config/config.yaml
+```
+
+You will get a fully commented `config.yaml` file to help you during configuration
+
+
+In order to get started with your project, you might look at thoses sections of
+`config.yaml`:
 
 sequences
 : List the RNA molecules used in this project, and the path to there sequence
@@ -31,9 +40,7 @@ ipanemap
 
 Others sections can stay untouch depending of your needs
 
-### Workflow configuration reference for `config.yaml`
-```{autoyaml} ../../config/config.tpl.yaml
-```
+To go futher : [](config_yaml_ref)
 
 
 ## Samples declaration
