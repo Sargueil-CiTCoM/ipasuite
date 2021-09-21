@@ -1,14 +1,303 @@
-$schema: "http://json-schema.org/draft-04/schema#"
-
-description: snakemake configuration file
-
-type: object
-
-# possible entries of the config file and which type they should be
-properties:
-  samples:
-    type: string
-
-# entries that have to be in the config file for successful validation
-required:
-  - samples
+---
+"$schema": http://json-schema.org/draft-06/schema#
+"$ref": "#/definitions/ShapeCEConfig"
+definitions:
+  ShapeCEConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      samples:
+        type: string
+      sequences:
+        "$ref": "#/definitions/Sequences"
+      conditions:
+        type: array
+        items:
+          type: string
+      allow_auto_import:
+        type: boolean
+      format:
+        "$ref": "#/definitions/Format"
+      rawdata:
+        "$ref": "#/definitions/Rawdata"
+      qushape:
+        "$ref": "#/definitions/Qushape"
+      normalization:
+        "$ref": "#/definitions/Normalization"
+      aggregate:
+        "$ref": "#/definitions/Aggregate"
+      ipanemap:
+        "$ref": "#/definitions/Ipanemap"
+      folders:
+        "$ref": "#/definitions/Folders"
+    required:
+    - aggregate
+    - allow_auto_import
+    - conditions
+    - folders
+    - format
+    - ipanemap
+    - normalization
+    - qushape
+    - rawdata
+    - samples
+    - sequences
+    title: Shape-CE Config
+  Aggregate:
+    description: "Aggregate script configuration"
+    type: object
+    additionalProperties: false
+    properties:
+      norm_method:
+        type: string
+      min_ndata_perc:
+        type: number
+      min_nsubdata_perc:
+        type: number
+      max_mean_perc:
+        type: number
+      min_dispersion:
+        type: number
+    required:
+    - max_mean_perc
+    - min_dispersion
+    - min_ndata_perc
+    - min_nsubdata_perc
+    - norm_method
+    title: Aggregate
+  Folders:
+    type: object
+    additionalProperties: false
+    properties:
+      fluo-ceq8000:
+        type: string
+      fluo-ce:
+        type: string
+      qushape:
+        type: string
+      reactivity:
+        type: string
+      normreact:
+        type: string
+      aggreact:
+        type: string
+      aggreact-ipanemap:
+        type: string
+      ipanemap-config:
+        type: string
+      ipanemap-out:
+        type: string
+      structure:
+        type: string
+      varna:
+        type: string
+    required:
+    - aggreact
+    - aggreact-ipanemap
+    - fluo-ce
+    - fluo-ceq8000
+    - ipanemap-config
+    - ipanemap-out
+    - normreact
+    - qushape
+    - reactivity
+    - structure
+    - varna
+    title: Folders
+  Format:
+    type: object
+    additionalProperties: false
+    properties:
+      condition:
+        type: string
+      control_condition:
+        type: string
+      message:
+        type: string
+    required:
+    - condition
+    - control_condition
+    - message
+    title: Format
+  Ipanemap:
+    type: object
+    additionalProperties: false
+    properties:
+      pools:
+        type: array
+        items:
+          "$ref": "#/definitions/Pool"
+      sampling:
+        "$ref": "#/definitions/Sampling"
+      clustering:
+        "$ref": "#/definitions/Clustering"
+      pareto:
+        "$ref": "#/definitions/Pareto"
+      visualization:
+        "$ref": "#/definitions/Visualization"
+    required:
+    - clustering
+    - pareto
+    - pools
+    - sampling
+    - visualization
+    title: Ipanemap
+  Clustering:
+    type: object
+    additionalProperties: false
+    properties:
+      max_diameter_threshold:
+        type: integer
+      max_avg_diameter_threshold:
+        type: integer
+    required:
+    - max_avg_diameter_threshold
+    - max_diameter_threshold
+    title: Clustering
+  Pareto:
+    type: object
+    additionalProperties: false
+    properties:
+      percentage:
+        type: integer
+      zcutoff:
+        type: number
+    required:
+    - percentage
+    - zcutoff
+    title: Pareto
+  Pool:
+    type: object
+    additionalProperties: false
+    properties:
+      id:
+        type: string
+      rna_id:
+        type: string
+      conditions:
+        type: array
+        items:
+          "$ref": "#/definitions/Condition"
+    required:
+    - conditions
+    - id
+    - rna_id
+    title: Pool
+  Condition:
+    type: object
+    additionalProperties: true 
+    title: Condition
+  Sampling:
+    type: object
+    additionalProperties: false
+    properties:
+      enable:
+        type: boolean
+      nstructures:
+        type: integer
+      temperature:
+        type: integer
+      m:
+        type: number
+      b:
+        type: number
+    required:
+    - b
+    - enable
+    - m
+    - nstructures
+    - temperature
+    title: Sampling
+  Visualization:
+    type: object
+    additionalProperties: false
+    properties:
+      draw_models:
+        type: boolean
+      draw_centroids:
+        type: boolean
+      show_probing:
+        type: boolean
+    required:
+    - draw_centroids
+    - draw_models
+    - show_probing
+    title: Visualization
+  Normalization:
+    type: object
+    additionalProperties: false
+    properties:
+      reactive_nucleotides:
+        type: array
+        items:
+          type: string
+      stop_percentile:
+        type: integer
+      low_norm_reactivity_threshold:
+        type: number
+      norm_methods:
+        type: array
+        items:
+          type: string
+      simple_outlier_percentile:
+        type: integer
+      simple_norm_term_avg_percentile:
+        type: integer
+    required:
+    - low_norm_reactivity_threshold
+    - norm_methods
+    - reactive_nucleotides
+    - simple_norm_term_avg_percentile
+    - simple_outlier_percentile
+    - stop_percentile
+    title: Normalization
+  Qushape:
+    type: object
+    additionalProperties: false
+    properties:
+      channels:
+        "$ref": "#/definitions/Channels"
+      ddNTP:
+        type: string
+    required:
+    - channels
+    - ddNTP
+    title: Qushape
+  Channels:
+    type: object
+    additionalProperties: false
+    properties:
+      RX:
+        type: integer
+      RXS1:
+        type: integer
+      BG:
+        type: integer
+      BGS1:
+        type: integer
+    required:
+    - BG
+    - BGS1
+    - RX
+    - RXS1
+    title: Channels
+  Rawdata:
+    type: object
+    additionalProperties: false
+    properties:
+      path_prefix:
+        type: string
+      type:
+        type: string
+      control:
+        type: string
+    required:
+    - control
+    - path_prefix
+    - type
+    title: Rawdata
+  Sequences:
+    type: object
+    additionalProperties:
+      type: string
+    title: Sequences
