@@ -20,6 +20,8 @@ quickstart
 requirements
 install
 configuration
+run
+troubleshooting
 folders
 modules
 ```
