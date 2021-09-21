@@ -14,7 +14,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../../../"))
-
+sys.path.insert(0, os.path.abspath("../../scripts/tools"))
+print(sys.path)
 
 # -- Project information -----------------------------------------------------
 
@@ -28,7 +29,12 @@ author = "François-Xavier Lyonnet du Moutier"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["myst_parser"]
+extensions = [
+    "myst_parser",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.coverage",
+    "sphinx.ext.napoleon",
+]
 myst_enable_extensions = ["deflist"]
 
 # Add any paths that contain templates here, relative to this directory.

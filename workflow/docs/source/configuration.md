@@ -8,12 +8,25 @@ The workflow contains 2 configuration files
 ## Quickstart Workflow configuration 
 
 `config.yaml` contains all informations necessary to execute the workflow. 
-In this section we will discuss the main configurations
+In this section we will discuss the configurations necessary to use the workflow, a more complete documentation is available in the 
 
 
-### 
-sequences
-: 
+### Sequences
+```yaml
+sequences:
+  sequence_id_1: "resources/sequence1.fa"
+  sequence_id_2: "resources/sequence2.fa"
+  sequence_id_3: "resources/sequence3.fa"
+```
+
+### Conditions
+```yaml
+conditions:
+    - probe
+    - temperature
+    - magnesium
+```
+
 
 
 ## Declare samples 

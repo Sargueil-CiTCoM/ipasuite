@@ -21,6 +21,7 @@ requirements
 install
 configuration
 folders
+modules
 ```
 
 Indices and tables
