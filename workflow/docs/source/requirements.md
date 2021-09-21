@@ -20,7 +20,9 @@ The original version of QuShape relies on PythonXY, an unmaintained python2 dist
 
 We provide a version that is compatible with conda, and correct few bugs with the latest python2 version.
 
-You can find it here [](https://github.com/CiTCoM-Lab/QuShape)
+You can find it here [https://github.com/CiTCoM-Lab/QuShape](https://github.com/CiTCoM-Lab/QuShape)
+
+A installation tutorial is available
 
 In addition, some part of QuShape have been converted to Python 3 and embedded with this
 shape-ce pipeline.
