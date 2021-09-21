@@ -5,31 +5,38 @@ The workflow contains 2 configuration files
 - `config/config.yml` Which contains general configuration for the workflow
 - `config/samples.tsv` That contains informations about samples and replicates
 
-## Quickstart Workflow configuration 
-
+## Workflow configuration 
+### Quickstart
 `config.yaml` contains all informations necessary to execute the workflow. 
-In this section we will discuss the configurations necessary to use the workflow, a more complete documentation is available in the 
 
+In order to start with your project, you might look at thoses sections:
 
-### Sequences
-```yaml
-sequences:
-  sequence_id_1: "resources/sequence1.fa"
-  sequence_id_2: "resources/sequence2.fa"
-  sequence_id_3: "resources/sequence3.fa"
+sequences
+: List the RNA molecules used in this project, and the path to there sequence
+
+conditions
+: List the experimental conditions which will be explored in this project
+
+format
+: Choose how the files will be named, in relation the your `conditions` section
+
+rawdata
+: If you want to import files from previous analysis, you should modify this section
+
+qushape
+: Input the configuration used with your capillary sequencer. (Channels and ddNTP) 
+
+ipanemap
+: Configure the execution conditions for IPANEMAP
+
+Others sections can stay untouch depending of your needs
+
+### Workflow configuration reference for `config.yaml`
+```{autoyaml} ../../config/config.tpl.yaml
 ```
 
-### Conditions
-```yaml
-conditions:
-    - probe
-    - temperature
-    - magnesium
-```
 
-
-
-## Declare samples 
+## Samples declaration
 
 `.tsv` file is a tabular file format that you can open either with a text editor or an spreadsheet program
 

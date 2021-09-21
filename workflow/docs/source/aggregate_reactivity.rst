@@ -1,7 +1,6 @@
-aggregate\_reactivity module
-============================
+aggregate\_reactivity.py
+========================
 
 .. automodule:: aggregate_reactivity
    :members:
-   :undoc-members:
    :show-inheritance:

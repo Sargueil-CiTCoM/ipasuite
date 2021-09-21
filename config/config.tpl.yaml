@@ -4,6 +4,10 @@
 # path to the samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas and opened by
 # libreoffice and excel
+#Typically:
+#```yaml
+# samples: "config/samples.tsv" 
+#```
 samples: "config/samples.tsv"
 
 ## General Workflow configuration ##
@@ -12,11 +16,28 @@ samples: "config/samples.tsv"
 # List of studied RNA, with an identifier, and the corresponding fasta file
 # The fasta file should contain a description line containing the origin of the sequence (sequence database) with its unique identifier
 # all "rna_id" column value in samples.tsv must have a corresponding line in this section.
+#
+# *Example:*
+# ```yaml
+# sequences:
+#   sequence_id_1: "resources/sequence1.fa"
+#   sequence_id_2: "resources/sequence2.fa"
+#   sequence_id_3: "resources/sequence3.fa"
+#```
 sequences:
   gltB2: "resources/gltB2.fa"
 
 ###
 # List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also putted into format -> condition
+# *Example:*
+#
+# ```yaml
+# conditions:
+#   - probe 
+#   - temperature 
+#   - magnesium
+#   - ...
+#```
 conditions:
   - probe
   - interaction
@@ -29,50 +50,144 @@ conditions:
 allow_auto_import: True
 
 ###
-# filename and titles formatting 
+# Section to define filename and titles formatting 
 format:
   ###
   # Format of the conditions, will be use to identify sample and construct filename.
   # All variable conditions should be referenced here
   # Name of the conditions must correspond a column header in the samples.tsv file
+  #
+  # *Example:* 
+  # ```yaml
+  # format:
+  #   ...
+  #   condition: "{probe}_{temperature}_{magnesium}"
+  #   ...
+  # ```
   condition: "{probe}_{interaction}_{magnesium}"
   ###   
   # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content 
+  #
+  # *Example:* 
+  # ```yaml
+  # format:
+  #   ...
+  #   control_condition: "{control}_of_{probe}_{temperature}C_{magnesium}"
+  #   ...
+  # ```
   control_condition: "{control}_of_{probe}_{interaction}_{magnesium}"
   ###
   # Format use to create comprehensible Snakemake message when running workflow. conditions must be prefixed with "wildcards."
+  #
+  # *Example:* 
+  # ```yaml
+  # format:
+  #   ...
+  #   message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.temperature}°C {wildcards.magnesium}"
+  #   ...
+  # ```
   message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.interaction} {wildcards.magnesium}"
 
 ###
 # Information concerning raw datas
 rawdata:
   ###
-  # Path to the folder containing Raw experimental data, it will be prefixed to "control_file" and "probe_file"
+  # Path to the folder containing Raw experimental data, it will be prefixed to "control_file" and "probe_file" to auto import data from this folder. Absolute path, and relative path from project root are accepted.
+  #
+  # *Example: 
+  # ```yaml
+  # rawdata:
+  #   ...
+  #   path_prefix: "path/to/my/raw/data/folder
+  #   ...
+  # ```
   path_prefix: "../../biodata"
   ###
   # Type of the raw data. It will establish the starting point of the pipeline. Either from file directly from the sequencer or already converted to csv.
+  # Accepted values : "fluo-ceq8000" or "fluo-ce"
+  #
+  # *Example:* 
+  # ```yaml
+  # rawdata:
+  #   ...
+  #   type: "fluo-ceq8000"
+  #   ...
+  # ```
   type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce"]
   ###
   # Name of the control 
+  #
+  # *Example:* 
+  # ```yaml
+  # rawdata:
+  #   ...
+  #   control: "DMSO"
+  #   ...
+  # ```
   control: "DMSO"
 
 ## Steps configurations ##
 
 ###
 # QuShape project generator & extractor
+# This section allow to configure the way snakemake will generate QuShape
+# project. those informations must be identical to the configuration of your
+# capillary sequencer
+#
+# `channel` section corresponds to the definition of sequencer channels 
+# used for this project, here, channel start at index 0: channel 1 
+# correspond to value 0
+#
+# `ddNTP` corresponds to the ddNTP used for sequence samples
+#
+# *Example:* 
+#
+# ```yaml
+#qushape:
+#  channels:
+#    RX: 0 # Channel 1
+#    RXS1: 2 # Channel 3
+#    BG: 0 # Channel 1
+#    BGS1: 2 # Channel 3
+#  ddNTP: ddA
+# ```
 qushape:
-  ###
-  # Definition of sequencer channels used for this project
   channels:
     RX: 0 # Channel 1
     RXS1: 2 # Channel 3
     BG: 0 # Channel 1
     BGS1: 2 # Channel 3
-  ###
-  # Used ddNTP 
   ddNTP: ddA
 
-### Reactivity Normalization ###
+###
+# Reactivity Normalization configuration
+# 
+# items in this sections are equivalent of the flags available when running 
+# ```bash
+# python workflow/scripts/tools/normalize_reactivity.py --help
+# ```
+# you can refer to this for more accurate information
+# 
+#
+# ```yaml
+# normalization:
+#   # Which nucleotide are reactive to the shape probe
+#   reactive_nucleotides: ["A", "C", "G", "U"]
+#   # All value above this percentile are considered as outliers, preliminarly to all other treatments.
+#   stop_percentile: 90. 
+#   # Value below this threshold are considered non-reactive (0.0)
+#   low_norm_reactivity_threshold: -0.3
+#   # Which normalizations methods will be used, several are accepted. Autorized values are : simple, interquartile
+#   norm_methods:
+#     - simple
+#     - interquartile
+#   # oulier threshold for simple normalization method
+#   simple_outlier_percentile: 98.
+#   # percentile of values averaged to create the normalization term
+#   simple_norm_term_avg_percentile: 90.
+# ```
+#
+#
 normalization:
   # Which nucleotide are reactive to the shape probe
   reactive_nucleotides: ["A", "C", "G", "U"]
@@ -89,7 +204,27 @@ normalization:
   # percentile of values averaged to create the normalization term
   simple_norm_term_avg_percentile: 90.
 
-### Replicate Aggregation
+### 
+# Replicate Aggregation configuration 
+# 
+# items in this sections are equivalent of the flags available when running 
+# ```bash
+# python workflow/scripts/tools/aggregate_reactivity.py --help
+# ```
+# you can refer to this for more accurate information
+# 
+#
+# ```yaml
+# aggregate:
+#   norm_method: simple # or interquartile 
+#   
+#   # You can specify the name of the column used for normalization instead of the normalization method 
+#   #norm_column: "simple_norm_reactivity" #  
+#   min_ndata_perc: 0.5
+#   min_nsubdata_perc: 0.66
+#   max_mean_perc: 0.682
+#   min_dispersion: 0.05
+# ```
 aggregate:
   norm_method: simple # or interquartile 
   
@@ -100,7 +235,72 @@ aggregate:
   max_mean_perc: 0.682
   min_dispersion: 0.05
 
-### IPANEMAP ###
+### 
+# IPANEMAP configuration
+#
+# in order to calculate structures, you can define in which way you want to
+# combine conditions as input for ipanemap. the `pool section` enable you to do
+# so.
+#
+# *Example:*
+#
+# ```yaml 
+# ipanemap:
+#   ...
+#   pools:
+#     - id: 1M7_noMg_37C
+#       rna_id: sequence1 
+#       conditions:
+#         - temperature: 37
+#           magnesium: noMg
+#           probe: 1M7
+#     - id: allProbe_noMg_37C
+#       rna_id: sequence1 
+#       conditions:
+#         - temperature: 37 
+#           magnesium: noMg
+#           probe: 1M7
+#         - temperature: 37 
+#           magnesium: noMg
+#           probe: NMIA
+#         - temperature: 37 
+#           magnesium: noMg
+#           probe: BzCN
+#   ...
+# ```
+# 
+# each run of IPANEMAP can be entirerly configure.
+# to create un new run (or `pool`) add a dash in the `pools` sections
+# each pool should have an unique `id` of your choice.
+# 
+# `rna_id` correspond to the sequence to input to IPANEMAP this id must
+# correspond to and id of the `sequences` section of this configuration file.
+#
+# `conditions` correspond of the sets of conditions you want to be added to
+# IPANEMAP run. each set of condition start with a dash and must contains all
+# conditions references in the `conditions` section of this configuration file.
+# 
+# *In the Example:*
+#
+# - first pool (1M7_noMg_37C) will be executed with "sequence1"
+# and with one condition: 
+#   - all sample aggregated which have no magnesium, a temperature of 37C,
+# and 1M7 probing 
+#
+# - second pool (allProbe_noMg_37C) will be executed with "sequence1"
+# and with 3 conditions :
+#   - all sample aggregated which have no magnesium, a temperature of 37C, and
+#  1M7 probing
+#   - all sample aggregated which have no magnesium, a temperature of 37C, and
+#  NMIA probing
+#   - all sample aggregated which have no magnesium, a temperature of 37C, and
+#  BzCN probing
+#
+# Parameters in sampling, clustering, pareto, visualization are equivalent to
+# the content of ipanemap config file. Please refer to IPANEMAP documentation
+#
+# [https://github.com/afafbioinfo/IPANEMAP](https://github.com/afafbioinfo/IPANEMAP)
+#
 ipanemap:
   pools:
     - id: 1M7_Mg_none
@@ -126,9 +326,27 @@ ipanemap:
     draw_centroids: True
     show_probing: True
 
-## Others configurations ## 
-
+### 
 # Folder names 
+# 
+# Intermediary folder naming is fully customable,
+# 
+# *Default values:*
+#
+# ```yaml
+# folders:
+#   fluo-ceq8000: 1.1-fluo-ceq8000
+#   fluo-ce: 1.2-fluo-ce
+#   qushape: 2-qushape
+#   reactivity: 3.1-reactivity
+#   normreact: 3.2-normreact
+#   aggreact: 4.1-aggreact
+#   aggreact-ipanemap: 4.2-aggreact-ipanemap  
+#   ipanemap-config: 5.1-ipanemap-config
+#   ipanemap-out: 5.2-ipanemap-out
+#   structure: 5.3-structure
+#   varna: 5.4-varna
+# ```
 folders:
   fluo-ceq8000: 1.1-fluo-ceq8000
   fluo-ce: 1.2-fluo-ce

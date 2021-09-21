@@ -1,7 +1,6 @@
-normalize\_reactivity module
+normalize\_reactivity.py
 ============================
 
 .. automodule:: normalize_reactivity
    :members:
-   :undoc-members:
    :show-inheritance:

@@ -34,9 +34,11 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
+    "sphinxcontrib.autoyaml",
+    "sphinx-jsonschema"
 ]
 myst_enable_extensions = ["deflist"]
-
+autoyaml_level = 3
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
