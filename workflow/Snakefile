@@ -4,14 +4,18 @@
 
 report: "report/workflow.rst"
 
+
 # Allow users to fix the underlying OS via singularity.
 container: "docker://continuumio/miniconda3"
+
 
 include: "rules/common.smk"
 include: "rules/tools.smk"
 include: "rules/other.smk"
 include: "rules/ipanemap.smk"
 include: "rules/importation.smk"
+
+
 rule all:
     input:
         #get_final_outputs()
@@ -20,9 +24,8 @@ rule all:
         #get_all_reactivity_outputs()
         #get_all_aggreact_outputs()
         #get_all_structure_outputs
-        aggregates = get_all_aggreact_outputs(),
+        aggregates=get_all_aggreact_outputs(),
         #structures = get_all_structure_outputs
-        vienna = get_all_vienna_outputs
+        vienna=get_all_vienna_outputs,
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
-
