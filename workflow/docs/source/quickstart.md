@@ -8,7 +8,7 @@ In order to use the pipeline you will have to follow those steps :
 4. Launch `./shape-ce.sh`
 5. Open your generated .qushape file in results/2-qushape and perform the qushape
    analysis and save the complete analysis
-6. Launch again `./shape.sh`
+6. Launch again `./shape-ce.sh`
 
 You will find your structure data in results/5.3-structure and results/05.4-varna treated
 with ipanemap as set up in your `config/config.yaml`

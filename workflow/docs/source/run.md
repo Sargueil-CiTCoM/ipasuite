@@ -24,6 +24,15 @@ It will run `snakemake` with 8 threads, using conda and continuing on job fail.
 At the end of snakemake run, it will output logs if they contains informations.
 
 
-## Step by step
+## In practice 
 
-1. run `shape-ce.sh`
+1. Open an terminal / console
+2. Got to your git repository
+```bash
+cd path/to/project/
+```
+3. run `./shape-ce.sh`
+4. Open each new qushape project with QuShape and perform data treatment until reactivity step (no reactivity export needed)
+5. run again `./shape-ce.sh`
+
+You will find generated structure in `5.3-structure`

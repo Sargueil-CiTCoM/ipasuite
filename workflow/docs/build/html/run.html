@@ -40,7 +40,11 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Run the pipeline</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run the pipeline</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-information">General information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#in-practice">In practice</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Go further</span></p>
@@ -76,6 +80,42 @@
              
   <div class="tex2jax_ignore mathjax_ignore section" id="run-the-pipeline">
 <h1>Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-information">
+<h2>General information<a class="headerlink" href="#general-information" title="Permalink to this headline">¶</a></h2>
+<p>Once you configured your pipeline it is time to launch it.</p>
+<p>Snakemake will try to go forward with all step available :</p>
+<ul class="simple">
+<li><p>If input file are missing it will try to import them using <code class="docutils literal notranslate"><span class="pre">rawdata:prefix_path</span></code> from <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> concatenated with <code class="docutils literal notranslate"><span class="pre">probe_file</span></code> and <code class="docutils literal notranslate"><span class="pre">control_file</span></code> column from <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code></p></li>
+<li><p>If QuShape projects does not exist, it will created using sequencer data.</p></li>
+<li><p>If QuShape projects exists, it will try extract reactivity and go on until structures are generated</p></li>
+</ul>
+<p>Simplest way to run the pipeline is to launch <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span></code> from the root of your project</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda activate snakemake 
+<span class="c1"># or</span>
+<span class="nb">source</span> activate snakemake
+
+./shape-ce.sh
+</pre></div>
+</div>
+<p>It will run <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> with 8 threads, using conda and continuing on job fail.
+At the end of snakemake run, it will output logs if they contains informations.</p>
+</div>
+<div class="section" id="in-practice">
+<h2>In practice<a class="headerlink" href="#in-practice" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Open an terminal / console</p></li>
+<li><p>Got to your git repository</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> path/to/project/
+</pre></div>
+</div>
+<ol class="simple">
+<li><p>run <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span></code></p></li>
+<li><p>Open each new qushape project with QuShape and perform data treatment until reactivity step (no reactivity export needed)</p></li>
+<li><p>run again <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span></code></p></li>
+</ol>
+<p>You will find generated structure in <code class="docutils literal notranslate"><span class="pre">5.3-structure</span></code></p>
+</div>
 </div>
 
 
