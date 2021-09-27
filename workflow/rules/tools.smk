@@ -66,9 +66,15 @@ rule extract_reactivity:
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True) 
+#    onerror:
+#        print(f"Extraction failed for {MESSAGE}")
+#        with open("{log}", "r") as f:
+#            print(f.read())
     shell:
         f"python {TOOLS}/qushape_extract_reactivity.py {{input}}"
-        f" --output={{output.react}} &> {{log}}"
+        f" --output={{output.react}} &> {{log}};"
+        f"out=$?; if [ $out != 0 ] ; then echo 'ERROR:'; cat {{log}}; fi;"
+        f" exit $out"
 
 rule normalize_reactivity:
     conda:  "../scripts/tools/conda-env.yml"
