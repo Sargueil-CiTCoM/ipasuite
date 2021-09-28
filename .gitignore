@@ -1,4 +1,3 @@
-workflow/scripts/IPANEMAP
 results/5.2-ipanemap-out
 .snakemake
 logs/
