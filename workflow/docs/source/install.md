@@ -6,7 +6,8 @@
 
 - Clone your repository 
 ```bash
-git clone https://path.to/your/repository/shape-ce
+git clone --recurse-submodules https://path.to/your/repository/shape-ce
+
 ```
 
 - From repository root, create conda environnement
@@ -19,5 +20,3 @@ source activate snakemake
 # or 
 conda activate snakemake
 ```
-
-
