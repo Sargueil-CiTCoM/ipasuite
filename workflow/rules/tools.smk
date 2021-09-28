@@ -11,7 +11,7 @@ TOOLS = "workflow/scripts/tools/"
 
 if RAW_DATA_TYPE == "fluo_ceq8000":
     rule fluo_ceq8000:
-        conda: "../scripts/tools/conda-env.yml"
+        conda: "../envs/tools.yml"
         input: construct_path(step="fluo-ceq8000", results_dir=False)
         output: protected(construct_path(step="fluo-ce", results_dir=False)) 
         log: construct_path('fluo-ce', ext=".log", log_dir=True) 
@@ -34,7 +34,7 @@ if RAW_DATA_TYPE == "fluo_ceq8000":
 
 
 rule generate_project_qushape:
-    conda: "../scripts/tools/conda-env.yml"
+    conda: "../envs/tools.yml"
     input:
         rx = ancient(construct_path("fluo-ce", results_dir = False)),
         bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
@@ -58,7 +58,7 @@ rule generate_project_qushape:
         f" {{params}} --output={{output}} &> {{log}}"
 
 rule extract_reactivity:
-    conda:  "../scripts/tools/conda-env.yml"
+    conda:  "../envs/tools.yml"
     input: construct_path("qushape", ext=".qushape")
     output: 
         react=construct_path("reactivity")
@@ -77,7 +77,7 @@ rule extract_reactivity:
         f" exit $out"
 
 rule normalize_reactivity:
-    conda:  "../scripts/tools/conda-env.yml"
+    conda:  "../envs/tools.yml"
     input: construct_path("reactivity")
     output: construct_path("normreact")
     message: f"Normalizing reactivity for {MESSAGE}"
@@ -95,7 +95,7 @@ rule normalize_reactivity:
         f" --output={{output}} &> {{log}}"
 
 rule aggregate_reactivity:
-    conda:  "../scripts/tools/conda-env.yml"
+    conda:  "../envs/tools.yml"
     input: 
         norm= lambda wildcards: expand(construct_path("normreact"), replicate=get_replicates(wildcards, qushape_analysed = True), allow_missing=True),
         refseq = lambda wildcards: get_refseq(wildcards, all_replicates= True)
