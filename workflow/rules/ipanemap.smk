@@ -282,12 +282,14 @@ rule varna:
             allow_missing=True,
         ),
         svg=report(expand(
-            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna",
+            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
             folder=config["folders"]["varna"],
             allow_missing=True,
-        ), title="6. Secondary structure"),
+        ), category="6.-Secondary structure"),
     log:
         "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg",
     shell:
         f"java -cp {VARNA} fr.orsay.lri.varna.applications.VARNAcmd"
-        f" -i {{input}} -o {{output}}"
+        f" -i {{input}} -o {{output.varna}};"
+        f"java -cp {VARNA} fr.orsay.lri.varna.applications.VARNAcmd"
+        f" -i {{input}} -o {{output.svg}};"

@@ -16,7 +16,7 @@ def plot_norm_reactivity(
     format="svg",
 ):
     df = df.sort_values(by=["seqNum"], ascending=True)
-    df["xlabel"] = df["seqRNA"].astype(str) + "\n" + df["seqNum"].astype(str)
+    df["xlabel"] = df["seqRNA"].astype(str) + "\n" + df.index.astype(str)
     df.loc[df["simple_norm_reactivity"] == -10, "simple_norm_reactivity"] = 0
     df.loc[
         df["interquartile_norm_reactivity"] == -10,
