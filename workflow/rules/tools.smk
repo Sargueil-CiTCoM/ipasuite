@@ -60,15 +60,20 @@ rule extract_reactivity:
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True)
-#    onerror:
-#        print(f"Extraction failed for {MESSAGE}")
-#        with open("{log}", "r") as f:
-#            print(f.read())
+
     shell:
-        f"python {TOOLS}/qushape_extract_reactivity.py {{input}}"
-        f" --output={{output.react}} --plot={{output.plot}} &> {{log}};"
-        f"out=$?; if [ $out != 0 ] ; then echo 'ERROR:'; cat {{log}}; fi;"
-        f" exit $out"
+        f"""
+        set +e
+        python {TOOLS}/qushape_extract_reactivity.py {{input}} \
+        --output={{output.react}} --plot={{output.plot}} &> {{log}}
+
+        exitcode=$?
+        if [ $exitcode != 0 ] ; then 
+            echo -n 'ERROR: ' 
+            cat {{log}} 
+        fi
+        exit $exitcode
+        """
 
 rule normalize_reactivity:
     conda:  "../envs/tools.yml"
@@ -94,7 +99,8 @@ rule normalize_reactivity:
 rule aggregate_reactivity:
     conda:  "../envs/tools.yml"
     input:
-        norm= lambda wildcards: expand(construct_path("normreact"), replicate=get_replicates(wildcards, qushape_analysed = True), allow_missing=True),
+        norm= lambda wildcards: expand(construct_path("normreact"),
+                replicate=get_replicates(wildcards), allow_missing=True),
         refseq = lambda wildcards: get_refseq(wildcards, all_replicates= True)
     output:
         full= construct_path("aggreact", replicate = False),

@@ -143,12 +143,9 @@ def get_qushape_refproj(wildcards):
     return []
 
 
-def get_replicates(wildcards, qushape_analysed=False):
+def get_replicates(wildcards):
     replicates = get_sample(wildcards, all_replicates=True)
-    if qushape_analysed:
-        return replicates.loc[replicates["qushape_analysed"] == "yes"]["replicate"]
-    else:
-        return replicates["replicate"]
+    return replicates["replicate"]
 
 
 def get_ipanemap_inputs(wildcards):
@@ -197,8 +194,7 @@ def get_all_reactivity_outputs():
             + config["format"]["condition"]
             + "_{replicate}.{step}.tsv"
         ).format(folder=config["folders"]["reactivity"], step="reactivity", **row)
-        if row["qushape_analysed"] == "yes":
-            outputs.append(sample)
+        outputs.append(sample)
     return outputs
 
 
@@ -209,12 +205,11 @@ def get_all_aggreact_outputs():
         sampleipan = expand(
             construct_path("aggreact-ipanemap", replicate=False, ext=".txt"), **row
         )
-        if row["qushape_analysed"] == "yes":
-            outputs.append(sample)
-            outputs.append(sampleipan)
-        else:
-            sample = expand(construct_path("qushape", ext=".qushape"), **row)
-            outputs.append(sample)
+        outputs.append(sample)
+        outputs.append(sampleipan)
+#        else:
+#            sample = expand(construct_path("qushape", ext=".qushape"), **row)
+#            outputs.append(sample)
     return outputs
 
 
