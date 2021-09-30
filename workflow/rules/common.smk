@@ -238,7 +238,7 @@ def get_all_structure_outputs(wildcards):
     return outputs
 
 
-def get_all_vienna_outputs(wildcards):
+def get_all_varna_outputs(wildcards):
     outputs = []
     for pool in config["ipanemap"]["pools"]:
         checkpoint_output = checkpoints.ipanemap.get(
