@@ -1,15 +1,7 @@
-CONDITION = config["format"]["condition"]
-CTRL_CONDITION = config["format"]["control_condition"]
-RAW_DATA_TYPE = config["rawdata"]["type"]
-CONTROL = config["rawdata"]["control"]
-FOLDERS = config["folders"]
-MESSAGE = config["format"]["message"]
-CNORM = config["normalization"]
-
 TOOLS = "workflow/scripts/tools/"
 
 
-if RAW_DATA_TYPE == "fluo_ceq8000":
+if RAW_DATA_TYPE == "fluo-ceq8000":
     rule fluo_ceq8000:
         conda: "../envs/tools.yml"
         input: construct_path(step="fluo-ceq8000", results_dir=False)

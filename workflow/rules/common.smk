@@ -16,6 +16,13 @@ configfile: "config/config.yaml"
 
 validate(config, schema="../schemas/config.schema.yaml")
 
+CONDITION = config["format"]["condition"]
+CTRL_CONDITION = config["format"]["control_condition"]
+RAW_DATA_TYPE = config["rawdata"]["type"]
+CONTROL = config["rawdata"]["control"]
+FOLDERS = config["folders"]
+MESSAGE = config["format"]["message"]
+CNORM = config["normalization"]
 
 def get_indexes(replicates=True):
     indexes = ["rna_id"]
@@ -73,7 +80,7 @@ def get_sample(wildcards, all_replicates=False):
     sval.extend([wildcards[cond] for cond in config["conditions"]])
 
     if all_replicates:
-        return samples_replicates.loc[tuple(sval)]
+        return samples_replicates.loc[[tuple(sval)]]
 
     sval.append(int(wildcards.replicate))
     return samples.loc[tuple(sval)]
