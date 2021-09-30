@@ -258,6 +258,15 @@ def get_all_varna_outputs(wildcards):
                 idx=glob.idx,
             )
         )
+        outputs.extend(
+            expand(
+                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+                folder=config["folders"]["varna"],
+                rna_id=pool["rna_id"],
+                pool_id=pool["id"],
+                idx=glob.idx,
+            )
+        )
     return outputs
 # def get_final_outputs():
 #    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"

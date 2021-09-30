@@ -276,11 +276,16 @@ rule varna:
             allow_missing=True,
         ),
     output:
-        expand(
+        varna=expand(
             "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna",
             folder=config["folders"]["varna"],
             allow_missing=True,
         ),
+        svg=report(expand(
+            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna",
+            folder=config["folders"]["varna"],
+            allow_missing=True,
+        ), title="6. Secondary structure"),
     log:
         "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg",
     shell:

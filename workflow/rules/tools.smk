@@ -77,11 +77,11 @@ rule extract_reactivity:
 
 rule normalize_reactivity:
     conda:  "../envs/tools.yml"
-    input: construct_path("reactivity")
+    input: construct_path("3.1 Reactivity")
     output:
         nreact=construct_path("normreact"),
         plot=report(construct_path("normreact", ext=".normreact.svg"),
-                category="Normalized reactivity")
+                category="3.2 Normalized reactivity")
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True)
@@ -108,7 +108,7 @@ rule aggregate_reactivity:
                 ext=".txt"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
             replicate=False),
-                category="Aggregated reactivity")
+                category="4. Aggregated reactivity")
 
     #message: f"Aggregating normalized reactivity for {MESSAGE}"
     log: construct_path('aggreact', ext=".log", log_dir=True, replicate=False)
