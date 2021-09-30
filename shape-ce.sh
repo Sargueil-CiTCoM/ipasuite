@@ -1,6 +1,6 @@
 #!/bin/bash
 
-snakemake -j8 --use-conda --keep-going
+snakemake -j8 --use-conda --keep-going $*
 
 for log in logs/*.log ; do
     if [ -s "$log" ] ; then
@@ -9,6 +9,3 @@ for log in logs/*.log ; do
         cat $log
     fi
 done
-
-
-

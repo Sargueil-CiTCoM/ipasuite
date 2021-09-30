@@ -4,15 +4,42 @@ import os
 import pandas as pd
 import fire
 import numpy as np
+import matplotlib.pyplot as plt
 
 allowed_methods = ["simple", "interquartile"]
 
 
+def plot_norm_reactivity(
+    df: pd.DataFrame,
+    title="Normalized reactivity",
+    output="fig.svg",
+    format="svg",
+):
+    df = df.sort_values(by=["seqNum"], ascending=True)
+    df["xlabel"] = df["seqRNA"].astype(str) + "\n" + df["seqNum"].astype(str)
+    df.loc[df["simple_norm_reactivity"] == -10, "simple_norm_reactivity"] = 0
+    df.loc[
+        df["interquartile_norm_reactivity"] == -10,
+        "interquartile_norm_reactivity",
+    ] = 0
+
+    df.plot(
+        x="xlabel",
+        y=["simple_norm_reactivity", "interquartile_norm_reactivity"],
+        width=0.7,
+        rot=0,
+        kind="bar",
+        figsize=(len(df), 4),
+    )
+    plt.title(title, loc="left")
+    plt.legend(loc="upper left")
+    plt.tight_layout()
+    plt.savefig(output, format=format)
+
+
 def check_files(src, dest):
     if len(src) == 0:
-        raise fire.core.FireError(
-                "missing input"
-            )
+        raise fire.core.FireError("missing input")
 
     if len(src) > 1:
         if dest is None:
@@ -22,9 +49,7 @@ def check_files(src, dest):
         elif not os.path.isdir(dest):
             raise fire.core.FireError(
                 'Output folder "{0}" does not exists '
-                'or is not a directory'.format(
-                    dest
-                )
+                "or is not a directory".format(dest)
             )
     for file in src:
         if not os.path.exists(file):
@@ -80,7 +105,7 @@ def compute_simple_norm_term(
     outlier_percentile: float = 98,
     norm_term_avg_percentile: float = 90,
 ) -> float:
-    """ \"Simple\" normalization
+    """\"Simple\" normalization
 
     average of the 10% top reactive nucleotides, minus the top 2% (outliers)
 
@@ -126,7 +151,7 @@ def compute_simple_norm_term(
 def compute_interquart_norm_term(
     df: pd.DataFrame, norm_column: str = "corr_areaRX"
 ) -> float:
-    """ \"BoxPlot\"  normalization
+    """\"BoxPlot\"  normalization
 
         define outline threshold as 1.5 * interquartile range
         remove value above 3rd quartile that are above threshold,
@@ -185,6 +210,7 @@ def normalize_one_path(
     simple_norm_term_avg_percentile: float = 90.0,
     low_norm_reactivity_threshold: float = -0.3,
     norm_methods: [str] = ["simple", "interquartile"],
+    plot: str = None
 ) -> int:
 
     intensity_area_df = pd.read_csv(inputpath, sep="\t")
@@ -258,6 +284,10 @@ def normalize_one_path(
     if outputpath is None:
         outputpath = sys.stdout
     norm_df.to_csv(outputpath, sep="\t", float_format="%.4f")
+
+    if plot is not None:
+        plot_norm_reactivity(norm_df, outputpath, plot)
+
     return 0
 
 
@@ -269,9 +299,10 @@ def normalize_all(
     simple_outlier_percentile: float = 98.0,
     simple_norm_term_avg_percentile: float = 90.0,
     low_norm_reactivity_threshold: float = -0.3,
-    norm_methods: [str] = ["simple", "interquartile"]
+    norm_methods: [str] = ["simple", "interquartile"],
+    plot: str = None,
 ) -> int:
-    """ Normalized reactivity for each input files
+    """Normalized reactivity for each input files
 
        Output tsv file with normalized reactivities
 
@@ -318,6 +349,7 @@ def normalize_all(
         "simple_norm_term_avg_percentile": simple_norm_term_avg_percentile,
         "low_norm_reactivity_threshold": low_norm_reactivity_threshold,
         "norm_methods": norm_methods,
+        "plot": plot
     }
 
     if output is None or not os.path.isdir(output):

@@ -4,12 +4,91 @@ import os
 import pandas as pd
 import fire
 import numpy as np
-
+import matplotlib.pyplot as plt
+from matplotlib import cm
 import itertools
 from skbio import DNA, RNA
 from skbio.alignment import local_pairwise_align_ssw
 
 ddof = 1
+
+
+def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
+
+    first_idx = aggregated.first_valid_index()[0]
+    last_idx = aggregated.last_valid_index()[0]
+    #    unit = (56 / 4.0) / (last_idx - first_idx)
+
+    for index, row in aggregated.loc[first_idx:last_idx].iterrows():
+        idx = index[0]
+        if row["desc"] == "reduced":
+            ax.axvspan(
+                (idx - first_idx) - 0.5,
+                (idx - first_idx + 0.4),
+                alpha=0.3,
+                color="orange",
+            )
+        if row["desc"] == "one-value-available":
+            ax.axvspan(
+                (idx - first_idx) - 0.5,
+                (idx - first_idx + 0.4),
+                alpha=0.3,
+                color="yellow",
+            )
+        if row["desc"] == "no-enough-values":
+            ax.axvspan(
+                (idx - first_idx) - 0.5,
+                (idx - first_idx + 0.4),
+                alpha=0.3,
+                color="blue",
+            )
+        if row["desc"] == "non-consistant":
+            ax.axvspan(
+                (idx - first_idx) - 0.5,
+                (idx - first_idx + 0.4),
+                alpha=0.3,
+                color="red",
+            )
+
+
+def plot_aggregate(
+    aggregated: pd.DataFrame,
+    output="fig.svg",
+    title: str = "Aggregated reactivity",
+    format="svg",
+):
+    replicates = aggregated.loc[
+        :,
+        aggregated.columns.drop(
+            ["used_values", "mean", "stdev", "desc", "sem"]
+        ),
+    ].replace(-10, np.NaN)
+    meanstdev = aggregated.loc[:, ["mean", "stdev"]].replace(-10, np.NaN)
+
+    ax = replicates.plot(
+        kind="bar",
+        width=0.7,
+        stacked=False,
+        figsize=(len(aggregated), 4)
+    )
+    meanstdev.plot(
+        ax=ax,
+        yerr="stdev",
+        colormap=cm.cubehelix,
+    )
+
+    plot_aggregation_infos(aggregated, ax)
+
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+
+    plt.title(title, loc="left")
+    plt.legend(loc="upper left")
+    plt.tight_layout()
+    plt.savefig(output, format=format)
+
+    # mplcursors.cursor()
+    # return fig, axs
+    # ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45, ha='right');
 
 
 def check_files(src, dest):
@@ -23,25 +102,6 @@ def check_files(src, dest):
             raise fire.core.FireError(
                 'Input file "{0}" does not exists'.format(file)
             )
-
-    return (src, dest)
-
-
-def get_src_dest(files):
-    if len(files) < 2:
-        raise fire.core.FireError(
-            "Needed at least two arguments : [src] and [dest]"
-        )
-    dest = files[-1]
-    src = files[:-1]
-
-    for file in src:
-        if not os.path.exists(file):
-            raise fire.core.FireError("Input file {0} does not exists", file)
-    if os.path.exists(dest) and os.path.isdir(dest):
-        raise fire.core.FireError(
-            "Output {0} is a directory ,choose a filename", dest
-        )
 
     return (src, dest)
 
@@ -246,7 +306,8 @@ def aggregate(
     min_ndata_perc: float = 0.5,
     min_nsubdata_perc: float = 0.66,
     max_mean_perc: float = 0.682,
-    min_dispersion: float = 0.05
+    min_dispersion: float = 0.05,
+    plot: str = None,
 ):
     """Aggregate reactivity files together
 
@@ -296,9 +357,9 @@ def aggregate(
             try:
                 refseq = RNA.read(refseq, format="fasta")
             except ValueError:
-                sys.stderr.write(
-                    "WARNING: File is not RNA, using DNA + transcription\n"
-                )
+                # sys.stderr.write(
+                #     "WARNING: File is not RNA, using DNA + transcription\n"
+                # )
                 refseq = DNA.read(refseq, format="fasta").transcribe()
 
         refseqdf = pd.DataFrame(
@@ -361,6 +422,9 @@ def aggregate(
         aggregated.reset_index(level="sequence")["mean"].to_csv(
             ipanemap_output, sep="\t", float_format="%.4f", header=False
         )
+
+    if plot is not None:
+        plot_aggregate(aggregated, output=plot, title=output)
 
 
 if __name__ == "__main__":

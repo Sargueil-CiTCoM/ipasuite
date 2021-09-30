@@ -4,6 +4,28 @@ import os
 import fire
 import bsddb3 as bsddb
 import pickle
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+def plot_reactivity(
+    df: pd.DataFrame, title="Reactivity", output="fig.svg", format="svg"
+):
+    df = df.sort_values(by=["seqNum"], ascending=True)
+    df["xlabel"] = df["seqRNA"].astype(str) + "\n" + df["seqNum"].astype(str)
+
+    df.plot(
+        x="xlabel",
+        y=["areaRX", "areaBG", "areaDiff"],
+        width=0.7,
+        rot=0,
+        kind="bar",
+        figsize=(len(df), 4),
+    )
+    plt.title(title, loc='left')
+    plt.legend(loc='upper left')
+    plt.tight_layout()
+    plt.savefig(output, format=format)
 
 
 def getProjData(filepath):
@@ -23,7 +45,10 @@ def getProjData(filepath):
 
 
 def extract_reactivity(
-    qushape_project: str, output: str = "reactivity.tsv.txt", dry_run=False
+    qushape_project: str,
+    output: str = "reactivity.tsv.txt",
+    plot: str = None,
+    dry_run=False,
 ):
 
     proj = getProjData(qushape_project)
@@ -36,6 +61,10 @@ def extract_reactivity(
     report = qsfr.createDReport(proj)
     if not dry_run:
         qsfr.writeReportFile(report, output)
+
+    if plot is not None:
+        df = pd.read_csv(output, sep='\t')
+        plot_reactivity(df, output, plot)
 
 
 if __name__ == "__main__":

@@ -80,8 +80,7 @@ def get_sample(wildcards, all_replicates=False):
 
 
 def construct_path(
-    step, control=False, results_dir=True, ext=None, replicate=True, log_dir=False
-):
+    step, control=False, results_dir=True, ext=None, replicate=True, log_dir=False):
     cond = (
         f"_{CONDITION}"
         if not control
