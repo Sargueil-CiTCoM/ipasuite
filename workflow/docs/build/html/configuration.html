@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; Shape-CE  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Configuration &mdash; Shape-CE  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -34,7 +36,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
@@ -59,7 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="run.html">Run the pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Go further</span></p>
+<p class="caption" role="heading"><span class="caption-text">Go further</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="config_yaml_ref.html">Workflow configuration reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="folders.html">Folder structure</a></li>
@@ -91,14 +93,14 @@
            <div itemprop="articleBody">
              
   <div class="tex2jax_ignore mathjax_ignore section" id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline"></a></h1>
 <p>The workflow contains 2 configuration files</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">config/config.yml</span></code> Which contains general configuration for the workflow</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">config/samples.tsv</span></code> That contains informations about samples and replicates</p></li>
 </ul>
 <div class="section" id="workflow-configuration">
-<h2>Workflow configuration<a class="headerlink" href="#workflow-configuration" title="Permalink to this headline">¶</a></h2>
+<h2>Workflow configuration<a class="headerlink" href="#workflow-configuration" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">config/config.yaml</span></code> contains all informations necessary to execute the workflow.</p>
 <p>To get started, copy <code class="docutils literal notranslate"><span class="pre">config/config.tpl.yaml</span></code> into <code class="docutils literal notranslate"><span class="pre">config/config.yaml</span></code></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp config/config.tpl.yaml config/config.yaml
@@ -125,12 +127,12 @@
 <p>To go futher : <a class="reference internal" href="config_yaml_ref.html"><span class="doc std std-doc">Workflow configuration reference</span></a></p>
 </div>
 <div class="section" id="samples-declaration">
-<h2>Samples declaration<a class="headerlink" href="#samples-declaration" title="Permalink to this headline">¶</a></h2>
+<h2>Samples declaration<a class="headerlink" href="#samples-declaration" title="Permalink to this headline"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">.tsv</span></code> file is a tabular file format that you can open either with a text editor or an spreadsheet program</p>
 <p>This file contains each experiment with related information. One line per experiment.</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">config/samples.tpl.tsv</span></code> is available, and can be used as a model for your project</p>
 <div class="section" id="mandatory-columns">
-<h3>Mandatory columns<a class="headerlink" href="#mandatory-columns" title="Permalink to this headline">¶</a></h3>
+<h3>Mandatory columns<a class="headerlink" href="#mandatory-columns" title="Permalink to this headline"></a></h3>
 <dl class="simple myst">
 <dt>id (string)</dt><dd><p>a unique number to identity experiment</p>
 </dd>
@@ -143,11 +145,11 @@
 </dl>
 </div>
 <div class="section" id="conditions-columns">
-<h3>Conditions columns<a class="headerlink" href="#conditions-columns" title="Permalink to this headline">¶</a></h3>
+<h3>Conditions columns<a class="headerlink" href="#conditions-columns" title="Permalink to this headline"></a></h3>
 <p>For each type of experimental condition, you must declare it in the <code class="docutils literal notranslate"><span class="pre">condition_names</span></code> of <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code> file the name declared in the config file must be the same as the on in <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code>
 In order to generate unambiguous file name, you must also add the conditions in the <code class="docutils literal notranslate"><span class="pre">format</span></code> section</p>
 <div class="section" id="examples">
-<h4>Examples :<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h4>
+<h4>Examples :<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h4>
 <dl class="simple myst">
 <dt>probe (string)</dt><dd><p>Which probe was used in this sample (1M7, BzCN, NMIA, etc.)</p>
 </dd>
@@ -161,7 +163,7 @@ In order to generate unambiguous file name, you must also add the conditions in 
 </div>
 </div>
 <div class="section" id="optional-columns">
-<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this headline">¶</a></h3>
+<h3>Optional columns<a class="headerlink" href="#optional-columns" title="Permalink to this headline"></a></h3>
 <dl class="simple myst">
 <dt>probe_file (relative file path)</dt><dd><p>relative path to the external file fluo-ce file corresponding to this shape sample. if this field is filled in and no file is present for this sample in <code class="docutils literal notranslate"><span class="pre">resources/1.1-fluo-ce</span></code> snakemake will try to import this file. <code class="docutils literal notranslate"><span class="pre">rawdata-&gt;path_prefix</span></code> (from <code class="docutils literal notranslate"><span class="pre">config.yaml</span></code>) is prefixed to the content of the to construct fullpath.</p>
 </dd>
@@ -172,10 +174,10 @@ In order to generate unambiguous file name, you must also add the conditions in 
 </dl>
 </div>
 <div class="section" id="other-columns">
-<h3>Other columns<a class="headerlink" href="#other-columns" title="Permalink to this headline">¶</a></h3>
+<h3>Other columns<a class="headerlink" href="#other-columns" title="Permalink to this headline"></a></h3>
 <p>You can add as many columns to your <code class="docutils literal notranslate"><span class="pre">samples.tsv</span></code> as you wish, to help you classify and caracterize your data. Each column must have un unique name.</p>
 <div class="section" id="id1">
-<h4>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<h4>Examples<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
 <dl class="simple myst">
 <dt>experimenter</dt><dd><p>Who performed the sample acquisition</p>
 </dd>

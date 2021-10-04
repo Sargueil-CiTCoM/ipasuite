@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Run the pipeline &mdash; Shape-CE  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Run the pipeline &mdash; Shape-CE  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -34,7 +36,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
@@ -47,7 +49,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Go further</span></p>
+<p class="caption" role="heading"><span class="caption-text">Go further</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="config_yaml_ref.html">Workflow configuration reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="folders.html">Folder structure</a></li>
@@ -79,9 +81,9 @@
            <div itemprop="articleBody">
              
   <div class="tex2jax_ignore mathjax_ignore section" id="run-the-pipeline">
-<h1>Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline">¶</a></h1>
+<h1>Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline"></a></h1>
 <div class="section" id="general-information">
-<h2>General information<a class="headerlink" href="#general-information" title="Permalink to this headline">¶</a></h2>
+<h2>General information<a class="headerlink" href="#general-information" title="Permalink to this headline"></a></h2>
 <p>Once you configured your pipeline it is time to launch it.</p>
 <p>Snakemake will try to go forward with all step available :</p>
 <ul class="simple">
@@ -95,13 +97,18 @@
 <span class="nb">source</span> activate snakemake
 
 ./shape-ce.sh
+<span class="c1"># or</span>
+snakemake -j8 --use-conda --keep-going
 </pre></div>
 </div>
-<p>It will run <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> with 8 threads, using conda and continuing on job fail.
+<p>It will run <code class="docutils literal notranslate"><span class="pre">snakemake</span></code> with 8 threads, using conda and do as much treatment it can.
 At the end of snakemake run, it will output logs if they contains informations.</p>
+<p>In order to control when the pipeline will stop during the treatement, you can make it stop at intermediate steps :</p>
+<p>To stop after generating QuShape project : <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span> <span class="pre">all_qushape</span></code>
+To stop after sample aggregation (before IPANEMAP) : <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span> <span class="pre">all_aggregate</span></code></p>
 </div>
 <div class="section" id="in-practice">
-<h2>In practice<a class="headerlink" href="#in-practice" title="Permalink to this headline">¶</a></h2>
+<h2>In practice<a class="headerlink" href="#in-practice" title="Permalink to this headline"></a></h2>
 <ol class="simple">
 <li><p>Open an terminal / console</p></li>
 <li><p>Got to your git repository</p></li>
@@ -110,7 +117,7 @@ At the end of snakemake run, it will output logs if they contains informations.<
 </pre></div>
 </div>
 <ol class="simple">
-<li><p>run <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span></code></p></li>
+<li><p>run <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span> <span class="pre">all_qushape</span></code></p></li>
 <li><p>Open each new qushape project with QuShape and perform data treatment until reactivity step (no reactivity export needed)</p></li>
 <li><p>run again <code class="docutils literal notranslate"><span class="pre">./shape-ce.sh</span></code></p></li>
 </ol>

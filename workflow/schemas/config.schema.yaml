@@ -16,6 +16,7 @@ definitions:
           type: string
       allow_auto_import:
         type: boolean
+        description: allow the data to be imported from external sources
       format:
         "$ref": "#/definitions/Format"
       rawdata:

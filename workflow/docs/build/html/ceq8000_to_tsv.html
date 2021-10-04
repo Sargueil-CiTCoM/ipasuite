@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ceq8000_to_tsv module &mdash; Shape-CE  documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>ceq8000_to_tsv module &mdash; Shape-CE  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -34,7 +36,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Getting started</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
@@ -43,7 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="run.html">Run the pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Go further</span></p>
+<p class="caption" role="heading"><span class="caption-text">Go further</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="config_yaml_ref.html">Workflow configuration reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="folders.html">Folder structure</a></li>
@@ -83,21 +85,21 @@
            <div itemprop="articleBody">
              
   <div class="section" id="module-ceq8000_to_tsv">
-<span id="ceq8000-to-tsv-module"></span><h1>ceq8000_to_tsv module<a class="headerlink" href="#module-ceq8000_to_tsv" title="Permalink to this headline">¶</a></h1>
+<span id="ceq8000-to-tsv-module"></span><h1>ceq8000_to_tsv module<a class="headerlink" href="#module-ceq8000_to_tsv" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt id="ceq8000_to_tsv.all_to_tsv">
-<code class="sig-prename descclassname"><span class="pre">ceq8000_to_tsv.</span></code><code class="sig-name descname"><span class="pre">all_to_tsv</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">*files:</span> <span class="pre">[&lt;class</span> <span class="pre">'str'&gt;],</span> <span class="pre">lookup:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'INDEX'</span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#ceq8000_to_tsv.all_to_tsv" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="ceq8000_to_tsv.all_to_tsv">
+<span class="sig-prename descclassname"><span class="pre">ceq8000_to_tsv.</span></span><span class="sig-name descname"><span class="pre">all_to_tsv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ceq8000_to_tsv.all_to_tsv" title="Permalink to this definition"></a></dt>
 <dd><p>Transform seq8000 file into tsv files. last argument is the destination</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="ceq8000_to_tsv.get_start_line">
-<code class="sig-prename descclassname"><span class="pre">ceq8000_to_tsv.</span></code><code class="sig-name descname"><span class="pre">get_start_line</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'INDEX'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#ceq8000_to_tsv.get_start_line" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="ceq8000_to_tsv.get_start_line">
+<span class="sig-prename descclassname"><span class="pre">ceq8000_to_tsv.</span></span><span class="sig-name descname"><span class="pre">get_start_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'INDEX'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#ceq8000_to_tsv.get_start_line" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="ceq8000_to_tsv.to_tsv">
-<code class="sig-prename descclassname"><span class="pre">ceq8000_to_tsv.</span></code><code class="sig-name descname"><span class="pre">to_tsv</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'INDEX'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#ceq8000_to_tsv.to_tsv" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="ceq8000_to_tsv.to_tsv">
+<span class="sig-prename descclassname"><span class="pre">ceq8000_to_tsv.</span></span><span class="sig-name descname"><span class="pre">to_tsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lookup</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'INDEX'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ceq8000_to_tsv.to_tsv" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </div>

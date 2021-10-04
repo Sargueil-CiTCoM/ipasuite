@@ -101,7 +101,7 @@ rule aggregate_reactivity:
     input:
         norm= lambda wildcards: expand(construct_path("normreact"),
                 replicate=get_replicates(wildcards), allow_missing=True),
-        refseq = lambda wildcards: get_refseq(wildcards, all_replicates= True)
+        refseq = lambda wildcards: get_refseq(wildcards, all_replicates=True)
     output:
         full= construct_path("aggreact", replicate = False),
         compact = construct_path("aggreact-ipanemap", replicate=False,

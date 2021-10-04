@@ -18,11 +18,17 @@ conda activate snakemake
 source activate snakemake
 
 ./shape-ce.sh
+# or
+snakemake -j8 --use-conda --keep-going
 ```
 
-It will run `snakemake` with 8 threads, using conda and continuing on job fail.
+It will run `snakemake` with 8 threads, using conda and do as much treatment it can.
 At the end of snakemake run, it will output logs if they contains informations.
 
+In order to control when the pipeline will stop during the treatement, you can make it stop at intermediate steps :
+
+To stop after generating QuShape project : `./shape-ce.sh all_qushape`
+To stop after sample aggregation (before IPANEMAP) : `./shape-ce.sh all_aggregate`
 
 ## In practice 
 
@@ -31,7 +37,7 @@ At the end of snakemake run, it will output logs if they contains informations.
 ```bash
 cd path/to/project/
 ```
-3. run `./shape-ce.sh`
+3. run `./shape-ce.sh all_qushape`
 4. Open each new qushape project with QuShape and perform data treatment until reactivity step (no reactivity export needed)
 5. run again `./shape-ce.sh`
 

@@ -16,6 +16,7 @@ configfile: "config/config.yaml"
 
 validate(config, schema="../schemas/config.schema.yaml")
 
+
 CONDITION = config["format"]["condition"]
 CTRL_CONDITION = config["format"]["control_condition"]
 RAW_DATA_TYPE = config["rawdata"]["type"]
@@ -33,10 +34,17 @@ def get_indexes(replicates=True):
 
 
 condition_types = {name: "str" for name in config["conditions"]}
+condition_types['id'] = "str"
+condition_types['rna_id'] = "str"
+condition_types['replicate'] = "str"
 
 unindexed_samples = pd.read_csv(
     config["samples"], sep="\t", dtype=condition_types
 )  # .set_index("sample", drop=False)
+
+validate(unindexed_samples, schema="../schemas/samples.schema.yaml",
+        set_default=True)
+
 samples = unindexed_samples.set_index(get_indexes(), drop=True)
 samples_replicates = unindexed_samples.set_index(
     get_indexes(replicates=False), drop=True
@@ -46,8 +54,6 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 # samples = samples[samples.ref.notnull()]
 # samples.index.names = ["sample_id"]
 
-# TODO : Activate before prod
-# validate(samples, schema="../schemas/samples.schema.yaml")
 
 
 def construct_list_param(config_category, param_name):
