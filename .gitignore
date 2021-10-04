@@ -3,3 +3,4 @@ results/5.2-ipanemap-out
 .ipynb_checkpoints
 logs/*
 **/__pycache__
+*.zip
