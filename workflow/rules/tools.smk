@@ -54,8 +54,9 @@ rule extract_reactivity:
     input: construct_path("qushape", ext=".qushape")
     output:
         react=construct_path("reactivity"),
-        plot=report(construct_path("reactivity", ext=".reactivity.svg"),
-                category="3.1-Reactivity")
+        plot=report(construct_path("reactivity", ext=".reactivity.svg"
+            ),
+            category="3.1-Reactivity", subcategory=CONDITION)
         #,protect = protected(construct_path("qushape", ext=".qushape"))
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
@@ -65,12 +66,12 @@ rule extract_reactivity:
         f"""
         set +e
         python {TOOLS}/qushape_extract_reactivity.py {{input}} \
-        --output={{output.react}} --plot={{output.plot}} &> {{log}}
+                --output={{output.react}} --plot={{output.plot}} &> {{log}}
 
         exitcode=$?
-        if [ $exitcode != 0 ] ; then 
-            echo -n 'ERROR: ' 
-            cat {{log}} 
+        if [ $exitcode != 0 ] ; then
+            echo -n 'ERROR: '
+            cat {{log}}
         fi
         exit $exitcode
         """
@@ -81,7 +82,7 @@ rule normalize_reactivity:
     output:
         nreact=construct_path("normreact"),
         plot=report(construct_path("normreact", ext=".normreact.svg"),
-                category="3.2-Normalized reactivity")
+                category="3.2-Normalized reactivity", subcategory=CONDITION)
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True)
@@ -108,7 +109,7 @@ rule aggregate_reactivity:
                 ext=".txt"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
             replicate=False),
-                category="4-Aggregated reactivity")
+            category="4-Aggregated reactivity", subcategory=CONDITION)
 
     #message: f"Aggregating normalized reactivity for {MESSAGE}"
     log: construct_path('aggreact', ext=".log", log_dir=True, replicate=False)

@@ -285,7 +285,7 @@ rule varna:
             "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
             folder=config["folders"]["varna"],
             allow_missing=True,
-        ), category="6.-Secondary structure"),
+        ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
     log:
         "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg",
     shell:
