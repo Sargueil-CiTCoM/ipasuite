@@ -54,7 +54,7 @@ rule extract_reactivity:
     input: construct_path("qushape", ext=".qushape")
     output:
         react=construct_path("reactivity"),
-        plot=report(construct_path("reactivity", ext=".reactivity.svg"
+        plot=report(construct_path("reactivity", ext=".reactivity.svg", figure=True
             ),
             category="3.1-Reactivity", subcategory=CONDITION)
         #,protect = protected(construct_path("qushape", ext=".qushape"))
@@ -81,7 +81,7 @@ rule normalize_reactivity:
     input: construct_path("reactivity")
     output:
         nreact=construct_path("normreact"),
-        plot=report(construct_path("normreact", ext=".normreact.svg"),
+        plot=report(construct_path("normreact", ext=".normreact.svg", figure=True),
                 category="3.2-Normalized reactivity", subcategory=CONDITION)
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
@@ -108,7 +108,10 @@ rule aggregate_reactivity:
         compact = construct_path("aggreact-ipanemap", replicate=False,
                 ext=".txt"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
-            replicate=False),
+            replicate=False, figure=True),
+            category="4-Aggregated reactivity", subcategory=CONDITION),
+        fullplot =report(construct_path("aggreact", ext=".aggreact.full.svg",
+            replicate=False, figure=True),
             category="4-Aggregated reactivity", subcategory=CONDITION)
 
     #message: f"Aggregating normalized reactivity for {MESSAGE}"
@@ -124,7 +127,7 @@ rule aggregate_reactivity:
         f"python {TOOLS}/aggregate_reactivity.py {{input.norm}}"
         f" --output={{output.full}} {{params}}"
         f" --ipanemap_output={{output.compact}}"
-        f" --plot={{output.plot}} &> {{log}}"
+        f" --plot={{output.plot}} --fullplot={{output.fullplot}} &> {{log}}"
 
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"

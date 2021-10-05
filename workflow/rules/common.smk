@@ -88,23 +88,25 @@ def get_sample(wildcards, all_replicates=False):
     if all_replicates:
         return samples_replicates.loc[[tuple(sval)]]
 
-    sval.append(int(wildcards.replicate))
+    sval.append(wildcards.replicate)
     return samples.loc[tuple(sval)]
 
 
 def construct_path(
-    step, control=False, results_dir=True, ext=None, replicate=True, log_dir=False):
+    step, control=False, results_dir=True, ext=None, replicate=True,
+    log_dir=False, figure=False):
     cond = (
         f"_{CONDITION}"
         if not control
         else expand(f"_{CTRL_CONDITION}", control=CONTROL, allow_missing=True)[0]
     )
+    figdir = "figures/" if figure else ""
     basedir = "logs" if log_dir else ("results" if results_dir else "resources")
     replicate = "_{replicate}" if replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
     path = expand(
-        f"{basedir}/{pid}{cond}{replicate}{extension}",
+        f"{basedir}/{figdir}{pid}{cond}{replicate}{extension}",
         folder=FOLDERS[step],
         step=step,
         allow_missing=True,
@@ -114,17 +116,17 @@ def construct_path(
 
 
 def get_external_qushape(wildcards):
-    sample = get_sample(wildcards)
+    sample = get_sample(wildcards)[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
 
 
 def get_raw_probe_input(wildcards):
-    sample = get_sample(wildcards)
+    sample = get_sample(wildcards)[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
 
 
 def get_raw_control_input(wildcards):
-    sample = get_sample(wildcards)
+    sample = get_sample(wildcards)[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
 
 
@@ -137,14 +139,13 @@ def get_refseq(wildcards, all_replicates=False):
 
 
 def get_qushape_refproj(wildcards):
-    sample = get_sample(wildcards)
+    sample = get_sample(wildcards)[0]
     path = None
     if isinstance(sample["reference_qushape_file"], str):
         path = os.path.join(
             config["rawdata"]["path_prefix"], sample["reference_qushape_file"]
         )
-    if not path is None and os.path.exists(path):
-        print(path)
+    if path is not None and os.path.exists(path):
         return path
     return []
 

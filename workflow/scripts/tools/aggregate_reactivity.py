@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import sys
 import os
 import pandas as pd
 import fire
+import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -18,6 +18,10 @@ def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
     first_idx = aggregated.first_valid_index()[0]
     last_idx = aggregated.last_valid_index()[0]
     #    unit = (56 / 4.0) / (last_idx - first_idx)
+    fr = 0
+    fone = 0
+    fnev = 0
+    fnc = 0
 
     for index, row in aggregated.loc[first_idx:last_idx].iterrows():
         idx = index[0]
@@ -27,60 +31,129 @@ def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
                 (idx - first_idx + 0.4),
                 alpha=0.3,
                 color="orange",
+                label="_" * fr + "Reduced value",
             )
+            fr += 1
         if row["desc"] == "one-value-available":
             ax.axvspan(
                 (idx - first_idx) - 0.5,
                 (idx - first_idx + 0.4),
                 alpha=0.3,
                 color="yellow",
+                label="_" * fone + "Only one value",
             )
+            fone += 1
         if row["desc"] == "no-enough-values":
             ax.axvspan(
                 (idx - first_idx) - 0.5,
                 (idx - first_idx + 0.4),
                 alpha=0.3,
                 color="blue",
+                label="_" * fnev + "Not enough value",
             )
+            fnev += 1
         if row["desc"] == "non-consistant":
             ax.axvspan(
                 (idx - first_idx) - 0.5,
                 (idx - first_idx + 0.4),
                 alpha=0.3,
                 color="red",
+                label="_" * fnc + "Non consistant values",
             )
+            fnc += 1
 
 
 def plot_aggregate(
     aggregated: pd.DataFrame,
+    fulloutput="fig.full.svg",
     output="fig.svg",
     title: str = "Aggregated reactivity",
     format="svg",
 ):
+    aggregated = copy.deepcopy(aggregated)
+    aggregated["xlabel"] = (
+        aggregated.index.get_level_values("abs_position").astype(str)
+        + "\n"
+        + aggregated.index.get_level_values("sequence").astype(str)
+    )
     replicates = aggregated.loc[
         :,
         aggregated.columns.drop(
             ["used_values", "mean", "stdev", "desc", "sem"]
         ),
     ].replace(-10, np.NaN)
-    meanstdev = aggregated.loc[:, ["mean", "stdev"]].replace(-10, np.NaN)
+
+    meanstdev = aggregated.loc[:, ["xlabel", "mean", "stdev"]].replace(
+        -10, np.NaN
+    )
 
     ax = replicates.plot(
+        x="xlabel",
         kind="bar",
         width=0.7,
         stacked=False,
-        figsize=(len(aggregated), 4)
+        figsize=(len(aggregated) / 3.5, 4),
+        align="center",
+        xticks=np.arange(0, len(aggregated) + 1, 1),
     )
-    meanstdev.plot(
+    ax = meanstdev[["mean", "xlabel"]].plot(
+        x="xlabel",
+        y="mean",
+        drawstyle="steps-mid",
         ax=ax,
-        yerr="stdev",
         colormap=cm.cubehelix,
     )
 
     plot_aggregation_infos(aggregated, ax)
 
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+    # ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+    plt.margins(0)
+    plt.title(title, loc="left")
+    plt.legend(loc="upper left")
+    ax.errorbar(
+        meanstdev.index.get_level_values("abs_position") - 1,
+        meanstdev["mean"],
+        yerr=meanstdev["stdev"],
+        fmt="",
+        color="k",
+        ls="none",
+        capsize=4,
+    )
+    plt.tight_layout()
+    plt.savefig(fulloutput, format=format)
 
+    fig, ax = plt.subplots(
+        nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 7, 4)
+    )
+
+    aggregated["color"] = "white"
+    aggregated.loc[(aggregated["mean"] > 0.8), "color"] = "red"
+    aggregated.loc[
+        ((aggregated["mean"] <= 0.8) & (aggregated["mean"] > 0.5)), "color"
+    ] = "orange"
+    aggregated.loc[(aggregated["mean"] < 0.5), "color"] = "yellow"
+
+    aggregated.loc[(aggregated['mean'] == -10), 'stdev'] = np.NaN
+    aggregated.loc[(aggregated['mean'] == -10), 'mean'] = np.NaN
+    aggregated["xlabel_rot"] = (
+        aggregated.index.get_level_values("abs_position").astype(str)
+        + " - "
+        + aggregated.index.get_level_values("sequence").astype(str)
+    )
+
+    aggregated.plot(
+        ax=ax,
+        x="xlabel_rot",
+        rot=70,
+        y="mean",
+        kind="bar",
+        width=1,
+        color=aggregated["color"],
+        yerr="stdev",
+        stacked=False,
+    )
+
+    plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
     plt.tight_layout()
@@ -307,7 +380,8 @@ def aggregate(
     min_nsubdata_perc: float = 0.66,
     max_mean_perc: float = 0.682,
     min_dispersion: float = 0.05,
-    plot: str = None,
+    fullplot: str = None,
+    plot: str = None
 ):
     """Aggregate reactivity files together
 
@@ -423,8 +497,10 @@ def aggregate(
             ipanemap_output, sep="\t", float_format="%.4f", header=False
         )
 
-    if plot is not None:
-        plot_aggregate(aggregated, output=plot, title=output)
+    if plot is not None or fullplot is not None:
+        plot_aggregate(
+            aggregated, fulloutput=fullplot, output=plot, title=output
+        )
 
 
 if __name__ == "__main__":

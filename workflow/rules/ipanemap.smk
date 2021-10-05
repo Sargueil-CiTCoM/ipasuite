@@ -282,7 +282,7 @@ rule varna:
             allow_missing=True,
         ),
         svg=report(expand(
-            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
+            "results/figures/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
             folder=config["folders"]["varna"],
             allow_missing=True,
         ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),

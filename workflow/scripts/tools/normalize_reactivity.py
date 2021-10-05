@@ -26,14 +26,18 @@ def plot_norm_reactivity(
     df.plot(
         x="xlabel",
         y=["simple_norm_reactivity", "interquartile_norm_reactivity"],
-        width=0.7,
+        #width=0.7,
         rot=0,
-        kind="bar",
-        figsize=(len(df), 4),
+        #kind="line",
+        drawstyle="steps",
+        figsize=(len(df) / 3.5, 4),
+        x_compat=True,
+        xticks=np.arange(0, len(df)+1, 1)
     )
+    plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig(output, format=format)
 
 
