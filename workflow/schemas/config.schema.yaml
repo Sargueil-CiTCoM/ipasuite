@@ -31,6 +31,8 @@ definitions:
         "$ref": "#/definitions/Ipanemap"
       folders:
         "$ref": "#/definitions/Folders"
+      varna:
+        "$ref": "#/definitions/Varna"
     required:
     - aggregate
     - allow_auto_import
@@ -43,6 +45,7 @@ definitions:
     - rawdata
     - samples
     - sequences
+    - varna
     title: Shape-CE Config
   Aggregate:
     description: "Aggregate script configuration"
@@ -302,3 +305,11 @@ definitions:
     additionalProperties:
       type: string
     title: Sequences
+  Varna:
+    type: object
+    additionalProperties: true
+    properties:
+      colormapstyle:
+        type: string
+    required:
+      - colormapstyle

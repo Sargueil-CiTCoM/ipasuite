@@ -1,7 +1,7 @@
 import configparser
 
 IPANEMAP = "workflow/scripts/IPANEMAP/IPANEMAP.py"
-VARNA = "workflow/scripts/IPANEMAP/VARNAv3-93.jar"
+VARNA = "workflow/scripts/VARNA/build/jar/VARNAcmd.jar"
 
 
 def generate_ipanemap_config_from_snakeconf(
@@ -275,6 +275,9 @@ rule varna:
             folder=config["folders"]["structure"],
             allow_missing=True,
         ),
+    params:
+        colorstyle= f"-colorMapStyle '{config['varna']['colormapstyle']}'",
+        colormap= ""
     output:
         varna=expand(
             "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna",
@@ -282,14 +285,14 @@ rule varna:
             allow_missing=True,
         ),
         svg=report(expand(
-            "results/figures/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
+            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
             folder=config["folders"]["varna"],
             allow_missing=True,
         ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
     log:
         "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg",
     shell:
-        f"java -cp {VARNA} fr.orsay.lri.varna.applications.VARNAcmd"
-        f" -i {{input}} -o {{output.varna}};"
-        f"java -cp {VARNA} fr.orsay.lri.varna.applications.VARNAcmd"
-        f" -i {{input}} -o {{output.svg}};"
+        f"java -jar {VARNA} -i {{input}} -o {{output.varna}}" 
+        f"{{params.colorstyle}} {{params.colormap}};"
+        f"java -jar {VARNA} -i {{input}} -o {{output.svg}}" 
+        f"{{params.colorstyle}} {{params.colormap}};"

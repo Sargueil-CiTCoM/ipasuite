@@ -326,6 +326,10 @@ ipanemap:
     draw_centroids: True
     show_probing: True
 
+
+varna:
+  colormapstyle: "-10.00:#CCCCCC,-0.31:#999999,-0.3:#FFFFFF,0.2:#FFFFFF,0.4:#FFFF00,0.69:#FFFF47,0.7:#FF0000,5.00:#FF0033"
+
 ### 
 # Folder names 
 # 
