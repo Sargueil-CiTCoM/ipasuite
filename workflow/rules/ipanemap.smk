@@ -240,7 +240,7 @@ checkpoint ipanemap:
     log:
         "logs/ipanemap-out-{rna_id}_pool_{pool_id}.log",
     shell:
-        f"python {IPANEMAP} --config {{input.config}} &> {{log}}"
+        f"python {IPANEMAP} --config {{input.config}} | tee {{log}}"
 
 
 rule structure:

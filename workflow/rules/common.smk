@@ -116,17 +116,17 @@ def construct_path(
 
 
 def get_external_qushape(wildcards):
-    sample = get_sample(wildcards)[0]
+    sample = get_sample(wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
 
 
 def get_raw_probe_input(wildcards):
-    sample = get_sample(wildcards)[0]
+    sample = get_sample(wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
 
 
 def get_raw_control_input(wildcards):
-    sample = get_sample(wildcards)[0]
+    sample = get_sample(wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
 
 
@@ -139,7 +139,7 @@ def get_refseq(wildcards, all_replicates=False):
 
 
 def get_qushape_refproj(wildcards):
-    sample = get_sample(wildcards)[0]
+    sample = get_sample(wildcards).iloc[0]
     path = None
     if isinstance(sample["reference_qushape_file"], str):
         path = os.path.join(
