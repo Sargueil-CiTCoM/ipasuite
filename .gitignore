@@ -4,3 +4,4 @@ results/5.2-ipanemap-out
 logs/*
 **/__pycache__
 *.zip
+workflow/docs/
