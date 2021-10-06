@@ -37,8 +37,12 @@ To stop after sample aggregation (before IPANEMAP) : `./shape-ce.sh all_aggregat
 ```bash
 cd path/to/project/
 ```
-3. run `./shape-ce.sh all_qushape`
+3. run qushape projects generator 
+```
+./shape-ce.sh all_qushape
+```
 4. Open each new qushape project with QuShape and perform data treatment until reactivity step (no reactivity export needed)
-5. run again `./shape-ce.sh`
+5. run again 
+```./shape-ce.sh```
 
-You will find generated structure in `5.3-structure`
+You will find generated structure in `results/5.3-structure` and varna file in `results/5.4-varna` 

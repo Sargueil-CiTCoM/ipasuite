@@ -1,4 +1,4 @@
-# Welcome to the Shape-CE SnakeMake Pipeline documentation
+# Introduction 
 
 Shape-CE workflow intend to provide automation in the data treatment of SHAPE Capillary Electrophorese.
 
@@ -16,11 +16,13 @@ The workflow will enable you to generate structure data for a RNA fragment analy
 :maxdepth: 2
 :caption: Getting started
 
+self
 quickstart
 requirements
 install
 configuration
 run
+output
 troubleshooting
 ```
 

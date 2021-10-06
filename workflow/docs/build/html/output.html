@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Requirements &mdash; Shape-CE  documentation</title>
+  <title>Output and Reports &mdash; Shape-CE  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="install.html" />
-    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
+    <link rel="next" title="Workflow configuration reference" href="config_yaml_ref.html" />
+    <link rel="prev" title="Troubleshooting" href="troubleshooting.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,20 +40,17 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#operating-system">Operating system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#external-software">External software</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#qushape">QuShape</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="run.html">Run the pipeline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Output and Reports</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Output and Reports</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#normalized-reactivity">Normalized Reactivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#aggregated-reactivity">Aggregated Reactivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structures">Structures</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Go further</span></p>
 <ul>
@@ -76,9 +73,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Requirements</li>
+      <li>Output and Reports</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/requirements.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/output.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -86,50 +83,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="requirements">
-<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h1>
-<div class="section" id="operating-system">
-<h2>Operating system<a class="headerlink" href="#operating-system" title="Permalink to this headline"></a></h2>
-<p>The pipeline should work on any system suporting Conda.
-However, some packages (ViennaRNA, scikit-bio) are not available in Windows using conda, you will have install them manually.</p>
-<p>Tested Operating system :</p>
-<ul class="simple">
-<li><p>Archlinux</p></li>
-<li><p>Debian 11 (Bulleyes)</p></li>
-<li><p>Ubuntu 16.4 to 20.4</p></li>
-</ul>
+  <div class="tex2jax_ignore mathjax_ignore section" id="output-and-reports">
+<h1>Output and Reports<a class="headerlink" href="#output-and-reports" title="Permalink to this headline"></a></h1>
+<p>While running are generate figures in <code class="docutils literal notranslate"><span class="pre">results/figures</span></code></p>
+<p>to access all figures and information about snakemake execution, you can execute</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">shape</span><span class="o">-</span><span class="n">ce</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">report</span> <span class="n">report</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
 </div>
-<div class="section" id="external-software">
-<h2>External software<a class="headerlink" href="#external-software" title="Permalink to this headline"></a></h2>
-<div class="section" id="qushape">
-<h3>QuShape<a class="headerlink" href="#qushape" title="Permalink to this headline"></a></h3>
-<p>In order to do the manual part of the workflow, you must install QuShape.</p>
-<p>The original version of QuShape relies on PythonXY, an unmaintained python2 distribution.</p>
-<p>We provide a version that is compatible with conda, and correct few bugs with the latest python2 version.</p>
-<p>You can find it here <a class="reference external" href="https://github.com/CiTCoM-Lab/QuShape">https://github.com/CiTCoM-Lab/QuShape</a></p>
-<p>A installation tutorial is available</p>
-<p>In addition, some part of QuShape have been converted to Python 3 and embedded with this
-shape-ce pipeline.</p>
+<p>Then open the generate report in your web browser</p>
+<p>Description of mains figures generated :</p>
+<div class="section" id="normalized-reactivity">
+<h2>Normalized Reactivity<a class="headerlink" href="#normalized-reactivity" title="Permalink to this headline"></a></h2>
+<p>Normalized reactivity for each methods
+<img alt="Normalized reactivity for each methods" src="_images/normreact.png" /></p>
 </div>
+<div class="section" id="aggregated-reactivity">
+<h2>Aggregated Reactivity<a class="headerlink" href="#aggregated-reactivity" title="Permalink to this headline"></a></h2>
+<p>Detailed information about how was perform aggregation
+<img alt="Detailed information about how was perform aggregation" src="_images/aggreact.full.png" /></p>
+<p>Resulting aggregated reactivity
+<img alt="Resulting aggregated reactivity" src="_images/aggreact.png" /></p>
 </div>
-<div class="section" id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline"></a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You don’t need install manually the dependencies software. They are included
-with Miniconda and your conda environnement.</p>
-</div>
-<p>Main dependencies software required with pipeline :</p>
-<ul class="simple">
-<li><p>Miniconda</p></li>
-<li><p>Python &gt;= 3.9</p></li>
-<li><p>Java &gt;= 8</p></li>
-<li><p>Snakemake</p></li>
-<li><p>IPANEMAP</p></li>
-<li><p>ViennaRNA</p></li>
-<li><p>VARNA (shipped with IPANEMAP)</p></li>
-<li><p>Python packages: scikit-bio, pandas, fire, numpy, bsddb3</p></li>
-</ul>
+<div class="section" id="structures">
+<h2>Structures<a class="headerlink" href="#structures" title="Permalink to this headline"></a></h2>
+<p>Structure drawing generated through VARNA
+<img alt="Structure drawing generated through VARNA" src="_images/varna.png" /></p>
 </div>
 </div>
 
@@ -137,8 +115,8 @@ with Miniconda and your conda environnement.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="troubleshooting.html" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="config_yaml_ref.html" class="btn btn-neutral float-right" title="Workflow configuration reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

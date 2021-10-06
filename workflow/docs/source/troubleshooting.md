@@ -1,12 +1,10 @@
 # Troubleshooting
 
-
-## Errors messages and solutions
-### Error validating config file.
+## Runtime: Error validating config file.
 
 A problem in your `config.yaml` as been found. 
 
-#### Forgotten a mandatory element 
+### Forgotten a mandatory element 
 
 Example :
 
@@ -15,7 +13,7 @@ ValidationError: 'allow_auto_import' is a required property
 ```
 Solution : add `allow_auto_import: True` to `config.yaml`
 
-#### Mispelled or Invalid element
+### Mispelled or Invalid element
 
 Example :
 `config.yaml`:
@@ -30,7 +28,7 @@ ValidationError: Additional properties are not allowed ('alow_auto_import' was u
 Solution : replace `alow_auto_import` with `allow_auto_import`
 to `config.yaml`
 
-#### Misstyped element
+### Misstyped element
 
 Example :
 
