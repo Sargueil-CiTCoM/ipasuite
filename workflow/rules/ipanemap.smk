@@ -181,7 +181,7 @@ rule configure_ipanemap:
             allow_missing=True,
         ),
     log:
-        "logs/ipanemap-config-{rna_id}_pool_{pool_id}.cfg",
+        "logs/ipanemap-config-{rna_id}_pool_{pool_id}.log",
     run:
         generate_ipanemap_config_from_snakeconf(
             configfile_path=output.cfg[0],
@@ -238,9 +238,9 @@ checkpoint ipanemap:
             )
         ),
     log:
-        "logs/ipanemap-out-{rna_id}_pool_{pool_id}.cfg",
+        "logs/ipanemap-out-{rna_id}_pool_{pool_id}.log",
     shell:
-        f"python {IPANEMAP} --config {{input.config}}"
+        f"python {IPANEMAP} --config {{input.config}} &> {{log}}"
 
 
 rule structure:
@@ -261,38 +261,65 @@ rule structure:
             allow_missing=True,
         ),
     log:
-        "logs/ipanemap-{rna_id}_pool_{pool_id}_{idx}.cfg",
+        "logs/ipanemap-{rna_id}_pool_{pool_id}_{idx}.log",
     shell:
-        "cp {input} {output}"
+        "cp {input} {output} &> {log}"
 
 
-rule varna:
+rule varna_color_by_condition:
     conda:
         "../envs/ipanemap.yml"
     input:
-        expand(
+        struct=expand(
             "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn",
             folder=config["folders"]["structure"],
             allow_missing=True,
         ),
+        aggreact=construct_path("aggreact-ipanemap", replicate = False,
+                ext=".txt")
     params:
         colorstyle= f"-colorMapStyle '{config['varna']['colormapstyle']}'",
-        colormap= ""
+    output:
+        varna=expand(
+            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}_cond_{conditions}.varna",
+            folder=config["folders"]["varna"],
+            conditions=CONDITION,
+            allow_missing=True,
+        ),
+        svg=report(expand(
+            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}_cond_{conditions}.svg",
+            folder=config["folders"]["varna"],
+            conditions=CONDITION,
+            allow_missing=True,
+        ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
+    log:
+        f"logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}_{CONDITION}.log",
+    shell:
+        f"java -jar {VARNA} -i {{input.struct}} -o {{output.varna}}" 
+        f" {{params.colorstyle}} -colorMap {{input.aggreact}} &> {{log}};"
+        f"java -jar {VARNA} -i {{input.struct}} -o {{output.svg}}" 
+        f" {{params.colorstyle}} -colorMap {{input.aggreact}} &> {{log}};"
+
+
+# Not working while Varna can't save several rna inside one session file
+rule varna_pool_concat:
+    conda:
+        "../envs/ipanemap.yml"
+    input:
+        get_varna_pool_concat_inputs
     output:
         varna=expand(
             "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.varna",
             folder=config["folders"]["varna"],
             allow_missing=True,
         ),
-        svg=report(expand(
-            "results/{folder}/{rna_id}_pool_{pool_id}_{idx, \d+}.svg",
-            folder=config["folders"]["varna"],
-            allow_missing=True,
-        ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
+    params: 
+        inputs=lambda wildcards, input: "".join(f" -i {ipt}" for ipt in input)
     log:
-        "logs/varna-{rna_id}_pool_{pool_id}_{idx}.cfg",
+        f"logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}.log",
     shell:
-        f"java -jar {VARNA} -i {{input}} -o {{output.varna}}" 
-        f"{{params.colorstyle}} {{params.colormap}};"
-        f"java -jar {VARNA} -i {{input}} -o {{output.svg}}" 
-        f"{{params.colorstyle}} {{params.colormap}};"
+        f"java -jar {VARNA} {{params.inputs}} -o {{output.varna}} &> {{log}};"
+
+
+
+#run varna_all_conditions:

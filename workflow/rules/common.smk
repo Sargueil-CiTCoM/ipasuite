@@ -154,23 +154,26 @@ def get_replicates(wildcards):
     replicates = get_sample(wildcards, all_replicates=True)
     return replicates["replicate"]
 
+def get_ipanemap_pool_inputs(pool):
+    inputs = []
+    for cond in pool["conditions"]:
+        inputs.extend(
+            expand(
+                construct_path(
+                    "aggreact-ipanemap", replicate=False, ext=".txt"
+                ),
+                rna_id=pool["rna_id"],
+                **cond,
+            )
+        )
+    return inputs
+
 
 def get_ipanemap_inputs(wildcards):
-    inputs = []
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == wildcards.pool_id:
-            for cond in pool["conditions"]:
-                inputs.extend(
-                    expand(
-                        construct_path(
-                            "aggreact-ipanemap", replicate=False, ext=".txt"
-                        ),
-                        rna_id=pool["rna_id"],
-                        **cond,
-                    )
-                )
-            break
-    return inputs
+            return get_ipanemap_pool_inputs(pool) 
+    return []
 
 
 def get_all_raw_outputs():
@@ -244,8 +247,24 @@ def get_all_structure_outputs(wildcards):
 
     return outputs
 
+def get_varna_pool_concat_inputs(wildcards):
+    inputs = []
+    for pool in config["ipanemap"]["pools"]:
+        if pool["id"] == wildcards.pool_id:
+            for cond in pool["conditions"]:
+                inputs.extend(
+                    expand(
+                        f"results/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
+                        folder=config["folders"]["varna"],
+                        **wildcards,
+                        **cond
+                    )
+                )
+            return inputs
+    return inputs
 
-def get_all_varna_outputs(wildcards):
+
+def get_all_varna_by_condition_outputs(wildcards):
     outputs = []
     for pool in config["ipanemap"]["pools"]:
         checkpoint_output = checkpoints.ipanemap.get(
@@ -256,25 +275,61 @@ def get_all_varna_outputs(wildcards):
                 checkpoint_output, "{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn"
             )
         )
-        outputs.extend(
-            expand(
-                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.varna",
-                folder=config["folders"]["varna"],
-                rna_id=pool["rna_id"],
-                pool_id=pool["id"],
-                idx=glob.idx,
+
+        for cond in pool["conditions"]:
+            outputs.extend(
+                expand(
+                    f"results/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
+                    folder=config["folders"]["varna"],
+                    rna_id=pool["rna_id"],
+                    pool_id=pool["id"],
+                    idx=glob.idx,
+                    **cond
+                )
             )
-        )
-        outputs.extend(
-            expand(
-                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
-                folder=config["folders"]["varna"],
-                rna_id=pool["rna_id"],
-                pool_id=pool["id"],
-                idx=glob.idx,
-            )
-        )
+#        outputs.extend(
+#            expand(
+#                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+#                folder=config["folders"]["varna"],
+#                rna_id=pool["rna_id"],
+#                pool_id=pool["id"],
+#                idx=glob.idx,
+#            )
+#        )
     return outputs
+
+def get_all_varna_pool_concat_outputs(wildcards):
+    outputs = []
+    for pool in config["ipanemap"]["pools"]:
+        checkpoint_output = checkpoints.ipanemap.get(
+            rna_id=pool["rna_id"], pool_id=pool["id"]
+        ).output[0]
+        glob = glob_wildcards(
+            os.path.join(
+                checkpoint_output, "{rna_id}_pool_{pool_id}_optimal_{idx, \d+}.dbn"
+            )
+        )
+
+        outputs.extend(
+            expand(
+                f"results/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}.varna",
+                folder=config["folders"]["varna"],
+                rna_id=pool["rna_id"],
+                pool_id=pool["id"],
+                idx=glob.idx,
+            )
+        )
+#        outputs.extend(
+#            expand(
+#                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+#                folder=config["folders"]["varna"],
+#                rna_id=pool["rna_id"],
+#                pool_id=pool["id"],
+#                idx=glob.idx,
+#            )
+#        )
+    return outputs
+
 # def get_final_outputs():
 #    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"
 #    outputs = []

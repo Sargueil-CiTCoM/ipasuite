@@ -26,7 +26,8 @@ rule all:
         #get_all_structure_outputs
         aggregates=get_all_aggreact_outputs(),
         #structures = get_all_structure_outputs
-        varna=get_all_varna_outputs,
+        varna_by_cond=get_all_varna_by_condition_outputs,
+        #varna_pool_concat=get_all_varna_pool_concat_outputs
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
 
