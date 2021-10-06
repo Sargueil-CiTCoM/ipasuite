@@ -1,4 +1,4 @@
-# Snakemake workflow: SHAPE-ceq
+# SHAPE-CE Snakemake workflow
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
 
