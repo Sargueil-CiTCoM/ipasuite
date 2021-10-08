@@ -13,6 +13,14 @@ properties:
   rna_id:
     type: string
     description: name of the current RNA fragment. Must be a string 
+  ddNTP:
+    type: string
+    description: which ddNTP was used during capilary eletrophorese
+    enum:
+      - ddA
+      - ddC
+      - ddT
+      - ddG 
   replicate:
     type: string
     description: identifier of the replicate for the current condition. generally a integer, can be a string
@@ -32,6 +40,9 @@ properties:
     type: string
     description: if set to "yes" the sample will be discarded from analysis
     default: "no"
+    enum:
+      - "yes"
+      - "no"
 #  rna_fragment_id:
 #    type: float
 #    description: name of the dna fragment 
@@ -41,6 +52,7 @@ required:
   - id
   - date
   - rna_id
+  - ddNTP
   - replicate
 #  - reference_qushape_file
 #  - probe_file

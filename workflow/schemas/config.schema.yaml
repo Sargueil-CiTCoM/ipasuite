@@ -261,11 +261,8 @@ definitions:
     properties:
       channels:
         "$ref": "#/definitions/Channels"
-      ddNTP:
-        type: string
     required:
     - channels
-    - ddNTP
     title: Qushape
   Channels:
     type: object

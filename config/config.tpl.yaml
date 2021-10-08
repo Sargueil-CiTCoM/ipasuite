@@ -138,8 +138,6 @@ rawdata:
 # used for this project, here, channel start at index 0: channel 1 
 # correspond to value 0
 #
-# `ddNTP` corresponds to the ddNTP used for sequence samples
-#
 # *Example:* 
 #
 # ```yaml
@@ -149,7 +147,6 @@ rawdata:
 #    RXS1: 2 # Channel 3
 #    BG: 0 # Channel 1
 #    BGS1: 2 # Channel 3
-#  ddNTP: ddA
 # ```
 qushape:
   channels:
@@ -157,7 +154,6 @@ qushape:
     RXS1: 2 # Channel 3
     BG: 0 # Channel 1
     BGS1: 2 # Channel 3
-  ddNTP: ddA
 
 ###
 # Reactivity Normalization configuration

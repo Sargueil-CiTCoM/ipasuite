@@ -42,6 +42,8 @@ unindexed_samples = pd.read_csv(
     config["samples"], sep="\t", dtype=condition_types
 )  # .set_index("sample", drop=False)
 
+unindexed_samples = unindexed_samples.loc[unindexed_samples["discard"] != "yes"]
+
 validate(unindexed_samples, schema="../schemas/samples.schema.yaml",
         set_default=True)
 
