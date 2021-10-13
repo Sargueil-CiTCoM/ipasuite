@@ -48,6 +48,16 @@ validate(unindexed_samples, schema="../schemas/samples.schema.yaml",
         set_default=True)
 
 samples = unindexed_samples.set_index(get_indexes(), drop=True)
+index_count = pd.Index(samples.index).value_counts()
+if len(index_count[index_count > 1]) > 0:
+    print("Duplicated entry in samples file")
+    print(f"Entries: {index_count[index_count > 1]}")
+    raise Exception("Duplicated entry")
+
+
+
+
+
 samples_replicates = unindexed_samples.set_index(
     get_indexes(replicates=False), drop=True
 )
