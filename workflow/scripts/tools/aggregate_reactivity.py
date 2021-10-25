@@ -7,8 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import itertools
-from skbio import DNA, RNA
-from skbio.alignment import local_pairwise_align_ssw
 
 ddof = 1
 
@@ -72,7 +70,7 @@ def plot_aggregate(
 ):
     aggregated = copy.deepcopy(aggregated)
     aggregated["xlabel"] = (
-        aggregated.index.get_level_values("abs_position").astype(str)
+        aggregated.index.get_level_values("seqNum").astype(str)
         + "\n"
         + aggregated.index.get_level_values("sequence").astype(str)
     )
@@ -111,7 +109,7 @@ def plot_aggregate(
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
     ax.errorbar(
-        meanstdev.index.get_level_values("abs_position") - 1,
+        meanstdev.index.get_level_values("seqNum") - 1,
         meanstdev["mean"],
         yerr=meanstdev["stdev"],
         fmt="",
@@ -136,7 +134,7 @@ def plot_aggregate(
     aggregated.loc[(aggregated['mean'] == -10), 'stdev'] = np.NaN
     aggregated.loc[(aggregated['mean'] == -10), 'mean'] = np.NaN
     aggregated["xlabel_rot"] = (
-        aggregated.index.get_level_values("abs_position").astype(str)
+        aggregated.index.get_level_values("seqNum").astype(str)
         + " - "
         + aggregated.index.get_level_values("sequence").astype(str)
     )
@@ -181,29 +179,14 @@ def check_files(src, dest):
 
 class ShapeReactivitySeq:
     def __init__(
-        self, filepath: str, reference: pd.DataFrame = None, refseq: RNA = None
+        self, filepath: str
     ):
         self.filepath = filepath
         self.name = os.path.splitext(os.path.basename(filepath))[0]
         self.df = pd.read_csv(filepath, sep="\t")
-        self.sequence = RNA("".join(self.df["seqRNA"]))
-        if reference is not None and refseq is not None:
-            self.reference = reference
-            self.reference_sequence = refseq
-            self.init_absolute_position()
-        else:
-            self.df = self.df.set_index("seqNum")
-            self.df = self.df.set_index("seqRNA", append=True)
-            self.df = self.df.rename_axis(index={"seqRNA": "sequence"})
-
-    def init_absolute_position(self):
-        _, _, startend = local_pairwise_align_ssw(
-            self.reference_sequence, self.sequence
-        )
-        shift = startend[0][0] + 1
-        self.df = self.df.set_index(
-            [pd.Index(range(shift, len(self.df) + shift), name="abs_position")]
-        )
+        self.df = self.df.set_index("seqNum")
+        self.df = self.df.set_index("seqRNA", append=True)
+        self.df = self.df.rename_axis(index={"seqRNA": "sequence"})
 
 
 def min_enough_values(nvalues: int, min_nsubdata_perc: float = 0.66):
@@ -372,9 +355,7 @@ def aggregate_replicates(
 def aggregate(
     *files: [str],
     output: str,
-    refseq=None,
     ipanemap_output=None,
-    ref_is_dna=False,
     normcol="simple_norm_reactivity",
     min_ndata_perc: float = 0.5,
     min_nsubdata_perc: float = 0.66,
@@ -394,12 +375,8 @@ def aggregate(
         Files to aggregate together
     output : str
         Output aggregated file
-    refseq :
-        file path to the reference sequence, None by default
     ipanemap_output :
         Output aggregated file in a compatible format for RNAFold and IPANEMAP
-    ref_is_dna :
-        if reference file is DNA, put --ref_is_dna=True, rna by default
     normcol :
         name of the normalization column in each input file
     min_ndata_perc : float
@@ -423,32 +400,10 @@ def aggregate(
 
     check_files(src, dest)
 
-    refseqdf = None
-    if refseq:
-        if ref_is_dna:
-            refseq = DNA.read(refseq, format="fasta").transcribe()
-        else:
-            try:
-                refseq = RNA.read(refseq, format="fasta")
-            except ValueError:
-                # sys.stderr.write(
-                #     "WARNING: File is not RNA, using DNA + transcription\n"
-                # )
-                refseq = DNA.read(refseq, format="fasta").transcribe()
-
-        refseqdf = pd.DataFrame(
-            [v.decode("utf-8") for v in refseq.values], columns=["sequence"]
-        )
-        refseqdf.index += 1
-        refseqdf.index.name = "abs_position"
-
     shape_react_seqs = [
-        ShapeReactivitySeq(filepath, refseqdf, refseq) for filepath in src
+        ShapeReactivitySeq(filepath) for filepath in src
     ]
     shape_dfs = []
-    if refseqdf is not None:
-        shape_dfs = [refseqdf]
-        # print(refseqdf)
 
     shape_dfs.extend(
         [
@@ -459,8 +414,6 @@ def aggregate(
 
     # print(shape_dfs[2])
     reacts = pd.concat(shape_dfs, axis=1)
-    if refseqdf is not None:
-        reacts = reacts.set_index(["sequence"], append=True)
     # Remove leading and trailing empty data
 
     # reacts = reacts.sort_index()
