@@ -275,7 +275,7 @@ rule varna_color_by_condition:
             folder=config["folders"]["structure"],
             allow_missing=True,
         ),
-        aggreact=construct_path("aggreact-ipanemap", replicate = False,
+        aggreact=construct_path("aggreact-ipanemap", show_replicate = False,
                 ext=".txt")
     params:
         colorstyle= f"-colorMapStyle '{config['varna']['colormapstyle']}'",

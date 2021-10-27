@@ -24,13 +24,30 @@ if RAW_DATA_TYPE == "fluo-ceq8000":
 #    shell:
 #        "cp {input} {output} &> {log}"
 
+if config["qushape"]["use_subsequence"]:
+    rule split_fasta:
+        conda: "../envs/tools.yml"
+        input:
+            ancient(get_refseq)
+        output:
+            f"results/{config['folders']['subseq']}/{{rna_id}}_{{rna_begin}}-{{rna_end}}.fasta"
+    
+        message:
+            f"Fragmenting fasta file {{input}} "
+            f"from {{wildcards.rna_begin}} to {{wildcards.rna_end}}"
+    
+        log: "logs/{config['folders']['subseq']}/{rna_id}_{rna_begin}-{rna_end}.log"
+        shell:
+            f"python {TOOLS}/split_fasta.py {{input}} {{output}} --begin "
+            f"{{wildcards.rna_begin}}"
+            f" --end {{wildcards.rna_end}}"
 
 rule generate_project_qushape:
     conda: "../envs/tools.yml"
     input:
         rx = ancient(construct_path("fluo-ce", results_dir = False)),
         bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
-        refseq = ancient(get_refseq),
+        refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True)),
         refproj = ancient(get_qushape_refproj)
     message: f"Generate QuShape project for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
@@ -43,24 +60,24 @@ rule generate_project_qushape:
         #channels=
     #output: protected(construct_path("qushape", ext=".qushape"))
 
-    log: construct_path('qushape', ext=".log", log_dir=True)
-    output: construct_path("qushape", ext=".qushape")
+    log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
+    output: construct_path("qushape", ext=".qushape", split_seq=True)
     shell:
         f"python {TOOLS}/qushape_proj_generator.py {{input.rx}} {{input.bg}}"
         f" {{params}} --output={{output}} &> {{log}}"
 
 rule extract_reactivity:
     conda:  "../envs/tools.yml"
-    input: construct_path("qushape", ext=".qushape")
+    input: construct_path("qushape", ext=".qushape", split_seq=True)
     output:
-        react=construct_path("reactivity"),
-        plot=report(construct_path("reactivity", ext=".reactivity.svg", figure=True
-            ),
+        react=construct_path("reactivity", split_seq=True),
+        plot=report(construct_path("reactivity", ext=".reactivity.svg", 
+            figure=True, split_seq=True),
             category="3.1-Reactivity", subcategory=CONDITION)
         #,protect = protected(construct_path("qushape", ext=".qushape"))
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
-    log: construct_path('reactivity', ext=".log", log_dir=True)
+    log: construct_path('reactivity', ext=".log", log_dir=True, split_seq=True)
 
     shell:
         f"""
@@ -78,14 +95,15 @@ rule extract_reactivity:
 
 rule normalize_reactivity:
     conda:  "../envs/tools.yml"
-    input: construct_path("reactivity")
+    input: construct_path("reactivity", split_seq=True)
     output:
-        nreact=construct_path("normreact"),
-        plot=report(construct_path("normreact", ext=".normreact.svg", figure=True),
+        nreact=construct_path("normreact", split_seq=True),
+        plot=report(construct_path("normreact", ext=".normreact.svg",
+            figure=True, split_seq=True),
                 category="3.2-Normalized reactivity", subcategory=CONDITION)
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
-    log: construct_path('normreact', ext=".log", log_dir=True)
+    log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
     params:
         react_nuc = construct_list_param(CNORM, "reactive_nucleotides"),
         st_perc = construct_param(CNORM, "stop_percentile"),
@@ -97,32 +115,49 @@ rule normalize_reactivity:
         f"python {TOOLS}/normalize_reactivity.py {{params}} {{input}}"
         f" --output={{output.nreact}} --plot={{output.plot}} &> {{log}}"
 
+if config["qushape"]["use_subsequence"]:
+    rule align_reactivity_to_ref:
+        conda: "../envs/tools.yml"
+        input: unpack(get_align_reactivity_inputs)
+        output: construct_path("alignnormreact")
+        params:
+            rna_begin = get_align_begin,
+            #rna_end = get_align_end
+
+        log: construct_path('alignnormreact', ext=".log", log_dir=True)
+        shell:
+            f"python {TOOLS}/shift_reactivity.py {{input.norm}} {{input.refseq}}"
+            f" {{output}} --begin {{params.rna_begin}} &> {{log}}"
+            #f" --end {{params.rna_end}} &> {{log}}"
+     
+
+
 rule aggregate_reactivity:
     conda:  "../envs/tools.yml"
     input:
-        norm= lambda wildcards: expand(construct_path("normreact"),
-                replicate=get_replicates(wildcards), allow_missing=True),
-        refseq = lambda wildcards: get_refseq(wildcards, all_replicates=True)
+        norm= lambda wildcards: expand(construct_path(aggregate_input_type()),
+                replicate=get_replicate_list(wildcards), allow_missing=True),
+        refseq = lambda wildcards: get_refseq(wildcards)
     output:
-        full= construct_path("aggreact", replicate = False),
-        compact = construct_path("aggreact-ipanemap", replicate=False,
+        full= construct_path("aggreact", show_replicate = False),
+        compact = construct_path("aggreact-ipanemap", show_replicate=False,
                 ext=".txt"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
-            replicate=False, figure=True),
+            show_replicate=False, figure=True),
             category="4-Aggregated reactivity", subcategory=CONDITION),
         fullplot =report(construct_path("aggreact", ext=".aggreact.full.svg",
-            replicate=False, figure=True),
+            show_replicate=False, figure=True),
             category="4-Aggregated reactivity", subcategory=CONDITION)
 
     #message: f"Aggregating normalized reactivity for {MESSAGE}"
-    log: construct_path('aggreact', ext=".log", log_dir=True, replicate=False)
+    log: construct_path('aggreact', ext=".log", log_dir=True, show_replicate=False)
     params:
         norm_method= construct_normcol(),
         minndp = construct_param(config["aggregate"], "min_ndata_perc"),
         mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
         maxmp = construct_param(config["aggregate"], "max_mean_perc"),
         mind = construct_param(config["aggregate"], "min_dispersion"),
-        refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
+        #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
         f"python {TOOLS}/aggregate_reactivity.py {{input.norm}}"
         f" --output={{output.full}} {{params}}"

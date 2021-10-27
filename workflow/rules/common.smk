@@ -25,10 +25,10 @@ FOLDERS = config["folders"]
 MESSAGE = config["format"]["message"]
 CNORM = config["normalization"]
 
-def get_indexes(replicates=True):
+def get_indexes(replicates_in_index=True):
     indexes = ["rna_id"]
     indexes.extend(config["conditions"])
-    if replicates:
+    if replicates_in_index:
         indexes.append("replicate")
     return indexes
 
@@ -54,12 +54,8 @@ if len(index_count[index_count > 1]) > 0:
     print(f"Entries: {index_count[index_count > 1]}")
     raise Exception("Duplicated entry")
 
-
-
-
-
-samples_replicates = unindexed_samples.set_index(
-    get_indexes(replicates=False), drop=True
+samples_no_rep_index = unindexed_samples.set_index(
+    get_indexes(replicates_in_index=False), drop=True
 )
 
 pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
@@ -93,20 +89,20 @@ def construct_normcol():
     return arg
 
 
-def get_sample(wildcards, all_replicates=False):
+def get_sample(wildcards, list_replicates=False):
     sval = [wildcards.rna_id]
     sval.extend([wildcards[cond] for cond in config["conditions"]])
 
-    if all_replicates:
-        return samples_replicates.loc[[tuple(sval)]]
-
+    if list_replicates:
+        return samples_no_rep_index.loc[[tuple(sval)]]
+    
     sval.append(wildcards.replicate)
-    return samples.loc[tuple(sval)]
+    return samples.loc[[tuple(sval)]]
 
 
 def construct_path(
-    step, control=False, results_dir=True, ext=None, replicate=True,
-    log_dir=False, figure=False):
+    step, control=False, results_dir=True, ext=None, show_replicate=True,
+    log_dir=False, figure=False, split_seq=False):
     cond = (
         f"_{CONDITION}"
         if not control
@@ -114,17 +110,27 @@ def construct_path(
     )
     figdir = "figures/" if figure else ""
     basedir = "logs" if log_dir else ("results" if results_dir else "resources")
-    replicate = "_{replicate}" if replicate else ""
+    replicate = "_{replicate}" if show_replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
+    ssplit = "_seq{rna_begin}-{rna_end}" if split_seq \
+             and config['qushape']['use_subsequence'] \
+             else "" 
+
     path = expand(
-        f"{basedir}/{figdir}{pid}{cond}{replicate}{extension}",
+        f"{basedir}/{figdir}{pid}{cond}{replicate}{ssplit}{extension}",
         folder=FOLDERS[step],
         step=step,
         allow_missing=True,
     )
     # print(path)
     return path
+
+def aggregate_input_type():
+    if config["qushape"]["use_subsequence"]:
+        return "alignnormreact"
+    else:
+        return "normreact"
 
 
 def get_external_qushape(wildcards):
@@ -141,13 +147,42 @@ def get_raw_control_input(wildcards):
     sample = get_sample(wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
 
+def get_align_begin(wildcards):
+    sample = get_sample(wildcards).iloc[0]
+    return sample["rna_begin"]
 
-def get_refseq(wildcards, all_replicates=False):
-    sample = get_sample(wildcards, all_replicates)
-    path = config["sequences"][wildcards.rna_id]
-    if os.path.exists(path):
-        return path
+def get_align_end(wildcards):
+    sample = get_sample(wildcards).iloc[0]
+    return sample["rna_end"]
+
+def get_align_reactivity_inputs(wildcards):
+    sample = get_sample(wildcards).iloc[0]
+    fa = f"results/{config['folders']['subseq']}/" \
+         f"{wildcards.rna_id}_{sample['rna_begin']}-{sample['rna_end']}.fasta"
+    norm = expand(construct_path("normreact", split_seq=True),
+            rna_begin=sample['rna_begin'],rna_end=sample['rna_end'],
+            **wildcards )
+    return {"refseq": fa, "norm": norm} 
+
+
+def get_subseq(wildcards, split_seq=False):
+    sample = get_sample(wildcards, list_replicates=split_seq)
+    fasta = config["sequences"][wildcards.rna_id]
+
+    if split_seq and config["qushape"]["use_subsequence"]:
+        return  f"results/{config['folders']['subseq']}/" \
+                f"{{rna_id}}_{{rna_begin}}-{{rna_end}}.fasta"
+
+    if os.path.exists(fasta):
+        return fasta
     return []
+
+def get_refseq(wildcards):
+    fasta = config["sequences"][wildcards.rna_id]
+    if os.path.exists(fasta):
+        return fasta
+    return []
+
 
 
 def get_qushape_refproj(wildcards):
@@ -157,14 +192,16 @@ def get_qushape_refproj(wildcards):
         path = os.path.join(
             config["rawdata"]["path_prefix"], sample["reference_qushape_file"]
         )
+
     if path is not None and os.path.exists(path):
         return path
     return []
 
 
-def get_replicates(wildcards):
-    replicates = get_sample(wildcards, all_replicates=True)
+def get_replicate_list(wildcards):
+    replicates = get_sample(wildcards, list_replicates=True)
     return replicates["replicate"]
+
 
 def get_ipanemap_pool_inputs(pool):
     inputs = []
@@ -172,7 +209,7 @@ def get_ipanemap_pool_inputs(pool):
         inputs.extend(
             expand(
                 construct_path(
-                    "aggreact-ipanemap", replicate=False, ext=".txt"
+                    "aggreact-ipanemap", show_replicate=False, ext=".txt"
                 ),
                 rna_id=pool["rna_id"],
                 **cond,
@@ -223,9 +260,9 @@ def get_all_reactivity_outputs():
 def get_all_aggreact_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = expand(construct_path(step="aggreact", replicate=False), **row)
+        sample = expand(construct_path(step="aggreact", show_replicate=False), **row)
         sampleipan = expand(
-            construct_path("aggreact-ipanemap", replicate=False, ext=".txt"), **row
+            construct_path("aggreact-ipanemap", show_replicate=False, ext=".txt"), **row
         )
         outputs.append(sample)
         outputs.append(sampleipan)

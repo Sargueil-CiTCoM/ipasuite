@@ -19,6 +19,8 @@ def check_files(src: str, dest: str):
 
 def shift(src: str, reference: str, dest: str, begin: int = 0):
     check_files(src, dest)
+    if begin == "nan":
+        begin = 0
     try:
         refseq = DNA.read(reference, format="fasta")
     except ValueError:
@@ -27,18 +29,17 @@ def shift(src: str, reference: str, dest: str, begin: int = 0):
     refdf = pd.DataFrame(
         [v.decode("utf-8") for v in refseq.values], columns=["seqRNA"]
     )
+
     refdf.index += 1
     refdf.index.name = "seqNum"
 
     srcdf = pd.read_csv(src, sep="\t")
-    srcdf = srcdf.rename(columns={"seqNum": "rel_seqNum", "seqRNA": "rel_seqRNA"})
+    srcdf = srcdf.rename(
+        columns={"seqNum": "rel_seqNum", "seqRNA": "rel_seqRNA"}
+    )
     srcdf["seqNum"] = srcdf["rel_seqNum"] + begin - 1
     srcdf = srcdf.set_index("seqNum")
-    print(srcdf)
-    print(refdf)
     outdf = pd.concat([refdf, srcdf], axis=1)
-
-    print(outdf)
 
     outdf.to_csv(dest, sep="\t", float_format="%.4f")
 

@@ -38,8 +38,16 @@ def split_fasta(src: str, dest: str, begin: int = 0, end: int = None):
     except ValueError:
         fa = RNA.read(src, format="fasta")
 
-    sub = fa[begin:end]
-    sub.metadata["description"] += f"from {begin} to {end}"
+    if begin == "nan":
+        begin = 0
+    if end == "nan":
+        end = None
+
+    if begin == 0 and end is None:
+        sub = fa
+    else:
+        sub = fa[begin:end]
+        sub.metadata["description"] += f"from {begin} to {end}"
 
     sub.write(dest, format="fasta")
 

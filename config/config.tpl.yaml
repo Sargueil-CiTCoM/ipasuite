@@ -125,7 +125,6 @@ rawdata:
   #   ...
   # ```
   control: "DMSO"
-
 ## Steps configurations ##
 
 ###
@@ -149,6 +148,7 @@ rawdata:
 #    BGS1: 2 # Channel 3
 # ```
 qushape:
+  use_subsequence: True
   channels:
     RX: 0 # Channel 1
     RXS1: 2 # Channel 3
@@ -350,9 +350,11 @@ varna:
 folders:
   fluo-ceq8000: 1.1-fluo-ceq8000
   fluo-ce: 1.2-fluo-ce
+  subseq: 1.3-subseq
   qushape: 2-qushape
   reactivity: 3.1-reactivity
   normreact: 3.2-normreact
+  alignnormreact: 3.3-align-normreact
   aggreact: 4.1-aggreact
   aggreact-ipanemap: 4.2-aggreact-ipanemap  
   ipanemap-config: 5.1-ipanemap-config

@@ -1,24 +1,24 @@
 image: continuumio/miniconda3:latest
 
 
-workflow:
-  rules:
-    - if: '$CI_COMMIT_BRANCH'
-
-#  - conda env create --file workflow/envs/doc.yml --name shape-ce-doc || true
-#  - source activate shape-ce-doc
-
-
-pages:
-  image : sphinxdoc/sphinx
-  before_script:
-    - pip install myst-parser sphinx-book-theme sphinx_rtd_theme sphinxcontrib-autoyaml sphinx-jsonschema
-  script:
-    - cd workflow/docs
-    - make html
-    - mv build/html ../../public
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+# workflow:
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH'
+#
+##  - conda env create --file workflow/envs/doc.yml --name shape-ce-doc || true
+##  - source activate shape-ce-doc
+#
+#
+#pages:
+#  image : sphinxdoc/sphinx
+#  before_script:
+#    - pip install myst-parser sphinx-book-theme sphinx_rtd_theme sphinxcontrib-autoyaml sphinx-jsonschema
+#  script:
+#    - cd workflow/docs
+#    - make html
+#    - mv build/html ../../public
+#  artifacts:
+#    paths:
+#      - public
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "main"'
