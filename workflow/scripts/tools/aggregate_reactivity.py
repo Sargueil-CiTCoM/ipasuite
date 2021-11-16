@@ -81,6 +81,7 @@ def plot_aggregate(
         ),
     ].replace(-10, np.NaN)
 
+    aggregated = aggregated.sort_index()
     meanstdev = aggregated.loc[:, ["xlabel", "mean", "stdev"]].replace(
         -10, np.NaN
     )

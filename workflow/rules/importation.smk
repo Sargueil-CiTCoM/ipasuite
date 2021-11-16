@@ -36,9 +36,9 @@ if config["allow_auto_import"]:
         input:
             get_external_qushape,
         output:
-            protected(construct_path("qushape", ext=".qushape", results_dir=True)),
+            construct_path("qushape", ext=".qushape", split_seq=True),
         log:
-            construct_path("qushape", ext=".log", log_dir=True),
+            construct_path("qushape", ext=".log", log_dir=True, split_seq=True),
         message:
             (
                 "Importing from external source: "

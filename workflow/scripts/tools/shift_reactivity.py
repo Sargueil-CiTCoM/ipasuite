@@ -37,7 +37,7 @@ def shift(src: str, reference: str, dest: str, begin: int = 0):
     srcdf = srcdf.rename(
         columns={"seqNum": "rel_seqNum", "seqRNA": "rel_seqRNA"}
     )
-    srcdf["seqNum"] = srcdf["rel_seqNum"] + begin - 1
+    srcdf["seqNum"] = srcdf["rel_seqNum"] + begin
     srcdf = srcdf.set_index("seqNum")
     outdf = pd.concat([refdf, srcdf], axis=1)
 

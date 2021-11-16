@@ -18,9 +18,13 @@ properties:
     description: which ddNTP was used during capilary eletrophorese
     enum:
       - ddA
+      - ddATP
       - ddC
+      - ddCTP
       - ddT
+      - ddTTP
       - ddG 
+      - ddGTP
   replicate:
     type: string
     description: identifier of the replicate for the current condition. generally a integer, can be a string

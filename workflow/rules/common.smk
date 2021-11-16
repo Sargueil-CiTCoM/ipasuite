@@ -113,7 +113,7 @@ def construct_path(
     replicate = "_{replicate}" if show_replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
-    ssplit = "_seq{rna_begin}-{rna_end}" if split_seq \
+    ssplit = "_seq{rt_end_pos}-{rt_begin_pos}" if split_seq \
              and config['qushape']['use_subsequence'] \
              else "" 
 
@@ -149,18 +149,18 @@ def get_raw_control_input(wildcards):
 
 def get_align_begin(wildcards):
     sample = get_sample(wildcards).iloc[0]
-    return sample["rna_begin"]
+    return sample["rt_end_pos"]
 
 def get_align_end(wildcards):
     sample = get_sample(wildcards).iloc[0]
-    return sample["rna_end"]
+    return sample["rt_begin_pos"]
 
 def get_align_reactivity_inputs(wildcards):
     sample = get_sample(wildcards).iloc[0]
     fa = f"results/{config['folders']['subseq']}/" \
-         f"{wildcards.rna_id}_{sample['rna_begin']}-{sample['rna_end']}.fasta"
+         f"{wildcards.rna_id}_{sample['rt_end_pos']}-{sample['rt_begin_pos']}.fasta"
     norm = expand(construct_path("normreact", split_seq=True),
-            rna_begin=sample['rna_begin'],rna_end=sample['rna_end'],
+            rt_end_pos=sample['rt_end_pos'],rt_begin_pos=sample['rt_begin_pos'],
             **wildcards )
     return {"refseq": fa, "norm": norm} 
 
@@ -171,7 +171,7 @@ def get_subseq(wildcards, split_seq=False):
 
     if split_seq and config["qushape"]["use_subsequence"]:
         return  f"results/{config['folders']['subseq']}/" \
-                f"{{rna_id}}_{{rna_begin}}-{{rna_end}}.fasta"
+                f"{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
 
     if os.path.exists(fasta):
         return fasta
@@ -240,7 +240,7 @@ def get_all_raw_outputs():
 def get_all_qushape_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(step="qushape", ext=".qushape")[0].format(**row)
+        sample = construct_path(step="qushape", ext=".qushape", split_seq=True)[0].format(**row)
         outputs.append(sample)
     return outputs
 

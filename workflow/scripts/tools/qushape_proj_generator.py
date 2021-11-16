@@ -83,13 +83,13 @@ def createDProject(
             dproj["dyeN"][name] = dyesBG[channels[name]]
 
     dproj["ddNTP1"] = ddNTP
-    if ddNTP == "ddC":
+    if ddNTP == "ddC" or ddNTP == "ddCTP":
         dproj["nuc1"] = "G"
-    elif ddNTP == "ddA":
+    elif ddNTP == "ddA" or ddNTP == "ddATP":
         dproj["nuc1"] = "U"
-    elif ddNTP == "ddG":
+    elif ddNTP == "ddG" or ddNTP == "ddGTP":
         dproj["nuc1"] = "C"
-    elif ddNTP == "ddT":
+    elif ddNTP == "ddT" or ddNTP == "ddTTP":
         dproj["nuc1"] = "A"
     else:
         raise "Invalid ddNTP"

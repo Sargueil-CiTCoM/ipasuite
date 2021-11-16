@@ -30,17 +30,18 @@ if config["qushape"]["use_subsequence"]:
         input:
             ancient(get_refseq)
         output:
-            f"results/{config['folders']['subseq']}/{{rna_id}}_{{rna_begin}}-{{rna_end}}.fasta"
+            f"results/{config['folders']['subseq']}/{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
     
         message:
             f"Fragmenting fasta file {{input}} "
-            f"from {{wildcards.rna_begin}} to {{wildcards.rna_end}}"
+            f"from {{wildcards.rt_end_pos}} to {{wildcards.rt_begin_pos}}"
     
-        log: "logs/{config['folders']['subseq']}/{rna_id}_{rna_begin}-{rna_end}.log"
+        log:
+            "logs/{config['folders']['subseq']}/{rna_id}_{rt_end_pos}-{rt_begin_pos}.log"
         shell:
             f"python {TOOLS}/split_fasta.py {{input}} {{output}} --begin "
-            f"{{wildcards.rna_begin}}"
-            f" --end {{wildcards.rna_end}}"
+            f"{{wildcards.rt_end_pos}}"
+            f" --end {{wildcards.rt_begin_pos}}"
 
 rule generate_project_qushape:
     conda: "../envs/tools.yml"
@@ -121,13 +122,13 @@ if config["qushape"]["use_subsequence"]:
         input: unpack(get_align_reactivity_inputs)
         output: construct_path("alignnormreact")
         params:
-            rna_begin = get_align_begin,
+            rt_end_pos = get_align_begin,
             #rna_end = get_align_end
 
         log: construct_path('alignnormreact', ext=".log", log_dir=True)
         shell:
             f"python {TOOLS}/shift_reactivity.py {{input.norm}} {{input.refseq}}"
-            f" {{output}} --begin {{params.rna_begin}} &> {{log}}"
+            f" {{output}} --begin {{params.rt_end_pos}} &> {{log}}"
             #f" --end {{params.rna_end}} &> {{log}}"
      
 
