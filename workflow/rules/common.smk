@@ -42,10 +42,16 @@ unindexed_samples = pd.read_csv(
     config["samples"], sep="\t", dtype=condition_types
 )  # .set_index("sample", drop=False)
 
-unindexed_samples = unindexed_samples.loc[unindexed_samples["discard"] != "yes"]
+unindexed_samples = unindexed_samples.loc[ \
+    (unindexed_samples["discard"] != "yes") & \
+    (unindexed_samples["discard"] != True)]
 
 validate(unindexed_samples, schema="../schemas/samples.schema.yaml",
         set_default=True)
+
+if config['qushape']['use_subsequence']:
+    unindexed_samples['rt_begin_pos'] = unindexed_samples['rt_begin_pos'].astype(int)
+    unindexed_samples['rt_end_pos'] = unindexed_samples['rt_end_pos'].astype(int)
 
 samples = unindexed_samples.set_index(get_indexes(), drop=True)
 index_count = pd.Index(samples.index).value_counts()

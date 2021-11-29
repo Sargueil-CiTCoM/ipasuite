@@ -445,9 +445,10 @@ def aggregate(
     if ipanemap_output is not None:
         aggripan = aggregated.reset_index(level="sequence")[["mean"]]
         idxmin = aggripan.index.min()
-        firstrows = pd.DataFrame({"mean": np.full(idxmin - 1, -10)},
-                index=range(1, idxmin))
-        firstrows.index.names = ['seqNum']
+        firstrows = pd.DataFrame(
+            {"mean": np.full(idxmin - 1, -10)}, index=range(1, idxmin)
+        )
+        firstrows.index.names = ["seqNum"]
         aggripan = firstrows.append(aggripan)
         aggripan.to_csv(
             ipanemap_output, sep="\t", float_format="%.4f", header=False

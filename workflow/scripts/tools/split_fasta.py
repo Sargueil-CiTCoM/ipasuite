@@ -46,7 +46,7 @@ def split_fasta(src: str, dest: str, begin: int = 0, end: int = None):
     if begin == 0 and end is None:
         sub = fa
     else:
-        sub = fa[begin:end]
+        sub = fa[int(begin):int(end)]
         sub.metadata["description"] += f"from {begin} to {end}"
 
     sub.write(dest, format="fasta")
