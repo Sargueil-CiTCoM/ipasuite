@@ -132,8 +132,8 @@ def plot_aggregate(
     ] = "orange"
     aggregated.loc[(aggregated["mean"] < 0.5), "color"] = "yellow"
 
-    aggregated.loc[(aggregated['mean'] == -10), 'stdev'] = np.NaN
-    aggregated.loc[(aggregated['mean'] == -10), 'mean'] = np.NaN
+    aggregated.loc[(aggregated["mean"] == -10), "stdev"] = np.NaN
+    aggregated.loc[(aggregated["mean"] == -10), "mean"] = np.NaN
     aggregated["xlabel_rot"] = (
         aggregated.index.get_level_values("seqNum").astype(str)
         + " - "
@@ -179,9 +179,7 @@ def check_files(src, dest):
 
 
 class ShapeReactivitySeq:
-    def __init__(
-        self, filepath: str
-    ):
+    def __init__(self, filepath: str):
         self.filepath = filepath
         self.name = os.path.splitext(os.path.basename(filepath))[0]
         self.df = pd.read_csv(filepath, sep="\t")
@@ -401,9 +399,7 @@ def aggregate(
 
     check_files(src, dest)
 
-    shape_react_seqs = [
-        ShapeReactivitySeq(filepath) for filepath in src
-    ]
+    shape_react_seqs = [ShapeReactivitySeq(filepath) for filepath in src]
     shape_dfs = []
 
     shape_dfs.extend(
@@ -447,7 +443,12 @@ def aggregate(
     # print(aggregated)
     aggregated.to_csv(dest, sep="\t", float_format="%.4f")
     if ipanemap_output is not None:
-        aggregated.reset_index(level="sequence")["mean"].to_csv(
+        aggripan = aggregated.reset_index(level="sequence")[["mean"]]
+        idxmin = aggripan.index.min()
+        firstrows = pd.DataFrame({"mean": np.full(idxmin, -10)}, index=range(idxmin))
+        firstrows.index.names = ['seqNum']
+        aggripan = firstrows.append(aggripan)
+        aggripan.to_csv(
             ipanemap_output, sep="\t", float_format="%.4f", header=False
         )
 
