@@ -118,8 +118,12 @@ def plot_aggregate(
         ls="none",
         capsize=4,
     )
-    plt.tight_layout()
-    plt.savefig(fulloutput, format=format)
+    try:
+        plt.tight_layout()
+        plt.savefig(fulloutput, format=format)
+    except ValueError as e:
+        print(f"Unable to save fullplot: {e}")
+        open(fulloutput, 'a').close()
 
     fig, ax = plt.subplots(
         nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 7, 4)
@@ -155,8 +159,12 @@ def plot_aggregate(
     plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
-    plt.tight_layout()
-    plt.savefig(output, format=format)
+    try:
+        plt.tight_layout()
+        plt.savefig(output, format=format)
+    except ValueError as e:
+        print(f"Unable to save plot: {e}")
+        open(output, 'a').close()
 
     # mplcursors.cursor()
     # return fig, axs
@@ -455,9 +463,14 @@ def aggregate(
         )
 
     if plot is not None or fullplot is not None:
-        plot_aggregate(
-            aggregated, fulloutput=fullplot, output=plot, title=output
-        )
+        try:
+            plot_aggregate(
+                aggregated, fulloutput=fullplot, output=plot, title=output
+            )
+        except ValueError as e:
+            print(f"Unable to save plot: {e}")
+            open(fullplot, 'a').close()
+            open(plot, 'a').close()
 
 
 if __name__ == "__main__":
