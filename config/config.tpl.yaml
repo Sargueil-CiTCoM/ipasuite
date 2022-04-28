@@ -305,26 +305,27 @@ ipanemap:
         - interaction: none
           magnesium: noMg
           probe: 1M7
-  sampling:
-    enable: True
-    nstructures: 1000
-    temperature: 37
-    m: 1.3
-    b: -0.4
-  clustering:
-    max_diameter_threshold: 7
-    max_avg_diameter_threshold: 7
-  pareto:
-    percentage: 20
-    zcutoff: 0.05
-  visualization:
-    draw_models: True
-    draw_centroids: True
-    show_probing: True
+  config:
+    sampling:
+      enable: true
+      nstructures: 1000
+      temperature: 37
+      slope: 1.3
+      intercept: -0.4
+    clustering:
+      max_diam: 7
+      max_avg_diam: 7
+    pareto:
+      percentage: 20
+      zcutoff: 0.05
+    visual:
+      models: true
+      centroids: true
+      probing: true
 
 
 varna:
-  colormapstyle: "-10.00:#CCCCCC,-0.31:#999999,-0.3:#FFFFFF,0.2:#FFFFFF,0.4:#FFFF00,0.69:#FFFF47,0.7:#FF0000,5.00:#FF0033"
+  colormapstyle: "$-10.00:#CCCCCC,$-0.31:#999999,$-0.3:#FFFFFF,$0.2:#FFFFFF,$0.4:#FFFF00,$0.69:#FFFF47,$0.7:#FF0000,$5.00:#FF0033"
 
 ### 
 # Folder names 

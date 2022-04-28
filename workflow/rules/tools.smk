@@ -30,7 +30,7 @@ if config["qushape"]["use_subsequence"]:
         input:
             ancient(get_refseq)
         output:
-            f"results/{config['folders']['subseq']}/{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
+            f"{RESULTS_DIR}/{config['folders']['subseq']}/{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
     
         message:
             f"Fragmenting fasta file {{input}} "

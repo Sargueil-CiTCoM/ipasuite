@@ -1,12 +1,12 @@
-name: qushape
+name: ipanemap 
 channels:
   - bioconda
   - conda-forge
 dependencies:
-    - python = 2.7
-    - cython
-    - scipy
-    - numpy 
-    - scikit-learn
+    - pip
     - viennarna
     - openjdk
+    - setuptools
+    - pip:
+        - setuptools
+        - ipanemap

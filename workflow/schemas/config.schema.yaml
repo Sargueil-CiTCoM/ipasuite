@@ -17,6 +17,12 @@ definitions:
       allow_auto_import:
         type: boolean
         description: allow the data to be imported from external sources
+      results_dir:
+        type: string
+        default: results
+      resource_dir:
+        type: string
+        default: resources
       format:
         "$ref": "#/definitions/Format"
       rawdata:
@@ -150,32 +156,43 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Pool"
+      config:
+        type: object
+        items:
+          "$ref": "#/definitions/IpanemapConfig"
+    required:
+    - pools
+    - config
+    title: Ipanemap
+  IpanemapConfig:
+    type: object
+    additionalProperties: false
+    properties:
       sampling:
         "$ref": "#/definitions/Sampling"
       clustering:
         "$ref": "#/definitions/Clustering"
       pareto:
         "$ref": "#/definitions/Pareto"
-      visualization:
-        "$ref": "#/definitions/Visualization"
+      visual:
+        "$ref": "#/definitions/Visual"
     required:
     - clustering
     - pareto
-    - pools
     - sampling
-    - visualization
-    title: Ipanemap
+    - visual
+    title: IpanemapConfig
   Clustering:
     type: object
     additionalProperties: false
     properties:
-      max_diameter_threshold:
+      max_diam:
         type: integer
-      max_avg_diameter_threshold:
+      max_avg_diam:
         type: integer
     required:
-    - max_avg_diameter_threshold
-    - max_diameter_threshold
+    - max_avg_diam
+    - max_diam
     title: Clustering
   Pareto:
     type: object
@@ -216,36 +233,36 @@ definitions:
     properties:
       enable:
         type: boolean
-      nstructures:
+      nstructure:
         type: integer
       temperature:
         type: integer
-      m:
+      slope:
         type: number
-      b:
+      intercept:
         type: number
     required:
-    - b
+    - slope
     - enable
-    - m
-    - nstructures
+    - intercept
+    - nstructure
     - temperature
     title: Sampling
-  Visualization:
+  Visual:
     type: object
     additionalProperties: false
     properties:
-      draw_models:
+      models:
         type: boolean
-      draw_centroids:
+      centroids:
         type: boolean
-      show_probing:
+      probing:
         type: boolean
     required:
-    - draw_centroids
-    - draw_models
-    - show_probing
-    title: Visualization
+    - centroids
+    - models
+    - probing
+    title: Visual
   Normalization:
     type: object
     additionalProperties: false

@@ -22,6 +22,8 @@ CTRL_CONDITION = config["format"]["control_condition"]
 RAW_DATA_TYPE = config["rawdata"]["type"]
 CONTROL = config["rawdata"]["control"]
 FOLDERS = config["folders"]
+RESULTS_DIR = config["results_dir"] if "results_dir" in config else "results"
+RESOURCES_DIR = config["resources_dir"] if "resources_dir" in config else "resources"
 MESSAGE = config["format"]["message"]
 CNORM = config["normalization"]
 
@@ -115,7 +117,7 @@ def construct_path(
         else expand(f"_{CTRL_CONDITION}", control=CONTROL, allow_missing=True)[0]
     )
     figdir = "figures/" if figure else ""
-    basedir = "logs" if log_dir else ("results" if results_dir else "resources")
+    basedir = "logs" if log_dir else (RESULTS_DIR if results_dir else RESOURCES_DIR)
     replicate = "_{replicate}" if show_replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
@@ -163,7 +165,7 @@ def get_align_end(wildcards):
 
 def get_align_reactivity_inputs(wildcards):
     sample = get_sample(wildcards).iloc[0]
-    fa = f"results/{config['folders']['subseq']}/" \
+    fa = f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
          f"{wildcards.rna_id}_{sample['rt_end_pos']}-{sample['rt_begin_pos']}.fasta"
     norm = expand(construct_path("normreact", split_seq=True),
             rt_end_pos=sample['rt_end_pos'],rt_begin_pos=sample['rt_begin_pos'],
@@ -176,7 +178,7 @@ def get_subseq(wildcards, split_seq=False):
     fasta = config["sequences"][wildcards.rna_id]
 
     if split_seq and config["qushape"]["use_subsequence"]:
-        return  f"results/{config['folders']['subseq']}/" \
+        return  f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
                 f"{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
 
     if os.path.exists(fasta):
@@ -255,9 +257,7 @@ def get_all_reactivity_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
         sample = (
-            "results/{folder}/{rna_id}_"
-            + config["format"]["condition"]
-            + "_{replicate}.{step}.tsv"
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_{config['format']['condition']}_{{replicate}}.{{step}}.tsv"
         ).format(folder=config["folders"]["reactivity"], step="reactivity", **row)
         outputs.append(sample)
     return outputs
@@ -292,7 +292,7 @@ def get_all_structure_outputs(wildcards):
         )
         outputs.extend(
             expand(
-                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.dbn",
+                f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}.dbn",
                 folder=config["folders"]["structure"],
                 rna_id=pool["rna_id"],
                 pool_id=pool["id"],
@@ -309,7 +309,7 @@ def get_varna_pool_concat_inputs(wildcards):
             for cond in pool["conditions"]:
                 inputs.extend(
                     expand(
-                        f"results/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
+                        f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
                         folder=config["folders"]["varna"],
                         **wildcards,
                         **cond
@@ -334,7 +334,7 @@ def get_all_varna_by_condition_outputs(wildcards):
         for cond in pool["conditions"]:
             outputs.extend(
                 expand(
-                    f"results/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
+                    f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
                     folder=config["folders"]["varna"],
                     rna_id=pool["rna_id"],
                     pool_id=pool["id"],
@@ -344,7 +344,7 @@ def get_all_varna_by_condition_outputs(wildcards):
             )
 #        outputs.extend(
 #            expand(
-#                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+#                "{RESULTS_DIR}/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
 #                folder=config["folders"]["varna"],
 #                rna_id=pool["rna_id"],
 #                pool_id=pool["id"],
@@ -367,7 +367,7 @@ def get_all_varna_pool_concat_outputs(wildcards):
 
         outputs.extend(
             expand(
-                f"results/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}.varna",
+                f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}.varna",
                 folder=config["folders"]["varna"],
                 rna_id=pool["rna_id"],
                 pool_id=pool["id"],
@@ -376,7 +376,7 @@ def get_all_varna_pool_concat_outputs(wildcards):
         )
 #        outputs.extend(
 #            expand(
-#                "results/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+#                "{RESULTS_DIR}/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
 #                folder=config["folders"]["varna"],
 #                rna_id=pool["rna_id"],
 #                pool_id=pool["id"],
