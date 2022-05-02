@@ -1,25 +1,44 @@
 import copy
 import yaml
+import json
 VARNA = "workflow/scripts/VARNA/build/jar/VARNAcmd.jar"
 
 def generate_conditions_config(pool_id, config):
     conditions = {}
+    rna_id = None 
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == pool_id:
+            rna_id = pool["rna_id"]
             for cond in pool["conditions"]:
-                react_file = expand("_" + config["format"]["condition"], **cond)
-                conditions['pool_id'] = {"reactivity_file": react_file}
+                cond_name = expand(config["format"]["condition"], **cond)[0]
+                react_file = expand(construct_path("aggreact-ipanemap", show_replicate=False,
+                ext=".shape"), rna_id=rna_id, **cond)[0]
+                print(react_file)
+                conditions[cond_name] = {"reactivity_file": react_file}
             break
-    return conditions
+    return conditions, rna_id
 
-def generate_ipanemap_config_file(configfile_path, pool_id):
+def generate_ipanemap_config_file(configfile_path, pool_id, output_dir):
     
-    ipanemap_config = copy.deepcopy(config["ipanemap"]["config"])
-    conditions = generate_conditions_config(pool_id, config)
+    ipanemap_config = json.loads(json.dumps(config["ipanemap"]["config"]))
+    conditions, rna_id = generate_conditions_config(pool_id, config)
+    ipanemap_config["conditions"] = conditions
+    ipanemap_config["output_dir"] = output_dir
+    ipanemap_config["sequence_file"] = config["sequences"][rna_id] 
 
-    config["conditions"] = conditions
+    ipanemap_config["tmp_dir"] = f"{output_dir}/tmp"
+    ipanemap_config["format"] = {
+            'dbn_file_pattern':
+            f"{output_dir}/{rna_id}_pool_{pool_id}_optimal_{{idx}}.dbn",
+            'dbn_centroid_file_pattern':
+            f"{output_dir}/{rna_id}_pool_{pool_id}_centroid_{{idx}}.dbn",
+            } 
+    
+
+
 
     with open(configfile_path, "w") as file:
+
         yaml.dump(ipanemap_config, file, default_flow_style=False)
         return configfile_path
     return None
@@ -47,7 +66,16 @@ rule configure_ipanemap:
     log:
         "logs/ipanemap-config-{rna_id}_pool_{pool_id}.log",
     run:
-        generate_ipanemap_config_file(configfile_path=output.cfg[0])
+        generate_ipanemap_config_file(
+            configfile_path=output.cfg[0],
+            pool_id=wildcards.pool_id,
+            output_dir=expand(
+                f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}",
+                folder=config["folders"]["ipanemap-out"],
+                rna_id=wildcards.rna_id,
+                pool_id=wildcards.pool_id,
+                allow_missing=True,
+            )[0])
 
 checkpoint ipanemap:
     conda:
@@ -71,7 +99,7 @@ checkpoint ipanemap:
     log:
         "logs/ipanemap-out-{rna_id}_pool_{pool_id}.log",
     shell:
-        f"ipanemap -f {{input.config}} | tee {{log}}"
+        f"ipanemap -f {{input.config}} --log {{log}}"
 
 
 rule structure:
@@ -81,7 +109,7 @@ rule structure:
     input:
         expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}/"
-            f"{{rna_id}}_pool_{{pool_id}}_optimal_{idx}.dbn",
+            f"{{rna_id}}_pool_{{pool_id}}_optimal_{{idx}}.dbn",
             folder=config["folders"]["ipanemap-out"],
             allow_missing=True,
         ),
@@ -107,18 +135,18 @@ rule varna_color_by_condition:
             allow_missing=True,
         ),
         aggreact=construct_path("aggreact-ipanemap", show_replicate = False,
-                ext=".txt")
+                ext=".shape")
     params:
         colorstyle= f"-colorMapStyle '{config['varna']['colormapstyle']}'",
     output:
         varna=expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx, \d+}}_cond_{{conditions}}.varna",
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx,\d+}}_cond_{{conditions}}.varna",
             folder=config["folders"]["varna"],
             conditions=CONDITION,
             allow_missing=True,
         ),
         svg=report(expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx, \d+}}_cond_{{conditions}}.svg",
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx,\d+}}_cond_{{conditions}}.svg",
             folder=config["folders"]["varna"],
             conditions=CONDITION,
             allow_missing=True,

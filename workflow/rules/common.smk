@@ -1,7 +1,7 @@
 from snakemake.utils import validate
 import pandas as pd
 import os
-
+import json
 
 # this container defines the underlying OS for each job when using the workflow
 # with --use-conda --use-singularity
@@ -23,7 +23,7 @@ RAW_DATA_TYPE = config["rawdata"]["type"]
 CONTROL = config["rawdata"]["control"]
 FOLDERS = config["folders"]
 RESULTS_DIR = config["results_dir"] if "results_dir" in config else "results"
-RESOURCES_DIR = config["resources_dir"] if "resources_dir" in config else "resources"
+RESOURCES_DIR = config["resource_dir"] if "resource_dir" in config else "resources"
 MESSAGE = config["format"]["message"]
 CNORM = config["normalization"]
 
@@ -71,6 +71,11 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 # samples.index.names = ["sample_id"]
 
 
+def construct_dict_param(config_category, param_name):
+    if param_name in config_category and len(config_category[param_name]) > 0:
+        dictparam = json.dumps(dict(config_category[param_name]))
+        return f"--{param_name}='{dictparam}'"
+    return ""
 
 def construct_list_param(config_category, param_name):
     if param_name in config_category and len(config_category[param_name]) > 0:
@@ -131,7 +136,7 @@ def construct_path(
         step=step,
         allow_missing=True,
     )
-    # print(path)
+    ##print(path)
     return path
 
 def aggregate_input_type():
@@ -217,7 +222,7 @@ def get_ipanemap_pool_inputs(pool):
         inputs.extend(
             expand(
                 construct_path(
-                    "aggreact-ipanemap", show_replicate=False, ext=".txt"
+                    "aggreact-ipanemap", show_replicate=False, ext=".shape"
                 ),
                 rna_id=pool["rna_id"],
                 **cond,
@@ -268,7 +273,8 @@ def get_all_aggreact_outputs():
     for idx, row in samples.reset_index().iterrows():
         sample = expand(construct_path(step="aggreact", show_replicate=False), **row)
         sampleipan = expand(
-            construct_path("aggreact-ipanemap", show_replicate=False, ext=".txt"), **row
+            construct_path("aggreact-ipanemap", show_replicate=False,
+                ext=".shape"), **row
         )
         outputs.append(sample)
         outputs.append(sampleipan)

@@ -56,7 +56,7 @@ rule generate_project_qushape:
         refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
         refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
         ddNTP= construct_param(config["qushape"], "ddNTP"),
-        channels= construct_list_param(config["qushape"], "channels")
+        channels= construct_dict_param(config["qushape"], "channels")
         #TODO channels
         #channels=
     #output: protected(construct_path("qushape", ext=".qushape"))
@@ -142,7 +142,7 @@ rule aggregate_reactivity:
     output:
         full= construct_path("aggreact", show_replicate = False),
         compact = construct_path("aggreact-ipanemap", show_replicate=False,
-                ext=".txt"),
+                ext=".shape"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
             show_replicate=False, figure=True),
             category="4-Aggregated reactivity", subcategory=CONDITION),
