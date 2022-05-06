@@ -216,6 +216,7 @@ def most_uniform_subsample_mean_std(sample):
     smean = np.Infinity
     sstdev = np.Infinity
     ssem = np.Infinity
+    smad = np.Infinity
     ssample = None
     for curssample in itertools.combinations(sample, len(sample) - 1):
         curssample = pd.Series(curssample)
@@ -224,8 +225,9 @@ def most_uniform_subsample_mean_std(sample):
             sstdev = curstdev
             ssem = curssample.sem(ddof=ddof)
             smean = np.mean(curssample)
+            smad = curssample.mad()
             ssample = curssample
-    return (ssample, smean, sstdev, ssem)
+    return (ssample, smean, sstdev, ssem, smad)
 
 
 # Alternative method, not used
@@ -293,6 +295,7 @@ def aggregate_replicates(
     mean = np.NaN
     stdev = np.NaN
     sem = np.NaN
+    mad = np.NaN
     values = row.drop("nvalid_values").replace(-10, np.NaN).dropna()
     nvalues = values.count()
     used_values = 0
@@ -304,6 +307,7 @@ def aggregate_replicates(
         mean = values[0]
         stdev = np.NaN
         sem = np.NaN
+        mad = np.NaN
         used_values = nvalues
     else:
         # if there is enough values available, we try to compute mean and stdev
@@ -311,6 +315,7 @@ def aggregate_replicates(
             curmean = values.mean()
             curstdev = values.std(ddof=ddof)
             cursem = values.sem(ddof=ddof)
+            curmad = values.mad()
 
             if curstdev <= dispersion_threshold(
                 curmean, max_mean_perc, min_dispersion
@@ -318,6 +323,7 @@ def aggregate_replicates(
                 mean = curmean
                 stdev = curstdev
                 sem = cursem
+                mad = curmad
                 used_values = nvalues
                 desc = "accepted"
             else:
@@ -330,6 +336,7 @@ def aggregate_replicates(
                         curmean,
                         curstdev,
                         cursem,
+                        curmad,
                     ) = most_uniform_subsample_mean_std(subsample)
                     if curstdev <= dispersion_threshold(
                         curmean, max_mean_perc, min_dispersion
@@ -337,6 +344,7 @@ def aggregate_replicates(
                         mean = curmean
                         stdev = curstdev
                         sem = cursem
+                        mad = curmad
                         used_values = len(subsample)
                         desc = "reduced"
                         break
@@ -344,6 +352,7 @@ def aggregate_replicates(
                     mean = -10
                     stdev = values.std(ddof=ddof)
                     sem = values.sem(ddof=ddof)
+                    mad = values.mad()
         else:
             desc = "no-enough-values"
             mean = -10 if any([v == -10 for v in row]) else np.NaN
@@ -352,10 +361,11 @@ def aggregate_replicates(
             "mean": mean,
             "stdev": stdev,
             "sem": sem,
+            "mad": mad,
             "used_values": used_values,
             "desc": desc,
         },
-        index=["mean", "stdev", "sem", "used_values", "desc"],
+        index=["mean", "stdev", "sem", "mad","used_values", "desc"],
     )
 
 
@@ -431,7 +441,7 @@ def aggregate(
     aggregated = reacts.copy()
 
     aggregated[
-        ["mean", "stdev", "sem", "used_values", "desc"]
+        ["mean", "stdev", "sem", "mad", "used_values", "desc"]
     ] = aggregated.apply(
         lambda row: aggregate_replicates(
             row,
