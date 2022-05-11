@@ -31,6 +31,8 @@ definitions:
         "$ref": "#/definitions/Qushape"
       normalization:
         "$ref": "#/definitions/Normalization"
+      probe:
+        "$ref": "#/definitions/Probe"
       aggregate:
         "$ref": "#/definitions/Aggregate"
       ipanemap:
@@ -52,6 +54,7 @@ definitions:
     - samples
     - sequences
     - varna
+    - probe
     title: Shape-CE Config
   Aggregate:
     description: "Aggregate script configuration"
@@ -291,6 +294,22 @@ definitions:
     - simple_outlier_percentile
     - stop_percentile
     title: Normalization
+  Probe:
+    type: object
+    additionalProperties: false
+    patternProperties:
+      "^.*$":
+        type: object
+        additionalProperties: false
+        properties:
+          reactive_nucleotides:
+            type: array
+            items:
+              type: string
+            title: ReactiveNucleotides
+        required:
+        - reactive_nucleotides 
+    title: Probe 
   Qushape:
     type: object
     additionalProperties: false

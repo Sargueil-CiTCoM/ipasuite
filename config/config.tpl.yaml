@@ -125,6 +125,16 @@ rawdata:
   #   ...
   # ```
   control: "DMSO"
+
+    
+probe:
+  1M7:
+    reactive_nucleotides: ["A", "C", "G", "U"]
+  DMS:
+    reactive_nucleotides: ["A", "C"]
+  CMCT:
+    reactive_nucleotides: ["G", "U"]
+    
 ## Steps configurations ##
 
 ###

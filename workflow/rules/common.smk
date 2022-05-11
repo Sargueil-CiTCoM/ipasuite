@@ -70,6 +70,12 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 # samples = samples[samples.ref.notnull()]
 # samples.index.names = ["sample_id"]
 
+def get_reactive_nucleotides(wildcards):
+    if wildcards.probe in config["probe"]:
+        return construct_list_param(config["probe"][probe], "reactive_nucleotides")
+    else:
+        return construct_list_param(CNORM, "reactive_nucleotides")
+
 
 def construct_dict_param(config_category, param_name):
     if param_name in config_category and len(config_category[param_name]) > 0:

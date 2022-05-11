@@ -106,7 +106,7 @@ rule normalize_reactivity:
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
     params:
-        react_nuc = construct_list_param(CNORM, "reactive_nucleotides"),
+        react_nuc = get_reactive_nucleotides,
         st_perc = construct_param(CNORM, "stop_percentile"),
         low_norm_reac_thres = construct_param(CNORM, "low_norm_reactivity_threshold"),
         norm_methods = construct_list_param(CNORM, "norm_methods"),
