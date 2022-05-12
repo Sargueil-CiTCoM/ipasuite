@@ -9,12 +9,16 @@ def generate_conditions_config(pool_id, config):
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == pool_id:
             rna_id = pool["rna_id"]
-            for cond in pool["conditions"]:
-                cond_name = expand(config["format"]["condition"], **cond)[0]
-                react_file = expand(construct_path("aggreact-ipanemap", show_replicate=False,
-                ext=".shape"), rna_id=rna_id, **cond)[0]
-                print(react_file)
-                conditions[cond_name] = {"reactivity_file": react_file}
+            if "conditions" in pool:
+                for cond in pool["conditions"]:
+                    cond_name = expand(config["format"]["condition"], **cond)[0]
+                    react_file = expand(construct_path("aggreact-ipanemap", show_replicate=False,
+                    ext=".shape"), rna_id=rna_id, **cond)[0]
+                    conditions[cond_name] = {"reactivity_file": react_file}
+            if "alignements" in pool:
+                for cond in pool["alignements"]:
+                    name, file = cond.items()[0]
+                    conditions[name] = {"alignement_file": file}
             break
     return conditions, rna_id
 
