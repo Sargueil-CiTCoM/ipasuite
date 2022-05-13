@@ -130,6 +130,12 @@ rawdata:
 probe:
   1M7:
     reactive_nucleotides: ["A", "C", "G", "U"]
+  BzCN:
+    reactive_nucleotides: ["A", "C", "G", "U"]
+  NMIA:
+    reactive_nucleotides: ["A", "C", "G", "U"]
+  NIA:
+    reactive_nucleotides: ["A", "C", "G", "U"]
   DMS:
     reactive_nucleotides: ["A", "C"]
   CMCT:
