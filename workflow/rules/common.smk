@@ -250,9 +250,6 @@ def get_footprint_inputs(wildcards):
 
     return inputs
 
-
-
-
 def get_ipanemap_inputs(wildcards):
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == wildcards.pool_id:
