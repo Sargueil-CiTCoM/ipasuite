@@ -9,6 +9,7 @@ dependencies:
     - numpy
     - matplotlib
     - scikit-bio
+    - scipy
     - pip
     - pip: 
       - bsddb3 

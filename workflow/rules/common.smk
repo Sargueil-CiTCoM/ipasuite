@@ -236,6 +236,22 @@ def get_ipanemap_pool_inputs(pool):
         )
     return inputs
 
+def get_footprint_comp_input(comp, cond_name):
+    return expand(construct_path("aggreact", show_replicate=False), 
+           rna_id=comp["rna_id"],**comp[cond_name])
+    
+
+def get_footprint_inputs(wildcards):
+    inputs = []
+    for comp in config["footprint"]["compares"]:
+        if comp["id"] == wildcards.foot_id:
+            inputs.extend(get_footprint_comp_input(comp, "condition1"))
+            inputs.extend(get_footprint_comp_input(comp, "condition2"))
+
+    return inputs
+
+
+
 
 def get_ipanemap_inputs(wildcards):
     for pool in config["ipanemap"]["pools"]:
@@ -314,6 +330,16 @@ def get_all_structure_outputs(wildcards):
 
     return outputs
 
+def get_all_footprint_outputs(wildcards):
+    outputs = []
+    for compare in config["footprint"]["compares"]:
+        outputs.extend(
+            expand(f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_footprint_{{foot_id}}.tsv",
+                folder=config["folders"]["footprint"],
+                rna_id=compare["rna_id"],
+                foot_id=compare["id"], **wildcards))
+    return outputs
+
 def get_varna_pool_concat_inputs(wildcards):
     inputs = []
     for pool in config["ipanemap"]["pools"]:
@@ -364,6 +390,7 @@ def get_all_varna_by_condition_outputs(wildcards):
 #            )
 #        )
     return outputs
+
 
 def get_all_varna_pool_concat_outputs(wildcards):
     outputs = []

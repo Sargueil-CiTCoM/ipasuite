@@ -39,6 +39,8 @@ definitions:
         "$ref": "#/definitions/Ipanemap"
       folders:
         "$ref": "#/definitions/Folders"
+      footprint:
+        "$ref": "#/definitions/Footprint"
       varna:
         "$ref": "#/definitions/Varna"
     required:
@@ -55,6 +57,7 @@ definitions:
     - sequences
     - varna
     - probe
+    - footprint
     title: Shape-CE Config
   Aggregate:
     description: "Aggregate script configuration"
@@ -121,6 +124,9 @@ definitions:
       varna:
         type: string
         default: "5.4-varna" 
+      footprint:
+        type: string
+        default: "5.5-footprint" 
     required:
     - aggreact
     - aggreact-ipanemap
@@ -135,6 +141,7 @@ definitions:
     - reactivity
     - structure
     - varna
+    - footprint
     title: Folders
   Format:
     type: object
@@ -151,6 +158,53 @@ definitions:
     - control_condition
     - message
     title: Format
+  Footprint:
+    type: object
+    additionalProperties: false
+    properties:
+      compares:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:  
+            id:
+              type: string
+            rna_id:
+              type: string
+            condition1:
+              "$ref": "#/definitions/Condition"
+            condition2:
+              "$ref": "#/definitions/Condition"
+          required:
+          - id
+          - rna_id
+          - condition1
+          - condition2
+      config:
+        type: object
+        additionalProperties: false
+        properties:
+          deviation_type:
+            type: string
+          ttest_pvalue_thres:
+            type: number
+          diff_thres:
+            type: number
+          ratio_thres:
+            type: number
+          plot_format:
+            type: string
+        required:
+        - deviation_type
+        - ttest_pvalue_thres
+        - diff_thres
+        - ratio_thres
+        - plot_format
+    required:
+    - compares
+    - config
+    title: Footprint
   Ipanemap:
     type: object
     additionalProperties: false

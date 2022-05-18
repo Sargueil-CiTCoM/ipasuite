@@ -165,6 +165,29 @@ rule aggregate_reactivity:
         f" --ipanemap_output={{output.compact}}"
         f" --plot={{output.plot}} --fullplot={{output.fullplot}} &> {{log}}"
 
+
+
+rule footprint:
+    conda: "../envs/tools.yml"
+    input:
+        get_footprint_inputs,
+    output:
+        tsv=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.tsv",
+        plot=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.svg",
+    log: "logs/footprint_{{rna_id}}_footprint_{foot_id}.log"
+    params:
+        ttest_pvalue_thres = construct_param(config["footprint"]["config"],
+                "ttest_pvalue_thres"),
+        deviation_type = construct_param(config["footprint"]["config"],
+                "deviation_type"),
+        diff_thres = construct_param(config["footprint"]["config"],
+                "diff_thres"),
+        ratio_thres = construct_param(config["footprint"]["config"],
+                "ratio_thres"),
+    shell:
+        f"python {TOOLS}/footprint.py {{input}}"
+        f" --output={{output.tsv}} {{params}}"
+        f" --plot={{output.plot}} --plot_format=svg --plot_title='{{wildcards.foot_id}}'"
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"
 #    input: construct_path("aggreact-ipanemap", replicate = False)

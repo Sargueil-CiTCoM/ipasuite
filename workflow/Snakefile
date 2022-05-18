@@ -27,6 +27,7 @@ rule all:
         aggregates=get_all_aggreact_outputs(),
         #structures = get_all_structure_outputs
         varna_by_cond=get_all_varna_by_condition_outputs,
+        footprint=get_all_footprint_outputs,
         #varna_pool_concat=get_all_varna_pool_concat_outputs
         # The first rule should define the default target files
         # Subsequent target rules can be specified below. They should start with all_*.
@@ -40,3 +41,5 @@ rule all_aggregate:
 rule all_qushape:
     input:
         get_all_qushape_outputs()
+
+

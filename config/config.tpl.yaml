@@ -43,7 +43,6 @@ conditions:
   - interaction
   - magnesium
 
-
 ###
 # Allow snakemake to import automatically external files
 # Not fully tested yet
@@ -344,8 +343,29 @@ ipanemap:
       probing: true
 
 
-varna:
+varna:  
   colormapstyle: "$-10.00:#CCCCCC,$-0.31:#999999,$-0.3:#FFFFFF,$0.2:#FFFFFF,$0.4:#FFFF00,$0.69:#FFFF47,$0.7:#FF0000,$5.00:#FF0033"
+
+
+footprint:
+  compares:
+    - id: 1M7_Mg_noMg
+      rna_id: seq314
+      condition1:
+        interaction: none
+        magnesium: Mg
+        probe: 1M7
+      condition2:
+        interaction: none
+        magnesium: noMg
+        probe: 1M7
+  config:    
+    deviation_type: mad
+    ttest_pvalue_thres: 0.01
+    diff_thres: 0.2
+    ratio_thres: 0.2
+    plot_format: svg
+
 
 ### 
 # Folder names 
@@ -382,3 +402,4 @@ folders:
   ipanemap-out: 5.2-ipanemap-out
   structure: 5.3-structure
   varna: 5.4-varna
+  footprint: 5.5-footprint
