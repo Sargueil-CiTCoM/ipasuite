@@ -3,3 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - snakemake >=5.24.1
+  - jupyterlab
+  - voila
+  - ipywidgets
+

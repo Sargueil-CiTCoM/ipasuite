@@ -72,7 +72,7 @@ pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 
 def get_reactive_nucleotides(wildcards):
     if wildcards.probe in config["probe"]:
-        return construct_list_param(config["probe"][probe], "reactive_nucleotides")
+        return construct_list_param(config["probe"][wildcards.probe], "reactive_nucleotides")
     else:
         return construct_list_param(CNORM, "reactive_nucleotides")
 
@@ -430,3 +430,5 @@ def get_all_varna_pool_concat_outputs(wildcards):
 #        sample = exppath.format(folder=folder,sample=os.path.splitext(row.sample_filename)[0])
 #        control = exppath.format(folder=folder,sample=os.path.splitext(row.control_filename)[0])
 #    return outputs
+
+
