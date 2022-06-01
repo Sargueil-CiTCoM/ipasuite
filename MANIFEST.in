@@ -1,0 +1,2 @@
+global-include *.ipynb *.schema.yaml *.smk Snakefile *.yml 
+

@@ -39,9 +39,19 @@ sequences:
 #   - ...
 #```
 conditions:
-  - probe
-  - interaction
-  - magnesium
+  probe:
+    - 1M7
+    - NMIA
+    - MIA
+    - BzCN
+    - DMS
+    - CMCT
+  temperature:
+    - 37
+    - 50
+  magnesium:
+    - Mg
+    - noMg
 
 ###
 # Allow snakemake to import automatically external files

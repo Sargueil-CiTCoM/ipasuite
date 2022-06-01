@@ -2,5 +2,5 @@
 	path = workflow/scripts/IPANEMAP
 	url = https://github.com/CiTCoM-Lab/IPANEMAP
 [submodule "workflow/scripts/VARNA"]
-	path = workflow/scripts/VARNA
+	path = shapece/workflow/scripts/VARNA
 	url = https://github.com/CiTCoM-Lab/VARNA.git
