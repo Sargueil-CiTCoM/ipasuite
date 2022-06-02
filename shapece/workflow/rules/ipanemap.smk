@@ -1,7 +1,7 @@
 import copy
 import yaml
 import json
-VARNA = "workflow/scripts/VARNA/build/jar/VARNAcmd.jar"
+VARNA = "workflow/scripts/VARNAcmd.jar"
 
 def generate_conditions_config(pool_id, config):
     conditions = {}
