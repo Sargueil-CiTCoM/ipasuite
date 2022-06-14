@@ -76,15 +76,11 @@ def plot_aggregate(
     )
     replicates = aggregated.loc[
         :,
-        aggregated.columns.drop(
-            ["used_values", "mean", "stdev", "desc", "sem"]
-        ),
+        aggregated.columns.drop(["used_values", "mean", "stdev", "desc", "sem"]),
     ].replace(-10, np.NaN)
 
     aggregated = aggregated.sort_index()
-    meanstdev = aggregated.loc[:, ["xlabel", "mean", "stdev"]].replace(
-        -10, np.NaN
-    )
+    meanstdev = aggregated.loc[:, ["xlabel", "mean", "stdev"]].replace(-10, np.NaN)
 
     ax = replicates.plot(
         x="xlabel",
@@ -123,7 +119,7 @@ def plot_aggregate(
         plt.savefig(fulloutput, format=format)
     except ValueError as e:
         print(f"Unable to save fullplot: {e}")
-        open(fulloutput, 'a').close()
+        open(fulloutput, "a").close()
 
     fig, ax = plt.subplots(
         nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 7, 4)
@@ -164,7 +160,7 @@ def plot_aggregate(
         plt.savefig(output, format=format)
     except ValueError as e:
         print(f"Unable to save plot: {e}")
-        open(output, 'a').close()
+        open(output, "a").close()
 
     # mplcursors.cursor()
     # return fig, axs
@@ -179,9 +175,7 @@ def check_files(src, dest):
 
     for file in src:
         if not os.path.exists(file):
-            raise fire.core.FireError(
-                'Input file "{0}" does not exists'.format(file)
-            )
+            raise fire.core.FireError('Input file "{0}" does not exists'.format(file))
 
     return (src, dest)
 
@@ -267,9 +261,7 @@ def _aggregate_replicates_tscore(row, max_dispersion=0.3):
                     desc = "reduced"
                     break
                 tscores = subvals.apply(
-                    lambda x: abs(
-                        (x - curmean) / (curstdev / np.sqrt(subvals.count()))
-                    )
+                    lambda x: abs((x - curmean) / (curstdev / np.sqrt(subvals.count())))
                 )
     else:
         desc = "no-enough-values"
@@ -317,9 +309,7 @@ def aggregate_replicates(
             cursem = values.sem(ddof=ddof)
             curmad = values.mad()
 
-            if curstdev <= dispersion_threshold(
-                curmean, max_mean_perc, min_dispersion
-            ):
+            if curstdev <= dispersion_threshold(curmean, max_mean_perc, min_dispersion):
                 mean = curmean
                 stdev = curstdev
                 sem = cursem
@@ -365,8 +355,22 @@ def aggregate_replicates(
             "used_values": used_values,
             "desc": desc,
         },
-        index=["mean", "stdev", "sem", "mad","used_values", "desc"],
+        index=["mean", "stdev", "sem", "mad", "used_values", "desc"],
     )
+
+
+def check_duplicated(aggregated: pd.DataFrame):
+    dup = pd.DataFrame(aggregated)
+    dup = aggregated.reset_index(drop=False)[["seqNum", "sequence"]]
+
+    dupcount = dup[["seqNum"]].duplicated().count()
+
+    if dupcount > 0:
+        raise ValueError(
+            "Some base are duplicated in aggregated data:"
+            " Did you use the same"
+            " sequence in QuShape for each replicate ?"
+        )
 
 
 def aggregate(
@@ -379,7 +383,7 @@ def aggregate(
     max_mean_perc: float = 0.682,
     min_dispersion: float = 0.05,
     fullplot: str = None,
-    plot: str = None
+    plot: str = None,
 ):
     """Aggregate reactivity files together
 
@@ -455,7 +459,8 @@ def aggregate(
     )
 
     aggregated = aggregated[aggregated.columns.drop(["nvalid_values"])]
-
+    aggregated = aggregated.sort_index()
+    check_duplicated(aggregated)
     # aggregated = aggregated.reset_index(level="seqRNA")
 
     # print(aggregated)
@@ -468,19 +473,15 @@ def aggregate(
         )
         firstrows.index.names = ["seqNum"]
         aggripan = firstrows.append(aggripan)
-        aggripan.to_csv(
-            ipanemap_output, sep="\t", float_format="%.4f", header=False
-        )
+        aggripan.to_csv(ipanemap_output, sep="\t", float_format="%.4f", header=False)
 
     if plot is not None or fullplot is not None:
         try:
-            plot_aggregate(
-                aggregated, fulloutput=fullplot, output=plot, title=output
-            )
+            plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=output)
         except ValueError as e:
             print(f"Unable to save plot: {e}")
-            open(fullplot, 'a').close()
-            open(plot, 'a').close()
+            open(fullplot, "a").close()
+            open(plot, "a").close()
 
 
 if __name__ == "__main__":
