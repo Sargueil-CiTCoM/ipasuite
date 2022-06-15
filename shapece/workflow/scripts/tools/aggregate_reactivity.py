@@ -363,13 +363,14 @@ def check_duplicated(aggregated: pd.DataFrame):
     dup = pd.DataFrame(aggregated)
     dup = aggregated.reset_index(drop=False)[["seqNum", "sequence"]]
 
-    dupcount = dup[["seqNum"]].duplicated().count()
-
+    duplist = dup[dup.duplicated("seqNum", keep=False)]
+    dupcount = len(dup[dup.duplicated("seqNum", keep="first")])
     if dupcount > 0:
         raise ValueError(
-            "Some base are duplicated in aggregated data:"
+            f"{dupcount} base/positions are duplicated in aggregated data:"
             " Did you use the same"
-            " sequence in QuShape for each replicate ?"
+            " sequence in QuShape for each replicate ?\n"
+            f"bases : {list(duplist)})\n"
         )
 
 
@@ -460,7 +461,12 @@ def aggregate(
 
     aggregated = aggregated[aggregated.columns.drop(["nvalid_values"])]
     aggregated = aggregated.sort_index()
-    check_duplicated(aggregated)
+    try:
+        check_duplicated(aggregated)
+    except ValueError as err:
+        print(err.args[0])
+        print(f"inputs: {files}")
+        exit(1)
     # aggregated = aggregated.reset_index(level="seqRNA")
 
     # print(aggregated)
@@ -472,7 +478,7 @@ def aggregate(
             {"mean": np.full(idxmin - 1, -10)}, index=range(1, idxmin)
         )
         firstrows.index.names = ["seqNum"]
-        aggripan = firstrows.append(aggripan)
+        aggripan = pd.concat([firstrows, aggripan])
         aggripan.to_csv(ipanemap_output, sep="\t", float_format="%.4f", header=False)
 
     if plot is not None or fullplot is not None:
@@ -484,5 +490,9 @@ def aggregate(
             open(plot, "a").close()
 
 
+def main():
+    return fire.Fire(aggregate)
+
+
 if __name__ == "__main__":
-    fire.Fire(aggregate)
+    main()

@@ -275,7 +275,8 @@ def footprint_main(
             plot_format,
             deviation_type=deviation_type,
         )
-
+def main():
+    return fire.Fire(footprint_main)
 
 if __name__ == "__main__":
-    fire.Fire(footprint_main)
+    main()

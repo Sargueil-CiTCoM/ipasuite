@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import utils.qushapeFuncFile as qsff
-import utils.qushapeFuncGeneral as qsfg
+from .utils import qushapeFuncFile as qsff
+from .utils import qushapeFuncGeneral as qsfg
 import shelve
 import bsddb3 as bsddb
 import fire
@@ -140,5 +140,9 @@ def createQuShapeFile(
     db.close()
 
 
+def main():
+    return fire.Fire(createQuShapeFile)
+
+
 if __name__ == "__main__":
-    fire.Fire(createQuShapeFile)
+    main()

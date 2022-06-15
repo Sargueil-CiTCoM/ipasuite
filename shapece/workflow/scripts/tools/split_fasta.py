@@ -11,9 +11,7 @@ def check_files(src: str, dest: str):
         )
 
     if not os.path.exists(src):
-        raise fire.core.FireError(
-            'Input file "{0}" does not exists'.format(src)
-        )
+        raise fire.core.FireError('Input file "{0}" does not exists'.format(src))
 
 
 def split_fasta(src: str, dest: str, begin: int = 0, end: int = None):
@@ -46,11 +44,15 @@ def split_fasta(src: str, dest: str, begin: int = 0, end: int = None):
     if begin == 0 and end is None:
         sub = fa
     else:
-        sub = fa[int(begin):int(end)]
+        sub = fa[int(begin) : int(end)]
         sub.metadata["description"] += f"from {begin} to {end}"
 
     sub.write(dest, format="fasta")
 
 
+def main():
+    return fire.Fire(split_fasta)
+
+
 if __name__ == "__main__":
-    fire.Fire(split_fasta)
+    main()

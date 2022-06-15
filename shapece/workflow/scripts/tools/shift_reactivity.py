@@ -43,6 +43,8 @@ def shift(src: str, reference: str, dest: str, begin: int = 0):
 
     outdf.to_csv(dest, sep="\t", float_format="%.4f")
 
+def main():
+    return fire.Fire(shift)
 
 if __name__ == "__main__":
-    fire.Fire(shift)
+   main() 

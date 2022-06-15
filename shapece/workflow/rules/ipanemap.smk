@@ -82,8 +82,8 @@ rule configure_ipanemap:
             )[0])
 
 checkpoint ipanemap:
-    conda:
-        "../envs/ipanemap.yml"
+    #conda:
+    #    "../envs/ipanemap.yml"
     threads: 8
     input:
         config=expand(
@@ -107,8 +107,8 @@ checkpoint ipanemap:
 
 
 rule structure:
-    conda:
-        "../envs/ipanemap.yml"
+    #conda:
+    #    "../envs/ipanemap.yml"
     threads: 8
     input:
         expand(
@@ -130,8 +130,8 @@ rule structure:
 
 
 rule varna_color_by_condition:
-    conda:
-        "../envs/ipanemap.yml"
+    #conda:
+    #    "../envs/ipanemap.yml"
     input:
         struct=expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}.dbn",
@@ -172,8 +172,8 @@ rule varna_color_by_condition:
 
 # Not working while Varna can't save several rna inside one session file
 rule varna_pool_concat:
-    conda:
-        "../envs/ipanemap.yml"
+    #conda:
+    #    "../envs/ipanemap.yml"
     input:
         get_varna_pool_concat_inputs
     output:

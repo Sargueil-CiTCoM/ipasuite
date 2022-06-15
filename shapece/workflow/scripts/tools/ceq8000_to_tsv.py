@@ -45,6 +45,9 @@ def all_to_tsv(*files: [str], lookup: str = "INDEX") -> None:
             cur_dest = os.path.join(dest, os.path.splitext(os.path.basename(file))[0] + ".tsv.txt")
             to_tsv(file, cur_dest, lookup)
 
+def main():
+    return fire.Fire(all_to_tsv)
+
 
 if __name__ == "__main__":
-    fire.Fire(all_to_tsv)
+    main()

@@ -3,14 +3,14 @@ TOOLS = "workflow/scripts/tools/"
 
 if RAW_DATA_TYPE == "fluo-ceq8000":
     rule fluo_ceq8000:
-        conda: "../envs/tools.yml"
+        #conda: "../envs/tools.yml"
         input: construct_path(step="fluo-ceq8000", results_dir=False)
         output: protected(construct_path(step="fluo-ce", results_dir=False))
         log: construct_path('fluo-ce', ext=".log", log_dir=True)
         message: f"Converting ceq8000 data for qushape: {MESSAGE} replicate"
                  f" {{wildcards.replicate}}"
         shell:
-            f"python {TOOLS}/ceq8000_to_tsv.py {{input}} {{output}} &> {{log}}"
+            f"ceq8000_to_tsv {{input}} {{output}} &> {{log}}"
 
 
 
@@ -26,7 +26,7 @@ if RAW_DATA_TYPE == "fluo-ceq8000":
 
 if config["qushape"]["use_subsequence"]:
     rule split_fasta:
-        conda: "../envs/tools.yml"
+        #conda: "../envs/tools.yml"
         input:
             ancient(get_refseq)
         output:
@@ -39,12 +39,12 @@ if config["qushape"]["use_subsequence"]:
         log:
             "logs/{config['folders']['subseq']}/{rna_id}_{rt_end_pos}-{rt_begin_pos}.log"
         shell:
-            f"python {TOOLS}/split_fasta.py {{input}} {{output}} --begin "
+            f"split_fasta {{input}} {{output}} --begin "
             f"{{wildcards.rt_end_pos}}"
             f" --end {{wildcards.rt_begin_pos}}"
 
 rule generate_project_qushape:
-    conda: "../envs/tools.yml"
+    #conda: "../envs/tools.yml"
     input:
         rx = ancient(construct_path("fluo-ce", results_dir = False)),
         bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
@@ -64,12 +64,14 @@ rule generate_project_qushape:
     log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
     output: construct_path("qushape", ext=".qushape", split_seq=True)
     shell:
-        f"python {TOOLS}/qushape_proj_generator.py {{input.rx}} {{input.bg}}"
+        f"qushape_proj_generator {{input.rx}} {{input.bg}}"
         f" {{params}} --output={{output}} &> {{log}}"
 
 rule extract_reactivity:
-    conda:  "../envs/tools.yml"
-    input: construct_path("qushape", ext=".qushape", split_seq=True)
+    #conda:  "../envs/tools.yml"
+    input: 
+        qushape = construct_path("qushape", ext=".qushape", split_seq=True),
+        refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True))
     output:
         react=construct_path("reactivity", split_seq=True),
         plot=report(construct_path("reactivity", ext=".reactivity.svg", 
@@ -83,7 +85,7 @@ rule extract_reactivity:
     shell:
         f"""
         set +e
-        python {TOOLS}/qushape_extract_reactivity.py {{input}} \
+        qushape_extract_reactivity {{input.qushape}} --rna_file {{input.refseq}}\
                 --output={{output.react}} --plot={{output.plot}} &> {{log}}
 
         exitcode=$?
@@ -95,7 +97,7 @@ rule extract_reactivity:
         """
 
 rule normalize_reactivity:
-    conda:  "../envs/tools.yml"
+    #conda:  "../envs/tools.yml"
     input: construct_path("reactivity", split_seq=True)
     output:
         nreact=construct_path("normreact", split_seq=True),
@@ -113,12 +115,12 @@ rule normalize_reactivity:
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
     shell:
-        f"python {TOOLS}/normalize_reactivity.py {{params}} {{input}}"
+        f"normalize_reactivity {{params}} {{input}}"
         f" --output={{output.nreact}} --plot={{output.plot}} &> {{log}}"
 
 if config["qushape"]["use_subsequence"]:
     rule align_reactivity_to_ref:
-        conda: "../envs/tools.yml"
+        #conda: "../envs/tools.yml"
         input: unpack(get_align_reactivity_inputs)
         output: construct_path("alignnormreact")
         params:
@@ -127,14 +129,14 @@ if config["qushape"]["use_subsequence"]:
 
         log: construct_path('alignnormreact', ext=".log", log_dir=True)
         shell:
-            f"python {TOOLS}/shift_reactivity.py {{input.norm}} {{input.refseq}}"
+            f"shift_reactivity {{input.norm}} {{input.refseq}}"
             f" {{output}} --begin {{params.rt_end_pos}} &> {{log}}"
             #f" --end {{params.rna_end}} &> {{log}}"
      
 
 
 rule aggregate_reactivity:
-    conda:  "../envs/tools.yml"
+    #conda:  "../envs/tools.yml"
     input:
         norm= lambda wildcards: expand(construct_path(aggregate_input_type()),
                 replicate=get_replicate_list(wildcards), allow_missing=True),
@@ -160,7 +162,7 @@ rule aggregate_reactivity:
         mind = construct_param(config["aggregate"], "min_dispersion"),
         #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
-        f"python {TOOLS}/aggregate_reactivity.py {{input.norm}}"
+        f"aggregate_reactivity {{input.norm}}"
         f" --output={{output.full}} {{params}}"
         f" --ipanemap_output={{output.compact}}"
         f" --plot={{output.plot}} --fullplot={{output.fullplot}} &> {{log}}"
@@ -168,7 +170,7 @@ rule aggregate_reactivity:
 
 
 rule footprint:
-    conda: "../envs/tools.yml"
+    #conda: "../envs/tools.yml"
     input:
         get_footprint_inputs,
     output:
@@ -185,7 +187,7 @@ rule footprint:
         ratio_thres = construct_param(config["footprint"]["config"],
                 "ratio_thres"),
     shell:
-        f"python {TOOLS}/footprint.py {{input}}"
+        f"footprint {{input}}"
         f" --output={{output.tsv}} {{params}}"
         f" --plot={{output.plot}} --plot_format=svg --plot_title='{{wildcards.foot_id}}'"
 #rule ipanemap:

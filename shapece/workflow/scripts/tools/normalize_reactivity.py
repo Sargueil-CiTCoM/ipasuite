@@ -368,6 +368,8 @@ def normalize_all(
 
     # return res
 
+def main():
+    return fire.Fire(normalize_all)
 
 if __name__ == "__main__":
-    fire.Fire(normalize_all)
+   main() 

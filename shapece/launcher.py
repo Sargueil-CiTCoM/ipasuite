@@ -28,11 +28,12 @@ def launch_snakemake(
 
     try:
         sm.snakemake(
-            os.path.join("workflow", "Snakefile"),
+            os.path.join(base_path, "workflow", "Snakefile"),
             configfiles=config,
             cores=8,
             keepgoing=keepgoing,
             use_conda=True,
+            conda_prefix="~/.shapece/conda"
         )
     except Exception as e:
         print(e)

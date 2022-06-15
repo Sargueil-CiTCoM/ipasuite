@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import utils.qushapeFuncReport as qsfr
+from .utils import qushapeFuncReport as qsfr
+from .utils import fasta
 import os
 import fire
 import bsddb3 as bsddb
@@ -22,8 +23,8 @@ def plot_reactivity(
         kind="bar",
         figsize=(len(df), 4),
     )
-    plt.title(title, loc='left')
-    plt.legend(loc='upper left')
+    plt.title(title, loc="left")
+    plt.legend(loc="upper left")
     plt.tight_layout()
     plt.savefig(output, format=format)
 
@@ -44,14 +45,31 @@ def getProjData(filepath):
     return proj
 
 
+def check_qushape_using_correct_rna(project, rna_file):
+
+    seqname, seq = fasta.get_first_fasta_seq(rna_file)
+    seq = seq.replace("T", "U")
+    if not seq.startswith(project["RNA"]):
+        print(
+            "Qushape project RNA is different from provided rna_file :\n"
+            f"qushape seq ({project['fNameSeq']}) : {project['RNA']}\n"
+            f"rna_file seq {seqname} - {rna_file}: {seq}"
+        )
+        raise SystemExit(-1)
+
+
 def extract_reactivity(
     qushape_project: str,
     output: str = "reactivity.tsv.txt",
     plot: str = None,
+    rna_file: str = None,
     dry_run=False,
 ):
 
     proj = getProjData(qushape_project)
+
+    if rna_file is not None:
+        check_qushape_using_correct_rna(proj, rna_file)
 
     #    if not "Reactivity" in proj["scriptList"][-1]:
     if "area" not in proj["dPeakRX"] or len(proj["seqNum"]) == 0:
@@ -63,9 +81,13 @@ def extract_reactivity(
         qsfr.writeReportFile(report, output)
 
     if plot is not None:
-        df = pd.read_csv(output, sep='\t')
+        df = pd.read_csv(output, sep="\t")
         plot_reactivity(df, output, plot)
 
 
+def main():
+    return fire.Fire(extract_reactivity)
+
+
 if __name__ == "__main__":
-    fire.Fire(extract_reactivity)
+    main()
