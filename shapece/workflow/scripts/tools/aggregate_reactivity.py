@@ -377,7 +377,8 @@ def check_duplicated(aggregated: pd.DataFrame):
 def aggregate(
     *files: [str],
     output: str,
-    ipanemap_output=None,
+    shape_output=None,
+    map_output=None,
     normcol="simple_norm_reactivity",
     min_ndata_perc: float = 0.5,
     min_nsubdata_perc: float = 0.66,
@@ -385,6 +386,7 @@ def aggregate(
     min_dispersion: float = 0.05,
     fullplot: str = None,
     plot: str = None,
+    err_on_dup: bool = True,
 ):
     """Aggregate reactivity files together
 
@@ -415,6 +417,7 @@ def aggregate(
         max_mean_perc represent this mean percentage.
     min_dispersion : float
         (default: 0.05) the consistancy ratio cannot be below a certain value
+
     """
 
     src = files
@@ -466,12 +469,13 @@ def aggregate(
     except ValueError as err:
         print(err.args[0])
         print(f"inputs: {files}")
-        exit(1)
+        if err_on_dup:
+            exit(1)
     # aggregated = aggregated.reset_index(level="seqRNA")
 
     # print(aggregated)
     aggregated.to_csv(dest, sep="\t", float_format="%.4f")
-    if ipanemap_output is not None:
+    if shape_output is not None:
         aggripan = aggregated.reset_index(level="sequence")[["mean"]]
         idxmin = aggripan.index.min()
         firstrows = pd.DataFrame(
@@ -479,8 +483,24 @@ def aggregate(
         )
         firstrows.index.names = ["seqNum"]
         aggripan = pd.concat([firstrows, aggripan])
-        aggripan.to_csv(ipanemap_output, sep="\t", float_format="%.4f", header=False)
+        aggripan.to_csv(shape_output, sep="\t", float_format="%.4f", header=False)
 
+    if map_output is not None:
+        aggripan = aggregated.reset_index(level="sequence")[
+            ["mean", "stdev", "sequence"]
+        ]
+        idxmin = aggripan.index.min()
+        firstrows = pd.DataFrame(
+            {
+                "mean": np.full(idxmin - 1, -10),
+                "stdev": np.zeros(idxmin - 1),
+                "sequence": np.full(idxmin - 1, "N"),
+            },
+            index=range(1, idxmin),
+        )
+        firstrows.index.names = ["seqNum"]
+        aggripan = pd.concat([firstrows, aggripan])
+        aggripan.to_csv(map_output, sep="\t", float_format="%.4f", header=False)
     if plot is not None or fullplot is not None:
         try:
             plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=output)

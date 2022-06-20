@@ -247,6 +247,7 @@ normalization:
 #   min_dispersion: 0.05
 # ```
 aggregate:
+  plot: False
   norm_method: simple # or interquartile 
   
   # You can specify the name of the column used for normalization instead of the normalization method 

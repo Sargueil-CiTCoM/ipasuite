@@ -16,24 +16,36 @@ def launch_voila(
 
 
 def launch_snakemake(
-    config: str = None, cores: int = 8, stoponerror: bool = False
+    action="all",
+    config: str = None,
+    cores: int = 8,
+    stoponerror: bool = False,
+    refactor: str = None,
 ):
 
-    #launch_voila()
+    # launch_voila()
 
     if config is not None:
         config = [config]
 
     keepgoing = not stoponerror
+    targets = ["all"]
+    extra_config = dict()
+
+    if refactor == "addpositions":
+        extra_config["refactor_enabled"] = True
+        targets = ["all_add_positions"]
 
     try:
         sm.snakemake(
             os.path.join(base_path, "workflow", "Snakefile"),
             configfiles=config,
-            cores=8,
+            config=extra_config,
+            targets=targets,
+            cores=cores,
             keepgoing=keepgoing,
             use_conda=True,
-            conda_prefix="~/.shapece/conda"
+            conda_prefix="~/.shapece/conda",
         )
     except Exception as e:
         print(e)

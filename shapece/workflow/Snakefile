@@ -10,36 +10,45 @@ container: "docker://continuumio/miniconda3"
 
 
 include: "rules/common.smk"
-include: "rules/tools.smk"
-include: "rules/other.smk"
-include: "rules/ipanemap.smk"
-include: "rules/importation.smk"
+if 'refactor_enabled' in config and config['refactor_enabled']:
+    include: "rules/refactor.smk"
+
+    rule all_add_positions:
+        input:
+            get_all_raw_refactors_outputs(),
+            get_all_raw_refactors_outputs("fluo-ce"),
+            get_all_qushape_refactors_outputs()
+else:
+    include: "rules/tools.smk"
+    include: "rules/other.smk"
+    include: "rules/ipanemap.smk"
+    include: "rules/importation.smk"
 
 
-rule all:
-    input:
-        #get_final_outputs()
-        #get_all_raw_outputs()
-        #get_all_qushape_outputs()
-        #get_all_reactivity_outputs()
-        #get_all_aggreact_outputs()
-        #get_all_structure_outputs
-        aggregates=get_all_aggreact_outputs(),
-        #structures = get_all_structure_outputs
-        varna_by_cond=get_all_varna_by_condition_outputs,
-        footprint=get_all_footprint_outputs,
-        #varna_pool_concat=get_all_varna_pool_concat_outputs
-        # The first rule should define the default target files
-        # Subsequent target rules can be specified below. They should start with all_*.
+    rule all:
+        input:
+            #get_final_outputs()
+            #get_all_raw_outputs()
+            #get_all_qushape_outputs()
+            #get_all_reactivity_outputs()
+            #get_all_aggreact_outputs()
+            #get_all_structure_outputs
+            aggregates=get_all_aggreact_outputs(),
+            #structures = get_all_structure_outputs
+            varna_by_cond=get_all_varna_by_condition_outputs,
+            footprint=get_all_footprint_outputs,
+            #varna_pool_concat=get_all_varna_pool_concat_outputs
+            # The first rule should define the default target files
+            # Subsequent target rules can be specified below. They should start with all_*.
+    
+    
+    rule all_aggregate:
+        input:
+            get_all_aggreact_outputs()
+    
+    
+    rule all_qushape:
+        input:
+            get_all_qushape_outputs()
 
-
-rule all_aggregate:
-    input:
-        get_all_aggreact_outputs()
-
-
-rule all_qushape:
-    input:
-        get_all_qushape_outputs()
-
-
+    

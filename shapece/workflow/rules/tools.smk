@@ -37,7 +37,7 @@ if config["qushape"]["use_subsequence"]:
             f"from {{wildcards.rt_end_pos}} to {{wildcards.rt_begin_pos}}"
     
         log:
-            "logs/{config['folders']['subseq']}/{rna_id}_{rt_end_pos}-{rt_begin_pos}.log"
+            f"logs/{config['folders']['subseq']}/{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.log"
         shell:
             f"split_fasta {{input}} {{output}} --begin "
             f"{{wildcards.rt_end_pos}}"
@@ -78,6 +78,8 @@ rule extract_reactivity:
             figure=True, split_seq=True),
             category="3.1-Reactivity", subcategory=CONDITION)
         #,protect = protected(construct_path("qushape", ext=".qushape"))
+    params:
+        rna_file= f"--rna_file {{input.refseq}}" if config["qushape"]["check_integrity"] else ""
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True, split_seq=True)
@@ -85,7 +87,7 @@ rule extract_reactivity:
     shell:
         f"""
         set +e
-        qushape_extract_reactivity {{input.qushape}} --rna_file {{input.refseq}}\
+        qushape_extract_reactivity {{input.qushape}} {{params.rna_file}}\
                 --output={{output.react}} --plot={{output.plot}} &> {{log}}
 
         exitcode=$?
@@ -102,8 +104,9 @@ rule normalize_reactivity:
     output:
         nreact=construct_path("normreact", split_seq=True),
         plot=report(construct_path("normreact", ext=".normreact.svg",
-            figure=True, split_seq=True),
-                category="3.2-Normalized reactivity", subcategory=CONDITION)
+            figure=True, split_seq=True) ,
+                category="3.2-Normalized reactivity", subcategory=CONDITION) if
+        config["normalization"]["plot"] else []
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
@@ -113,10 +116,11 @@ rule normalize_reactivity:
         low_norm_reac_thres = construct_param(CNORM, "low_norm_reactivity_threshold"),
         norm_methods = construct_list_param(CNORM, "norm_methods"),
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
-        snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile")
+        snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile"),
+        plot =  "--plot={output.plot}" if config["normalization"]["plot"] else ""
     shell:
         f"normalize_reactivity {{params}} {{input}}"
-        f" --output={{output.nreact}} --plot={{output.plot}} &> {{log}}"
+        f" --output={{output.nreact}}  &> {{log}}"
 
 if config["qushape"]["use_subsequence"]:
     rule align_reactivity_to_ref:
@@ -143,14 +147,15 @@ rule aggregate_reactivity:
         refseq = lambda wildcards: get_refseq(wildcards)
     output:
         full= construct_path("aggreact", show_replicate = False),
-        compact = construct_path("aggreact-ipanemap", show_replicate=False,
+        shape_file = construct_path("aggreact-ipanemap", show_replicate=False,
                 ext=".shape"),
+        map_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
             show_replicate=False, figure=True),
-            category="4-Aggregated reactivity", subcategory=CONDITION),
-        fullplot =report(construct_path("aggreact", ext=".aggreact.full.svg",
+            category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],
+        fullplot = report(construct_path("aggreact", ext=".aggreact.full.svg",
             show_replicate=False, figure=True),
-            category="4-Aggregated reactivity", subcategory=CONDITION)
+            category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],
 
     #message: f"Aggregating normalized reactivity for {MESSAGE}"
     log: construct_path('aggreact', ext=".log", log_dir=True, show_replicate=False)
@@ -160,12 +165,15 @@ rule aggregate_reactivity:
         mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
         maxmp = construct_param(config["aggregate"], "max_mean_perc"),
         mind = construct_param(config["aggregate"], "min_dispersion"),
+        plot = "--plot={output.plot} --fullplot={output.fullplot}" if
+        config["aggregate"]["plot"] else ""
         #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
         f"aggregate_reactivity {{input.norm}}"
         f" --output={{output.full}} {{params}}"
-        f" --ipanemap_output={{output.compact}}"
-        f" --plot={{output.plot}} --fullplot={{output.fullplot}} &> {{log}}"
+        f" --shape_output={{output.shape_file}}"
+        f" --map_output={{output.map_file}}"
+        f" --err_on_dup={config['aggregate']['err_on_dup']} &> {{log}}"
 
 
 

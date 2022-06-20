@@ -121,7 +121,7 @@ def get_sample(wildcards, list_replicates=False):
 
 def construct_path(
     step, control=False, results_dir=True, ext=None, show_replicate=True,
-    log_dir=False, figure=False, split_seq=False):
+    log_dir=False, figure=False, split_seq=False, force_split_seq=False):
     cond = (
         f"_{CONDITION}"
         if not control
@@ -132,8 +132,8 @@ def construct_path(
     replicate = "_{replicate}" if show_replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
-    ssplit = "_seq{rt_end_pos}-{rt_begin_pos}" if split_seq \
-             and config['qushape']['use_subsequence'] \
+    ssplit = "_seq{rt_end_pos}-{rt_begin_pos}" if (split_seq \
+             and config['qushape']['use_subsequence']) or force_split_seq \
              else "" 
 
     path = expand(
@@ -176,8 +176,10 @@ def get_align_end(wildcards):
 
 def get_align_reactivity_inputs(wildcards):
     sample = get_sample(wildcards).iloc[0]
-    fa = f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
-         f"{wildcards.rna_id}_{sample['rt_end_pos']}-{sample['rt_begin_pos']}.fasta"
+
+    fa = f"{config['sequences'][wildcards.rna_id]}"
+    #fa = f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
+         #f"{wildcards.rna_id}_{sample['rt_end_pos']}-{sample['rt_begin_pos']}.fasta"
     norm = expand(construct_path("normreact", split_seq=True),
             rt_end_pos=sample['rt_end_pos'],rt_begin_pos=sample['rt_begin_pos'],
             **wildcards )
@@ -256,6 +258,27 @@ def get_ipanemap_inputs(wildcards):
             return get_ipanemap_pool_inputs(pool) 
     return []
 
+def get_all_raw_refactors_outputs(raw_data_type=RAW_DATA_TYPE):
+    outputs = []
+    for idx, row in samples.reset_index().iterrows():
+        sample = construct_path(results_dir=False, step=raw_data_type,
+                force_split_seq=True)[0].format(**row)
+
+        control = construct_path(results_dir=False, step=raw_data_type, control=True,
+                force_split_seq=True)[
+            0
+        ].format(**row)
+        sample_src = construct_path(results_dir=False, step=raw_data_type,
+                force_split_seq=False)[0].format(**row)
+        control_src = construct_path(results_dir=False, step=raw_data_type,
+                control=True, force_split_seq=False)[
+            0
+        ].format(**row)
+        if os.path.exists(sample_src):
+            outputs.append(sample)
+        if os.path.exists(control_src):
+            outputs.append(control)
+    return outputs
 
 def get_all_raw_outputs():
     outputs = []
@@ -268,11 +291,22 @@ def get_all_raw_outputs():
         outputs.append(control)
     return outputs
 
+def get_all_qushape_refactors_outputs():
+    outputs = []
+    for idx, row in samples.reset_index().iterrows():
+        sample = construct_path(step="qushape", ext=".qushape",
+                split_seq=True, force_split_seq=True)[0].format(**row)
+        sample_src = construct_path(step="qushape", ext=".qushape",
+                split_seq=False, force_split_seq=False)[0].format(**row)
+        if os.path.exists(sample_src):
+            outputs.append(sample)
+    return outputs
 
 def get_all_qushape_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(step="qushape", ext=".qushape", split_seq=True)[0].format(**row)
+        sample = construct_path(step="qushape", ext=".qushape",
+                split_seq=True)[0].format(**row)
         outputs.append(sample)
     return outputs
 
@@ -280,9 +314,8 @@ def get_all_qushape_outputs():
 def get_all_reactivity_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = (
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_{config['format']['condition']}_{{replicate}}.{{step}}.tsv"
-        ).format(folder=config["folders"]["reactivity"], step="reactivity", **row)
+        sample = construct_path(step="reactivity",
+                split_seq=True)[0].format(**row)
         outputs.append(sample)
     return outputs
 

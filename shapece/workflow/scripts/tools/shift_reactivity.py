@@ -12,9 +12,7 @@ def check_files(src: str, dest: str):
         )
 
     if not os.path.exists(src):
-        raise fire.core.FireError(
-            'Input file "{0}" does not exists'.format(src)
-        )
+        raise fire.core.FireError('Input file "{0}" does not exists'.format(src))
 
 
 def shift(src: str, reference: str, dest: str, begin: int = 0):
@@ -26,25 +24,29 @@ def shift(src: str, reference: str, dest: str, begin: int = 0):
     except ValueError:
         refseq = RNA.read(reference, format="fasta")
 
-    refdf = pd.DataFrame(
-        [v.decode("utf-8") for v in refseq.values], columns=["seqRNA"]
-    )
+    refdf = pd.DataFrame([v.decode("utf-8") for v in refseq.values], columns=["seqRNA"])
 
     refdf.index += 1
     refdf.index.name = "seqNum"
 
     srcdf = pd.read_csv(src, sep="\t")
-    srcdf = srcdf.rename(
-        columns={"seqNum": "rel_seqNum", "seqRNA": "rel_seqRNA"}
-    )
+    srcdf = srcdf.rename(columns={"seqNum": "rel_seqNum", "seqRNA": "rel_seqRNA"})
     srcdf["seqNum"] = srcdf["rel_seqNum"] + begin
     srcdf = srcdf.set_index("seqNum")
     outdf = pd.concat([refdf, srcdf], axis=1)
 
+    if srcdf.index.max() > refdf.index.max():
+        raise ValueError(
+            f"reference sequence {refdf.index.max()} is too small for"
+            f"this offset : {begin}, dest max len : {srcdf.index.max()} "
+        )
+
     outdf.to_csv(dest, sep="\t", float_format="%.4f")
+
 
 def main():
     return fire.Fire(shift)
 
+
 if __name__ == "__main__":
-   main() 
+    main()

@@ -1,12 +1,13 @@
-if config["allow_auto_import"]:
+if config["allow_auto_import"] and not ('refactor_enabled' in config and
+        config['refactor_enabled']):
 
     rule import_raw_probe_data:
         input:
             get_raw_probe_input,
         output:
-            protected(construct_path(RAW_DATA_TYPE, results_dir=False)),
+            protected(construct_path(RAW_DATA_TYPE, results_dir=False, split_seq=True)),
         log:
-            construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True),
+            construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, split_seq=True),
         message:
             (
                 "Importing raw data from external source: "
@@ -20,9 +21,9 @@ if config["allow_auto_import"]:
         input:
             get_raw_control_input,
         output:
-            protected(construct_path(RAW_DATA_TYPE, control=True, results_dir=False)),
+            protected(construct_path(RAW_DATA_TYPE, control=True, results_dir=False, split_seq=True)),
         log:
-            construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True),
+            construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True, split_seq=True),
         message:
             (
                 "Importing raw data from external source: "

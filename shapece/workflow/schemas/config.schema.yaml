@@ -17,6 +17,9 @@ definitions:
       allow_auto_import:
         type: boolean
         description: allow the data to be imported from external sources
+      refactor_enabled:
+        type: boolean
+        description: refactoring 
       results_dir:
         type: string
         default: results
@@ -64,6 +67,9 @@ definitions:
     type: object
     additionalProperties: false
     properties:
+      plot: 
+        type: boolean
+        default: True
       norm_method:
         type: string
       min_ndata_perc:
@@ -74,12 +80,17 @@ definitions:
         type: number
       min_dispersion:
         type: number
+      err_on_dup:
+        type: boolean
+        default: False
     required:
     - max_mean_perc
     - min_dispersion
     - min_ndata_perc
     - min_nsubdata_perc
     - norm_method
+    - err_on_dup
+    - plot
     title: Aggregate
   Folders:
     type: object
@@ -324,6 +335,9 @@ definitions:
     type: object
     additionalProperties: false
     properties:
+      plot:
+        type: boolean
+        default: True
       reactive_nucleotides:
         type: array
         items:
@@ -341,6 +355,7 @@ definitions:
       simple_norm_term_avg_percentile:
         type: integer
     required:
+    - plot
     - low_norm_reactivity_threshold
     - norm_methods
     - reactive_nucleotides
@@ -373,8 +388,13 @@ definitions:
       use_subsequence:
         type: boolean
         default: False
+      check_integrity:
+        type: boolean
+        default: True
     required:
     - channels
+    - use_subsequence
+    - check_integrity
     title: Qushape
   Channels:
     type: object
