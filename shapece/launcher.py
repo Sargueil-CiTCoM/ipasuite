@@ -18,8 +18,11 @@ class Launcher(object):
         self._keepgoing = not stoponerror
 
     def config(self):
+        config = self._config[0] if self._config is not None else "config/config.yaml"
         path = os.path.join(base_path, "configurator.ipynb")
-        subprocess.run(["voila", path])
+        env = os.environ.copy()
+        env["CONFIG_FILE_PATH"] = os.path.join(os.getcwd(), config)
+        subprocess.run(["voila", path], env=env)
 
     def init(self, project: str):
         if os.path.exists(project):
