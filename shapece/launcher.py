@@ -19,6 +19,12 @@ class Launcher(object):
 
     def config(self):
         config = self._config[0] if self._config is not None else "config/config.yaml"
+        if not os.path.exists(config):
+            raise fire.core.FireError(
+                f"{config} file does not exist, please init your "
+                "project using `shapece init` command or specify another path"
+            )
+
         path = os.path.join(base_path, "configurator.ipynb")
         env = os.environ.copy()
         env["CONFIG_FILE_PATH"] = os.path.join(os.getcwd(), config)
@@ -46,7 +52,7 @@ class Launcher(object):
             extra_config["refactor_enabled"] = True
             targets = ["all_add_positions"]
         else:
-            fire.core.FireError(f"invalid refactor option {action}")
+            raise fire.core.FireError(f"invalid refactor option {action}")
 
         try:
             sm.snakemake(

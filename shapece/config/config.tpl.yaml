@@ -332,8 +332,8 @@ ipanemap:
           magnesium: noMg
           probe: 1M7
       alignements:
-        - alignment_name: file.aln
-        - alignement_name2: file2.aln
+        alignment_name: file.aln
+        alignement_name2: file2.aln
 
   config:
     sampling:
