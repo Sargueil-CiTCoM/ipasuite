@@ -13,9 +13,7 @@ definitions:
       sequences:
         "$ref": "#/definitions/Sequences"
       conditions:
-        type: array
-        items:
-          type: string
+        "$ref": "#/definitions/Conditions"
       allow_auto_import:
         type: boolean
         description: allow the data to be imported from external sources
@@ -288,15 +286,28 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Condition"
+      alignements:
+        type: object
+        additionalProperties: true
     required:
     - conditions
     - id
     - rna_id
+    - alignements
     title: Pool
   Condition:
     type: object
     additionalProperties: true 
     title: Condition
+  Conditions:
+    type: object
+    additionalProperties: false
+    patternProperties:
+      "^.*$":
+        type: array
+        items:
+          type: string
+    title: Conditions 
   Sampling:
     type: object
     additionalProperties: false
