@@ -27,7 +27,8 @@ class Launcher(object):
 
         path = os.path.join(base_path, "configurator.ipynb")
         env = os.environ.copy()
-        env["CONFIG_FILE_PATH"] = os.path.join(os.getcwd(), config)
+        env["CONFIG_FILE_PATH"] = os.path.join(config)
+        env["PROJECT_PATH"] = os.path.join(os.getcwd())
         if dev:
             subprocess.run(["jupyter-notebook", path], env=env)
         else:

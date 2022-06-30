@@ -1,0 +1,21 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - snakemake >=5.24.1
+  - jupyterlab
+  - voila
+  - ipywidgets
+  - mamba
+  - fire
+  - pandas
+  - numpy
+  - matplotlib
+  - scikit-bio
+  - scipy
+  - viennarna
+  - openjdk
+  - pip
+  - pip: 
+    - bsddb3 
+    - ipanemap
