@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 from .utils import qushapeFuncReport as qsfr
 from .utils import fasta
 import os
