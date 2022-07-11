@@ -10,7 +10,7 @@ if RAW_DATA_TYPE == "fluo-ceq8000":
         message: f"Converting ceq8000 data for qushape: {MESSAGE} replicate"
                  f" {{wildcards.replicate}}"
         shell:
-            f"ceq8000_to_tsv {{input}} {{output}} &> {{log}}"
+            f"python ceq8000_to_tsv {{input}} {{output}} &> {{log}}"
 
 
 
@@ -39,7 +39,7 @@ if config["qushape"]["use_subsequence"]:
         log:
             f"logs/{config['folders']['subseq']}/{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.log"
         shell:
-            f"split_fasta {{input}} {{output}} --begin "
+            f"python split_fasta {{input}} {{output}} --begin "
             f"{{wildcards.rt_end_pos}}"
             f" --end {{wildcards.rt_begin_pos}}"
 
@@ -64,7 +64,7 @@ rule generate_project_qushape:
     log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
     output: construct_path("qushape", ext=".qushape", split_seq=True)
     shell:
-        f"qushape_proj_generator {{input.rx}} {{input.bg}}"
+        f"python qushape_proj_generator {{input.rx}} {{input.bg}}"
         f" {{params}} --output={{output}} &> {{log}}"
 
 rule extract_reactivity:
@@ -87,7 +87,7 @@ rule extract_reactivity:
     shell:
         f"""
         set +e
-        qushape_extract_reactivity {{input.qushape}} {{params.rna_file}}\
+        python qushape_extract_reactivity {{input.qushape}} {{params.rna_file}}\
                 --output={{output.react}} --plot={{output.plot}} &> {{log}}
 
         exitcode=$?
@@ -119,7 +119,7 @@ rule normalize_reactivity:
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile"),
         plot =  "--plot={output.plot}" if config["normalization"]["plot"] else ""
     shell:
-        f"normalize_reactivity {{params}} {{input}}"
+        f"python normalize_reactivity {{params}} {{input}}"
         f" --output={{output.nreact}}  &> {{log}}"
 
 if config["qushape"]["use_subsequence"]:
@@ -133,7 +133,7 @@ if config["qushape"]["use_subsequence"]:
 
         log: construct_path('alignnormreact', ext=".log", log_dir=True)
         shell:
-            f"shift_reactivity {{input.norm}} {{input.refseq}}"
+            f"python shift_reactivity {{input.norm}} {{input.refseq}}"
             f" {{output}} --begin {{params.rt_end_pos}} &> {{log}}"
             #f" --end {{params.rna_end}} &> {{log}}"
      
@@ -169,7 +169,7 @@ rule aggregate_reactivity:
         config["aggregate"]["plot"] else ""
         #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
-        f"aggregate_reactivity {{input.norm}}"
+        f"python aggregate_reactivity {{input.norm}}"
         f" --output={{output.full}} {{params}}"
         f" --shape_output={{output.shape_file}}"
         f" --map_output={{output.map_file}}"
@@ -195,7 +195,7 @@ rule footprint:
         ratio_thres = construct_param(config["footprint"]["config"],
                 "ratio_thres"),
     shell:
-        f"footprint {{input}}"
+        f"python footprint {{input}}"
         f" --output={{output.tsv}} {{params}}"
         f" --plot={{output.plot}} --plot_format=svg --plot_title='{{wildcards.foot_id}}'"
 #rule ipanemap:
