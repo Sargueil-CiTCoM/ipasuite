@@ -287,13 +287,13 @@ definitions:
         items:
           "$ref": "#/definitions/Condition"
       alignements:
-        type: object
+        type: [object, null]
+        nullable: True
         additionalProperties: true
     required:
     - conditions
     - id
     - rna_id
-    - alignements
     title: Pool
   Condition:
     type: object

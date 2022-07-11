@@ -151,6 +151,9 @@ def aggregate_input_type():
     else:
         return "normreact"
 
+def get_ddntp_qushape(wildcards):
+    sample = get_sample(wildcards).iloc[0]
+    return sample["ddNTP"]
 
 def get_external_qushape(wildcards):
     sample = get_sample(wildcards).iloc[0]
@@ -196,6 +199,8 @@ def get_subseq(wildcards, split_seq=False):
 
     if os.path.exists(fasta):
         return fasta
+    else:
+        raise snakemake.exceptions.MissingInputExceptions(-1, fasta)
     return []
 
 def get_refseq(wildcards):

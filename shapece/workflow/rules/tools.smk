@@ -53,9 +53,9 @@ rule generate_project_qushape:
     message: f"Generate QuShape project for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     params:
-        refseq=lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else "",
+        refseq=lambda wildcards, input: f"--refseq={input.refseq}",
         refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
-        ddNTP= construct_param(config["qushape"], "ddNTP"),
+        ddNTP=lambda wildcards: f"--ddNTP={get_ddntp_qushape(wildcards)}",
         channels= construct_dict_param(config["qushape"], "channels")
         #TODO channels
         #channels=
@@ -79,7 +79,7 @@ rule extract_reactivity:
             category="3.1-Reactivity", subcategory=CONDITION)
         #,protect = protected(construct_path("qushape", ext=".qushape"))
     params:
-        rna_file= f"--rna_file {{input.refseq}}" if config["qushape"]["check_integrity"] else ""
+        rna_file=lambda wildcards, input: f"--rna_file {input.refseq}" if config["qushape"]["check_integrity"] else ""
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True, split_seq=True)
