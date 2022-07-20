@@ -11,6 +11,20 @@ import itertools
 ddof = 1
 
 
+class ReactivityThreshold:
+    INVALID = -0.3
+
+    LOW = 0.5
+    MEDIUM = 0.8
+    HIGH = 1.0
+
+    COLOR_INVALID = "grey"
+    COLOR_NONE = "white"
+    COLOR_LOW = "yellow"
+    COLOR_MEDIUM = "orange"
+    COLOR_HIGH = "red"
+
+
 def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
 
     first_idx = aggregated.first_valid_index()[0]
@@ -97,6 +111,7 @@ def plot_aggregate(
         drawstyle="steps-mid",
         ax=ax,
         colormap=cm.cubehelix,
+        linewidth=0.5,
     )
 
     plot_aggregation_infos(aggregated, ax)
@@ -113,6 +128,7 @@ def plot_aggregate(
         color="k",
         ls="none",
         capsize=4,
+        linewidth=0.5,
     )
     try:
         plt.tight_layout()
@@ -125,12 +141,27 @@ def plot_aggregate(
         nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 7, 4)
     )
 
-    aggregated["color"] = "white"
-    aggregated.loc[(aggregated["mean"] > 0.8), "color"] = "red"
+    aggregated["color"] = ReactivityThreshold.COLOR_NONE
     aggregated.loc[
-        ((aggregated["mean"] <= 0.8) & (aggregated["mean"] > 0.5)), "color"
-    ] = "orange"
-    aggregated.loc[(aggregated["mean"] < 0.5), "color"] = "yellow"
+        (aggregated["mean"] > ReactivityThreshold.HIGH), "color"
+    ] = ReactivityThreshold.COLOR_HIGH
+    aggregated.loc[
+        (
+            (aggregated["mean"] <= ReactivityThreshold.HIGH)
+            & (aggregated["mean"] > ReactivityThreshold.MEDIUM)
+        ),
+        "color",
+    ] = ReactivityThreshold.COLOR_MEDIUM
+    aggregated.loc[
+        (
+            (aggregated["mean"] <= ReactivityThreshold.MEDIUM)
+            & (aggregated["mean"] > ReactivityThreshold.LOW)
+        ),
+        "color",
+    ] = ReactivityThreshold.COLOR_LOW
+    aggregated.loc[
+        (aggregated["mean"] < ReactivityThreshold.INVALID), "color"
+    ] = ReactivityThreshold.COLOR_INVALID
 
     aggregated.loc[(aggregated["mean"] == -10), "stdev"] = np.NaN
     aggregated.loc[(aggregated["mean"] == -10), "mean"] = np.NaN
@@ -149,9 +180,17 @@ def plot_aggregate(
         width=1,
         color=aggregated["color"],
         yerr="stdev",
+        capsize=2,
         stacked=False,
     )
-
+    ax = meanstdev[["mean", "xlabel"]].plot(
+        x="xlabel",
+        y="mean",
+        drawstyle="steps-mid",
+        ax=ax,
+        colormap=cm.cubehelix,
+        linewidth=0.5,
+    )
     plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")

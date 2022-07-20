@@ -117,7 +117,7 @@ rule normalize_reactivity:
         norm_methods = construct_list_param(CNORM, "norm_methods"),
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile"),
-        plot =  "--plot={output.plot}" if config["normalization"]["plot"] else ""
+        plot =  lambda wildcards, output: f"--plot={output.plot}" if config["normalization"]["plot"] else ""
     shell:
         f"normalize_reactivity {{params}} {{input}}"
         f" --output={{output.nreact}}  &> {{log}}"
@@ -165,7 +165,7 @@ rule aggregate_reactivity:
         mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
         maxmp = construct_param(config["aggregate"], "max_mean_perc"),
         mind = construct_param(config["aggregate"], "min_dispersion"),
-        plot = "--plot={output.plot} --fullplot={output.fullplot}" if
+        plot = lambda wildcards, output: f"--plot={output.plot} --fullplot={output.fullplot}" if
         config["aggregate"]["plot"] else ""
         #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:

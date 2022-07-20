@@ -10,6 +10,9 @@
 #```
 samples: "config/samples.tsv"
 
+results_dir: results
+resource_dir: resources
+
 ## General Workflow configuration ##
 
 ### 
@@ -25,7 +28,7 @@ samples: "config/samples.tsv"
 #   sequence_id_3: "resources/sequence3.fa"
 #```
 sequences:
-  gltB2: "resources/gltB2.fa"
+  test: "resources/test.fa"
 
 ###
 # List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also putted into format -> condition
@@ -73,7 +76,7 @@ format:
   #   condition: "{probe}_{temperature}_{magnesium}"
   #   ...
   # ```
-  condition: "{probe}_{interaction}_{magnesium}"
+  condition: "{probe}_{interaction}_{magnesium}_id{id}"
   ###   
   # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content 
   #
@@ -84,7 +87,7 @@ format:
   #   control_condition: "{control}_of_{probe}_{temperature}C_{magnesium}"
   #   ...
   # ```
-  control_condition: "{control}_of_{probe}_{interaction}_{magnesium}"
+  control_condition: "{control}_of_{probe}_{interaction}_{magnesium}_id{id}"
   ###
   # Format use to create comprehensible Snakemake message when running workflow. conditions must be prefixed with "wildcards."
   #
@@ -96,6 +99,12 @@ format:
   #   ...
   # ```
   message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.interaction} {wildcards.magnesium}"
+
+  previous:
+    condition: "{probe}_{interaction}_{magnesium}"
+    control_condition: "{control}_of_{probe}_{interaction}_{magnesium}_id{id}"
+
+
 
 ###
 # Information concerning raw datas
@@ -326,9 +335,9 @@ aggregate:
 ipanemap:
   pools:
     - id: 1M7_Mg_none
-      rna_id: gltB2
+      rna_id: test
       conditions:
-        - interaction: none
+        - temperature: 37
           magnesium: noMg
           probe: 1M7
       alignements:
@@ -361,13 +370,13 @@ varna:
 footprint:
   compares:
     - id: 1M7_Mg_noMg
-      rna_id: seq314
+      rna_id: test
       condition1:
-        interaction: none
+        temperature: 37
         magnesium: Mg
         probe: 1M7
       condition2:
-        interaction: none
+        temperature: 37
         magnesium: noMg
         probe: 1M7
   config:    

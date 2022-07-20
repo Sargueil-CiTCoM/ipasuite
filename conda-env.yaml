@@ -6,6 +6,7 @@ dependencies:
   - jupyterlab
   - voila
   - ipywidgets
+  - ipyfilechooser
   - mamba
   - fire
   - pandas
@@ -16,6 +17,7 @@ dependencies:
   - viennarna
   - openjdk
   - pip
+  - ruamel.yaml
   - pip: 
     - bsddb3 
     - ipanemap

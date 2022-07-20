@@ -8,16 +8,25 @@ report: "report/workflow.rst"
 # Allow users to fix the underlying OS via singularity.
 container: "docker://continuumio/miniconda3"
 
+configfile: "config/config.yaml"
 
-include: "rules/common.smk"
-if 'refactor_enabled' in config and config['refactor_enabled']:
+include: "rules/common.py"
+if "refactor_addpositions" in config and config["refactor_addpositions"]:
     include: "rules/refactor.smk"
 
     rule all_add_positions:
         input:
-            get_all_raw_refactors_outputs(),
-            get_all_raw_refactors_outputs("fluo-ce"),
-            get_all_qushape_refactors_outputs()
+            get_all_raw_addpositions_outputs(),
+            get_all_raw_addpositions_outputs("fluo-ce"),
+            get_all_qushape_addpositions_outputs()
+
+if "refactor_rename" in config and config["refactor_rename"]:
+    include: "rules/refactor.smk"
+    rule all_rename:
+        input:
+            get_all_raw_rename_outputs(),
+            get_all_raw_rename_outputs("fluo-ce"),
+            get_all_qushape_rename_outputs()
 else:
     include: "rules/tools.smk"
     include: "rules/other.smk"

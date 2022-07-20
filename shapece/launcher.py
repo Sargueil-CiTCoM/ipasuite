@@ -10,15 +10,26 @@ base_path = os.path.dirname(__file__)
 
 
 class Launcher(object):
-    def __init__(self, config: str = None, cores: int = 8, stoponerror: bool = False):
+    def __init__(
+        self,
+        config: str = None,
+        cores: int = 8,
+        stoponerror: bool = False,
+        verbose: bool = False,
+    ):
         if config is not None:
             config = [config]
         self._config = config
         self._cores = cores
         self._keepgoing = not stoponerror
+        self._verbose = verbose
 
     def config(self, dev=False):
-        config = self._config[0] if self._config is not None else "config/config.yaml"
+        config = (
+            self._config[0]
+            if self._config is not None
+            else ("config.yaml" if os.path.exists("config.yaml") else "config/config.yaml")
+        )
         if not os.path.exists(config):
             raise fire.core.FireError(
                 f"{config} file does not exist, please init your "
@@ -52,9 +63,14 @@ class Launcher(object):
 
     def refactor(self, action: str = "addpositions"):
         extra_config = dict()
+
         if action == "addpositions":
-            extra_config["refactor_enabled"] = True
+            extra_config["refactor_addpositions"] = True
             targets = ["all_add_positions"]
+        elif action == "rename":
+            extra_config["refactor_rename"] = True
+            targets = ["all_rename"]
+
         else:
             raise fire.core.FireError(f"invalid refactor option {action}")
 
@@ -67,6 +83,8 @@ class Launcher(object):
                 cores=self._cores,
                 keepgoing=self._keepgoing,
                 use_conda=True,
+                verbose=self._verbose,
+                # listrules=True,
                 conda_prefix="~/.shapece/conda",
             )
         except Exception as e:
@@ -89,6 +107,7 @@ class Launcher(object):
                 cores=self._cores,
                 keepgoing=self._keepgoing,
                 use_conda=True,
+                verbose=self._verbose,
                 conda_prefix="~/.shapece/conda",
             )
         except Exception as e:

@@ -1,22 +1,26 @@
 from snakemake.utils import validate
-import pandas as pd
+import snakemake
 import os
 import json
+import load_samples
+from functools import partial
 
-# this container defines the underlying OS for each job when using the workflow
-# with --use-conda --use-singularity
-container: "docker://continuumio/miniconda3"
+# #### load config and sample sheets #####
 
+if "config" not in vars():
+    from snakemake.utils import expand
+    from snakemake.checkpoints import checkpoints
+    from snakemake.io import glob_wildcards
 
-##### load config and sample sheets #####
-
-
-configfile: "config/config.yaml"
+    config = {}
 
 
 validate(config, schema="../schemas/config.schema.yaml")
 
 
+if "previous" in config["format"]:
+    PREV_CONDITION = config["format"]["previous"]["condition"]
+    PREV_CTRL_CONDITION = config["format"]["previous"]["control_condition"]
 CONDITION = config["format"]["condition"]
 CTRL_CONDITION = config["format"]["control_condition"]
 RAW_DATA_TYPE = config["rawdata"]["type"]
@@ -27,52 +31,25 @@ RESOURCES_DIR = config["resource_dir"] if "resource_dir" in config else "resourc
 MESSAGE = config["format"]["message"]
 CNORM = config["normalization"]
 
-def get_indexes(replicates_in_index=True):
-    indexes = ["rna_id"]
-    indexes.extend(config["conditions"])
-    if replicates_in_index:
-        indexes.append("replicate")
-    return indexes
+indexes = load_samples.get_indexes(config, replicates_in_index=True)
+indexes_no_rep = load_samples.get_indexes(config, replicates_in_index=False)
+unindexed_samples = load_samples.get_unindexed_samples(config)
+samples = load_samples.get_samples(config)
+samples_no_rep_index = load_samples.get_samples(config, replicate_in_index=False)
 
+get_sample = partial(load_samples.get_sample, config)
 
-condition_types = {name: "str" for name in config["conditions"]}
-condition_types['id'] = "str"
-condition_types['rna_id'] = "str"
-condition_types['replicate'] = "str"
-
-unindexed_samples = pd.read_csv(
-    config["samples"], sep="\t", dtype=condition_types
-)  # .set_index("sample", drop=False)
-
-unindexed_samples = unindexed_samples.loc[ \
-    (unindexed_samples["discard"] != "yes") & \
-    (unindexed_samples["discard"] != True)]
-
-validate(unindexed_samples, schema="../schemas/samples.schema.yaml",
-        set_default=True)
-
-if config['qushape']['use_subsequence']:
-    unindexed_samples['rt_begin_pos'] = unindexed_samples['rt_begin_pos'].astype(int)
-    unindexed_samples['rt_end_pos'] = unindexed_samples['rt_end_pos'].astype(int)
-
-samples = unindexed_samples.set_index(get_indexes(), drop=True)
-index_count = pd.Index(samples.index).value_counts()
-if len(index_count[index_count > 1]) > 0:
-    print("Duplicated entry in samples file")
-    print(f"Entries: {index_count[index_count > 1]}")
-    raise Exception("Duplicated entry")
-
-samples_no_rep_index = unindexed_samples.set_index(
-    get_indexes(replicates_in_index=False), drop=True
-)
 
 pool_ids = [pool["id"] for pool in config["ipanemap"]["pools"]]
 # samples = samples[samples.ref.notnull()]
 # samples.index.names = ["sample_id"]
 
+
 def get_reactive_nucleotides(wildcards):
     if wildcards.probe in config["probe"]:
-        return construct_list_param(config["probe"][wildcards.probe], "reactive_nucleotides")
+        return construct_list_param(
+            config["probe"][wildcards.probe], "reactive_nucleotides"
+        )
     else:
         return construct_list_param(CNORM, "reactive_nucleotides")
 
@@ -82,6 +59,7 @@ def construct_dict_param(config_category, param_name):
         dictparam = json.dumps(dict(config_category[param_name]))
         return f"--{param_name}='{dictparam}'"
     return ""
+
 
 def construct_list_param(config_category, param_name):
     if param_name in config_category and len(config_category[param_name]) > 0:
@@ -95,7 +73,7 @@ def construct_param(config_category, param_name):
     return ""
 
 
-## Relative to tools/normalize_reactivity
+# Relative to tools/normalize_reactivity
 def construct_normcol():
     arg = ""
     if "norm_column" in config["aggregate"]:
@@ -108,33 +86,46 @@ def construct_normcol():
     return arg
 
 
-def get_sample(wildcards, list_replicates=False):
-    sval = [wildcards.rna_id]
-    sval.extend([wildcards[cond] for cond in config["conditions"]])
-
-    if list_replicates:
-        return samples_no_rep_index.loc[[tuple(sval)]]
-    
-    sval.append(wildcards.replicate)
-    return samples.loc[[tuple(sval)]]
-
-
 def construct_path(
-    step, control=False, results_dir=True, ext=None, show_replicate=True,
-    log_dir=False, figure=False, split_seq=False, force_split_seq=False):
-    cond = (
-        f"_{CONDITION}"
-        if not control
-        else expand(f"_{CTRL_CONDITION}", control=CONTROL, allow_missing=True)[0]
-    )
+    step,
+    control=False,
+    results_dir=True,
+    ext=None,
+    show_replicate=True,
+    log_dir=False,
+    figure=False,
+    split_seq=False,
+    force_split_seq=False,
+    previous=False,
+    merged_conditions=False,
+    source=None,
+):
+    if merged_conditions:
+        cond = "_{conditions}"
+    elif previous:
+        cond = (
+            f"_{PREV_CONDITION}"
+            if not control
+            else expand(f"_{PREV_CTRL_CONDITION}", control=CONTROL, allow_missing=True)[
+                0
+            ]
+        )
+    else:
+        cond = (
+            f"_{CONDITION}"
+            if not control
+            else expand(f"_{CTRL_CONDITION}", control=CONTROL, allow_missing=True)[0]
+        )
     figdir = "figures/" if figure else ""
     basedir = "logs" if log_dir else (RESULTS_DIR if results_dir else RESOURCES_DIR)
     replicate = "_{replicate}" if show_replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
-    ssplit = "_seq{rt_end_pos}-{rt_begin_pos}" if (split_seq \
-             and config['qushape']['use_subsequence']) or force_split_seq \
-             else "" 
+    ssplit = (
+        "_seq{rt_end_pos}-{rt_begin_pos}"
+        if (split_seq and config["qushape"]["use_subsequence"]) or force_split_seq
+        else ""
+    )
 
     path = expand(
         f"{basedir}/{figdir}{pid}{cond}{replicate}{ssplit}{extension}",
@@ -142,8 +133,26 @@ def construct_path(
         step=step,
         allow_missing=True,
     )
-    ##print(path)
+    # print(step)
+    # print(source)
+    # print(merged_conditions)
+    # print(path)
     return path
+
+
+def construct_full_condition_path(
+    wildcards, step, results_dir=True, ext=None, previous=False
+):
+    path = construct_path(
+        step=step, results_dir=results_dir, merged_conditions=False, previous=previous,
+        ext=ext
+    )[0]
+    # print(path)
+    if previous:
+        return path  # f"--full-previous-condition-format {path}"
+    else:
+        return path  # f"--full-condition-format {path}"
+
 
 def aggregate_input_type():
     if config["qushape"]["use_subsequence"]:
@@ -151,57 +160,68 @@ def aggregate_input_type():
     else:
         return "normreact"
 
+
 def get_ddntp_qushape(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     return sample["ddNTP"]
 
+
 def get_external_qushape(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
 
 
 def get_raw_probe_input(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
 
 
 def get_raw_control_input(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
 
+
 def get_align_begin(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples,wildcards).iloc[0]
     return sample["rt_end_pos"]
 
+
 def get_align_end(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     return sample["rt_begin_pos"]
 
+
 def get_align_reactivity_inputs(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
 
     fa = f"{config['sequences'][wildcards.rna_id]}"
-    #fa = f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
-         #f"{wildcards.rna_id}_{sample['rt_end_pos']}-{sample['rt_begin_pos']}.fasta"
-    norm = expand(construct_path("normreact", split_seq=True),
-            rt_end_pos=sample['rt_end_pos'],rt_begin_pos=sample['rt_begin_pos'],
-            **wildcards )
-    return {"refseq": fa, "norm": norm} 
+    # fa = f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
+    # f"{wildcards.rna_id}_{sample['rt_end_pos']}-{sample['rt_begin_pos']}.fasta"
+    norm = expand(
+        construct_path("normreact", split_seq=True),
+        rt_end_pos=sample["rt_end_pos"],
+        rt_begin_pos=sample["rt_begin_pos"],
+        **wildcards,
+    )
+    return {"refseq": fa, "norm": norm}
 
 
 def get_subseq(wildcards, split_seq=False):
-    sample = get_sample(wildcards, list_replicates=split_seq)
+    # sample = get_sample(wildcards, list_replicates=split_seq)
     fasta = config["sequences"][wildcards.rna_id]
 
     if split_seq and config["qushape"]["use_subsequence"]:
-        return  f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
-                f"{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
+        return (
+            f"{RESULTS_DIR}/{config['folders']['subseq']}/"
+            f"{{rna_id}}_{{rt_end_pos}}-{{rt_begin_pos}}.fasta"
+        )
 
     if os.path.exists(fasta):
         return fasta
     else:
         raise snakemake.exceptions.MissingInputExceptions(-1, fasta)
     return []
+
 
 def get_refseq(wildcards):
     fasta = config["sequences"][wildcards.rna_id]
@@ -210,9 +230,8 @@ def get_refseq(wildcards):
     return []
 
 
-
 def get_qushape_refproj(wildcards):
-    sample = get_sample(wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     path = None
     if isinstance(sample["reference_qushape_file"], str):
         path = os.path.join(
@@ -225,7 +244,7 @@ def get_qushape_refproj(wildcards):
 
 
 def get_replicate_list(wildcards):
-    replicates = get_sample(wildcards, list_replicates=True)
+    replicates = get_sample(samples_no_rep_index,wildcards)
     return replicates["replicate"]
 
 
@@ -234,19 +253,21 @@ def get_ipanemap_pool_inputs(pool):
     for cond in pool["conditions"]:
         inputs.extend(
             expand(
-                construct_path(
-                    "aggreact-ipanemap", show_replicate=False, ext=".shape"
-                ),
+                construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
                 rna_id=pool["rna_id"],
                 **cond,
             )
         )
     return inputs
 
+
 def get_footprint_comp_input(comp, cond_name):
-    return expand(construct_path("aggreact", show_replicate=False), 
-           rna_id=comp["rna_id"],**comp[cond_name])
-    
+    return expand(
+        construct_path("aggreact", show_replicate=False),
+        rna_id=comp["rna_id"],
+        **comp[cond_name],
+    )
+
 
 def get_footprint_inputs(wildcards):
     inputs = []
@@ -257,33 +278,65 @@ def get_footprint_inputs(wildcards):
 
     return inputs
 
+
 def get_ipanemap_inputs(wildcards):
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == wildcards.pool_id:
-            return get_ipanemap_pool_inputs(pool) 
+            return get_ipanemap_pool_inputs(pool)
     return []
 
-def get_all_raw_refactors_outputs(raw_data_type=RAW_DATA_TYPE):
+
+def get_all_raw_rename_outputs(raw_data_type=RAW_DATA_TYPE):
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(results_dir=False, step=raw_data_type,
-                force_split_seq=True)[0].format(**row)
+        sample = construct_path(results_dir=False, step=raw_data_type)[0].format(**row)
 
-        control = construct_path(results_dir=False, step=raw_data_type, control=True,
-                force_split_seq=True)[
+        control = construct_path(results_dir=False, step=raw_data_type, control=True,)[
             0
         ].format(**row)
-        sample_src = construct_path(results_dir=False, step=raw_data_type,
-                force_split_seq=False)[0].format(**row)
-        control_src = construct_path(results_dir=False, step=raw_data_type,
-                control=True, force_split_seq=False)[
-            0
-        ].format(**row)
+        sample_src = construct_path(
+            results_dir=False, step=raw_data_type, previous=True
+        )[0].format(**row)
+        control_src = construct_path(
+            results_dir=False, step=raw_data_type, control=True, previous=True
+        )[0].format(**row)
+        if os.path.exists(sample_src):
+            outputs.append(sample)
+        if os.path.exists(control_src):
+            outputs.append(control)
+    # print(outputs)
+    return outputs
+
+
+def get_all_raw_addpositions_outputs(raw_data_type=RAW_DATA_TYPE):
+    outputs = []
+    for idx, row in samples.reset_index().iterrows():
+        sample = construct_path(
+            results_dir=False, step=raw_data_type, force_split_seq=True
+        )[0].format(**row)
+
+        control = construct_path(
+            results_dir=False, step=raw_data_type, control=True, force_split_seq=True
+        )[0].format(**row)
+        sample_src = construct_path(
+            results_dir=False,
+            step=raw_data_type,
+            force_split_seq=False,
+            split_seq=False,
+        )[0].format(**row)
+        control_src = construct_path(
+            results_dir=False,
+            step=raw_data_type,
+            control=True,
+            force_split_seq=False,
+            split_seq=False,
+        )[0].format(**row)
         if os.path.exists(sample_src):
             outputs.append(sample)
         if os.path.exists(control_src):
             outputs.append(control)
     return outputs
+
 
 def get_all_raw_outputs():
     outputs = []
@@ -296,22 +349,41 @@ def get_all_raw_outputs():
         outputs.append(control)
     return outputs
 
-def get_all_qushape_refactors_outputs():
+
+def get_all_qushape_rename_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(step="qushape", ext=".qushape",
-                split_seq=True, force_split_seq=True)[0].format(**row)
-        sample_src = construct_path(step="qushape", ext=".qushape",
-                split_seq=False, force_split_seq=False)[0].format(**row)
+        sample = construct_path(step="qushape", ext=".qushape",)[
+            0
+        ].format(**row)
+        sample_src = construct_path(step="qushape", ext=".qushape", previous=True)[
+            0
+        ].format(**row)
         if os.path.exists(sample_src):
             outputs.append(sample)
     return outputs
 
+
+def get_all_qushape_addpositions_outputs():
+    outputs = []
+    for idx, row in samples.reset_index().iterrows():
+        sample = construct_path(
+            step="qushape", ext=".qushape", split_seq=True, force_split_seq=True
+        )[0].format(**row)
+        sample_src = construct_path(
+            step="qushape", ext=".qushape", split_seq=False, force_split_seq=False
+        )[0].format(**row)
+        if os.path.exists(sample_src):
+            outputs.append(sample)
+    return outputs
+
+
 def get_all_qushape_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(step="qushape", ext=".qushape",
-                split_seq=True)[0].format(**row)
+        sample = construct_path(step="qushape", ext=".qushape", split_seq=True)[
+            0
+        ].format(**row)
         outputs.append(sample)
     return outputs
 
@@ -319,8 +391,7 @@ def get_all_qushape_outputs():
 def get_all_reactivity_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(step="reactivity",
-                split_seq=True)[0].format(**row)
+        sample = construct_path(step="reactivity", split_seq=True)[0].format(**row)
         outputs.append(sample)
     return outputs
 
@@ -330,18 +401,18 @@ def get_all_aggreact_outputs():
     for idx, row in samples.reset_index().iterrows():
         sample = expand(construct_path(step="aggreact", show_replicate=False), **row)
         sampleipan = expand(
-            construct_path("aggreact-ipanemap", show_replicate=False,
-                ext=".shape"), **row
+            construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
+            **row,
         )
         outputs.append(sample)
         outputs.append(sampleipan)
-#        else:
-#            sample = expand(construct_path("qushape", ext=".qushape"), **row)
-#            outputs.append(sample)
+    #        else:
+    #            sample = expand(construct_path("qushape", ext=".qushape"), **row)
+    #            outputs.append(sample)
     return outputs
 
 
-## Not parallel, to be improved
+# Not parallel, to be improved
 def get_all_structure_outputs(wildcards):
     outputs = []
     for pool in config["ipanemap"]["pools"]:
@@ -365,15 +436,21 @@ def get_all_structure_outputs(wildcards):
 
     return outputs
 
+
 def get_all_footprint_outputs(wildcards):
     outputs = []
     for compare in config["footprint"]["compares"]:
         outputs.extend(
-            expand(f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_footprint_{{foot_id}}.tsv",
+            expand(
+                f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_footprint_{{foot_id}}.tsv",
                 folder=config["folders"]["footprint"],
                 rna_id=compare["rna_id"],
-                foot_id=compare["id"], **wildcards))
+                foot_id=compare["id"],
+                **wildcards,
+            )
+        )
     return outputs
+
 
 def get_varna_pool_concat_inputs(wildcards):
     inputs = []
@@ -382,10 +459,11 @@ def get_varna_pool_concat_inputs(wildcards):
             for cond in pool["conditions"]:
                 inputs.extend(
                     expand(
-                        f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
+                        f"{RESULTS_DIR}/{{folder}}/"
+                        f"{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
                         folder=config["folders"]["varna"],
                         **wildcards,
-                        **cond
+                        **cond,
                     )
                 )
             return inputs
@@ -407,23 +485,24 @@ def get_all_varna_by_condition_outputs(wildcards):
         for cond in pool["conditions"]:
             outputs.extend(
                 expand(
-                    f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
+                    f"{RESULTS_DIR}/{{folder}}/"
+                    f"{{rna_id}}_pool_{{pool_id}}_{{idx}}_cond_{CONDITION}.varna",
                     folder=config["folders"]["varna"],
                     rna_id=pool["rna_id"],
                     pool_id=pool["id"],
                     idx=glob.idx,
-                    **cond
+                    **cond,
                 )
             )
-#        outputs.extend(
-#            expand(
-#                "{RESULTS_DIR}/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
-#                folder=config["folders"]["varna"],
-#                rna_id=pool["rna_id"],
-#                pool_id=pool["id"],
-#                idx=glob.idx,
-#            )
-#        )
+    #        outputs.extend(
+    #            expand(
+    #                "{RESULTS_DIR}/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+    #                folder=config["folders"]["varna"],
+    #                rna_id=pool["rna_id"],
+    #                pool_id=pool["id"],
+    #                idx=glob.idx,
+    #            )
+    #        )
     return outputs
 
 
@@ -448,16 +527,17 @@ def get_all_varna_pool_concat_outputs(wildcards):
                 idx=glob.idx,
             )
         )
-#        outputs.extend(
-#            expand(
-#                "{RESULTS_DIR}/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
-#                folder=config["folders"]["varna"],
-#                rna_id=pool["rna_id"],
-#                pool_id=pool["id"],
-#                idx=glob.idx,
-#            )
-#        )
+    #        outputs.extend(
+    #            expand(
+    #                "{RESULTS_DIR}/{folder}/{rna_id}_pool_{pool_id}_{idx}.svg",
+    #                folder=config["folders"]["varna"],
+    #                rna_id=pool["rna_id"],
+    #                pool_id=pool["id"],
+    #                idx=glob.idx,
+    #            )
+    #        )
     return outputs
+
 
 # def get_final_outputs():
 #    exppath = "resources/{fluo-ceq8000}ceq8000/{folder}/{sample}.tsv"
@@ -465,8 +545,8 @@ def get_all_varna_pool_concat_outputs(wildcards):
 #    print(samples)
 #    for row in samples.itertuples(name="Sample"):
 #        folder = row.folder
-#        sample = exppath.format(folder=folder,sample=os.path.splitext(row.sample_filename)[0])
-#        control = exppath.format(folder=folder,sample=os.path.splitext(row.control_filename)[0])
+#        sample = exppath.format(folder=folder,
+#        sample=os.path.splitext(row.sample_filename)[0])
+#        control = exppath.format(folder=folder,
+#        sample=os.path.splitext(row.control_filename)[0])
 #    return outputs
-
-
