@@ -17,28 +17,41 @@ class Launcher(object):
         stoponerror: bool = False,
         verbose: bool = False,
     ):
-        if config is not None:
-            config = [config]
-        self._config = config
+        self._config = self._choose_config(config)
         self._cores = cores
         self._keepgoing = not stoponerror
         self._verbose = verbose
 
-    def config(self, dev=False):
+    def _choose_config(self, config):
         config = (
-            self._config[0]
-            if self._config is not None
-            else ("config.yaml" if os.path.exists("config.yaml") else "config/config.yaml")
+            config
+            if config is not None
+            else (
+                "config.yaml" if os.path.exists("config.yaml") else "config/config.yaml"
+            )
         )
         if not os.path.exists(config):
             raise fire.core.FireError(
                 f"{config} file does not exist, please init your "
                 "project using `shapece init` command or specify another path"
             )
+        print(config)
+        return config
 
+    def config(self, dev=False):
         path = os.path.join(base_path, "configurator.ipynb")
         env = os.environ.copy()
-        env["CONFIG_FILE_PATH"] = os.path.join(config)
+        env["CONFIG_FILE_PATH"] = os.path.join(self._config)
+        env["PROJECT_PATH"] = os.path.join(os.getcwd())
+        if dev:
+            subprocess.run(["jupyter-notebook", path], env=env)
+        else:
+            subprocess.run(["voila", path], env=env)
+
+    def report(self, dev=False):
+        path = os.path.join(base_path, "report.ipynb")
+        env = os.environ.copy()
+        env["CONFIG_FILE_PATH"] = os.path.join(self._config)
         env["PROJECT_PATH"] = os.path.join(os.getcwd())
         if dev:
             subprocess.run(["jupyter-notebook", path], env=env)
@@ -77,7 +90,7 @@ class Launcher(object):
         try:
             sm.snakemake(
                 os.path.join(base_path, "workflow", "Snakefile"),
-                configfiles=self._config,
+                configfiles=[self._config],
                 config=extra_config,
                 targets=targets,
                 cores=self._cores,
@@ -101,7 +114,7 @@ class Launcher(object):
         try:
             sm.snakemake(
                 os.path.join(base_path, "workflow", "Snakefile"),
-                configfiles=self._config,
+                configfiles=[self._config],
                 config=extra_config,
                 targets=targets,
                 cores=self._cores,
