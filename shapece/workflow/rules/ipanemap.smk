@@ -149,7 +149,7 @@ rule varna_color_by_condition:
             allow_missing=True,
         ),
         svg=report(expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx,\d+}}_cond_{{conditions}}.svg",
+            f"{RESULTS_DIR}/figures/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{idx,\d+}}_cond_{{conditions}}.svg",
             folder=config["folders"]["varna"],
             conditions=CONDITION,
             allow_missing=True,
