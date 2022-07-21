@@ -8,7 +8,7 @@
 #```yaml
 # samples: "config/samples.tsv" 
 #```
-samples: "config/samples.tsv"
+samples: "samples.tsv"
 
 results_dir: results
 resource_dir: resources

@@ -1,7 +1,6 @@
 import copy
 import yaml
 import json
-VARNA = "workflow/scripts/VARNAcmd.jar"
 
 def generate_conditions_config(pool_id, config):
     conditions = {}
@@ -158,12 +157,12 @@ rule varna_color_by_condition:
     log:
         f"logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}_{CONDITION}.log",
     shell:
-        f"java -jar {VARNA} -i {{input.struct}} -o {{output.varna}}" 
+        f"varna_wrapper -i {{input.struct}} -o {{output.varna}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}}_"
         f"{{wildcards.idx}} - {{wildcards.rna_id}}' "
         f"&> {{log}};"
-        f"java -jar {VARNA} -i {{input.struct}} -o {{output.svg}}" 
+        f"varna_wrapper -i {{input.struct}} -o {{output.svg}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}}_"
         f"{{wildcards.idx}} - {{wildcards.rna_id}}' "
@@ -187,7 +186,7 @@ rule varna_pool_concat:
     log:
         f"logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}.log",
     shell:
-        f"java -jar {VARNA} {{params.inputs}} -o {{output.varna}} &> {{log}};"
+        f"varna_wrapper {{params.inputs}} -o {{output.varna}} &> {{log}};"
 
 
 

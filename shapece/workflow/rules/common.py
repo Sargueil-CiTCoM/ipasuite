@@ -117,7 +117,11 @@ def construct_path(
             else expand(f"_{CTRL_CONDITION}", control=CONTROL, allow_missing=True)[0]
         )
     figdir = "figures/" if figure else ""
-    basedir = "logs" if log_dir else (RESULTS_DIR if results_dir else RESOURCES_DIR)
+    basedir = (
+        f"{RESULTS_DIR}/logs"
+        if log_dir
+        else (RESULTS_DIR if results_dir else RESOURCES_DIR)
+    )
     replicate = "_{replicate}" if show_replicate else ""
     extension = ".{step}.tsv" if ext is None else ext
     pid = "{folder}/{rna_id}" if not log_dir else "{step}-{rna_id}"
@@ -144,8 +148,11 @@ def construct_full_condition_path(
     wildcards, step, results_dir=True, ext=None, previous=False
 ):
     path = construct_path(
-        step=step, results_dir=results_dir, merged_conditions=False, previous=previous,
-        ext=ext
+        step=step,
+        results_dir=results_dir,
+        merged_conditions=False,
+        previous=previous,
+        ext=ext,
     )[0]
     # print(path)
     if previous:
@@ -182,7 +189,7 @@ def get_raw_control_input(wildcards):
 
 
 def get_align_begin(wildcards):
-    sample = get_sample(samples,wildcards).iloc[0]
+    sample = get_sample(samples, wildcards).iloc[0]
     return sample["rt_end_pos"]
 
 
@@ -244,7 +251,7 @@ def get_qushape_refproj(wildcards):
 
 
 def get_replicate_list(wildcards):
-    replicates = get_sample(samples_no_rep_index,wildcards)
+    replicates = get_sample(samples_no_rep_index, wildcards)
     return replicates["replicate"]
 
 
@@ -277,6 +284,14 @@ def get_footprint_inputs(wildcards):
             inputs.extend(get_footprint_comp_input(comp, "condition2"))
 
     return inputs
+
+
+def get_footprint_condition_name(wildcards, idx):
+    for comp in config["footprint"]["compares"]:
+        if comp["id"] == wildcards.foot_id:
+            return config["format"]["condition"].format(**comp[f"condition{idx}"])
+
+    return None
 
 
 def get_ipanemap_inputs(wildcards):

@@ -9,6 +9,7 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 
+plt.style.library['seaborn-dark']
 
 def plot_reactivity(
     df: pd.DataFrame, title="Reactivity", output="fig.svg", format="svg"
@@ -16,7 +17,7 @@ def plot_reactivity(
     df = df.sort_values(by=["seqNum"], ascending=True)
     df["xlabel"] = df["seqRNA"].astype(str) + "\n" + df["seqNum"].astype(str)
 
-    df.plot(
+    ax = df.plot(
         x="xlabel",
         y=["areaRX", "areaBG", "areaDiff"],
         width=0.7,
@@ -24,8 +25,11 @@ def plot_reactivity(
         kind="bar",
         figsize=(len(df), 4),
     )
+    ax.set_xlabel("Sequence")
+    ax.set_ylabel("Raw reactivity")
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
+
     plt.tight_layout()
     plt.savefig(output, format=format)
 
@@ -63,6 +67,7 @@ def extract_reactivity(
     qushape_project: str,
     output: str = "reactivity.tsv.txt",
     plot: str = None,
+    plot_title: str = None,
     rna_file: str = None,
     dry_run=False,
 ):
@@ -83,7 +88,8 @@ def extract_reactivity(
 
     if plot is not None:
         df = pd.read_csv(output, sep="\t")
-        plot_reactivity(df, output, plot)
+        title = plot_title if plot_title is not None else output
+        plot_reactivity(df, title, plot)
 
 
 def main():

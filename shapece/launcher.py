@@ -17,7 +17,7 @@ class Launcher(object):
         stoponerror: bool = False,
         verbose: bool = False,
     ):
-        self._config = self._choose_config(config)
+        self._config = config
         self._cores = cores
         self._keepgoing = not stoponerror
         self._verbose = verbose
@@ -39,40 +39,64 @@ class Launcher(object):
         return config
 
     def config(self, dev=False):
+        self._config = self._choose_config(self._config)
         path = os.path.join(base_path, "configurator.ipynb")
         env = os.environ.copy()
         env["CONFIG_FILE_PATH"] = os.path.join(self._config)
         env["PROJECT_PATH"] = os.path.join(os.getcwd())
         if dev:
-            subprocess.run(["jupyter-notebook", path], env=env)
+            subprocess.Popen(["jupyter-notebook", path], env=env)
         else:
-            subprocess.run(["voila", path], env=env)
+            subprocess.Popen(["voila", path], env=env)
 
+    #    def report(self):
+    #        targets = ["all"]
+    #        extra_config = dict()
+    #        report_path =os.path.join(os.getcwd(),"report.html")
+    #        try:
+    #            sm.snakemake(
+    #                os.path.join(base_path, "workflow", "Snakefile"),
+    #                configfiles=[self._config],
+    #                config=extra_config,
+    #                targets=targets,
+    #                cores=self._cores,
+    #                report=report_path,
+    #                keepgoing=self._keepgoing,
+    #                use_conda=True,
+    #                verbose=self._verbose,
+    #                conda_prefix="~/.shapece/conda",
+    #            )
+    #        except Exception as e:
+    #            print(e)
+    #        webbrowser.open_new_tab(report_path)
     def report(self, dev=False):
+        self._config = self._choose_config(self._config)
         path = os.path.join(base_path, "report.ipynb")
         env = os.environ.copy()
         env["CONFIG_FILE_PATH"] = os.path.join(self._config)
         env["PROJECT_PATH"] = os.path.join(os.getcwd())
         if dev:
-            subprocess.run(["jupyter-notebook", path], env=env)
+            subprocess.Popen(["jupyter-notebook", path], env=env)
         else:
-            subprocess.run(["voila", path], env=env)
+            subprocess.Popen(["voila", path], env=env)
 
     def init(self, project: str):
+
         if os.path.exists(project):
             fire.core.FireError(f"{project} folder already exists")
 
-        os.makedirs(os.path.join(project, "resources"))
-        os.mkdir(os.path.join(project, "results"))
         os.mkdir(os.path.join(project, "config"))
         shutil.copy(
             os.path.join(base_path, "config", "config.tpl.yaml"),
-            os.path.join(project, "config", "config.yaml"),
+            os.path.join(project, "config.yaml"),
         )
         shutil.copy(
             os.path.join(base_path, "config", "samples.tpl.tsv"),
-            os.path.join(project, "config", "samples.tsv"),
+            os.path.join(project, "samples.tsv"),
         )
+
+        os.makedirs(os.path.join(project, "resources"))
+        os.mkdir(os.path.join(project, "results"))
 
     def refactor(self, action: str = "addpositions"):
         extra_config = dict()
@@ -90,7 +114,7 @@ class Launcher(object):
         try:
             sm.snakemake(
                 os.path.join(base_path, "workflow", "Snakefile"),
-                configfiles=[self._config],
+                configfiles=[self._config] if self._config else None,
                 config=extra_config,
                 targets=targets,
                 cores=self._cores,
@@ -107,14 +131,14 @@ class Launcher(object):
         self,
         action="all",
     ):
-
         targets = ["all"]
         extra_config = dict()
 
         try:
+        #if True:
             sm.snakemake(
                 os.path.join(base_path, "workflow", "Snakefile"),
-                configfiles=[self._config],
+                configfiles=[self._config] if self._config else None,
                 config=extra_config,
                 targets=targets,
                 cores=self._cores,

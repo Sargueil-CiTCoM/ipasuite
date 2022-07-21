@@ -5,8 +5,11 @@ import fire
 import copy
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 from matplotlib import cm
 import itertools
+
+plt.style.library["seaborn-dark"]
 
 ddof = 1
 
@@ -120,16 +123,19 @@ def plot_aggregate(
     plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
+    print(meanstdev.index.get_level_values("seqNum") - 1)
     ax.errorbar(
-        meanstdev.index.get_level_values("seqNum") - 1,
+        range(0, meanstdev.shape[0]),
         meanstdev["mean"],
         yerr=meanstdev["stdev"],
         fmt="",
         color="k",
         ls="none",
-        capsize=4,
+        capsize=2,
         linewidth=0.5,
     )
+    ax.set_xlabel("Sequence")
+    ax.set_ylabel("Aggregated reactivity")
     try:
         plt.tight_layout()
         plt.savefig(fulloutput, format=format)
@@ -138,7 +144,7 @@ def plot_aggregate(
         open(fulloutput, "a").close()
 
     fig, ax = plt.subplots(
-        nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 7, 4)
+        nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 4, 4)
     )
 
     aggregated["color"] = ReactivityThreshold.COLOR_NONE
@@ -191,9 +197,18 @@ def plot_aggregate(
         colormap=cm.cubehelix,
         linewidth=0.5,
     )
+    ax.set_xlabel("Sequence")
+    ax.set_ylabel("Aggregated reactivity")
     plt.margins(0)
     plt.title(title, loc="left")
-    plt.legend(loc="upper left")
+
+    legend_elements = [
+        Patch(facecolor=ReactivityThreshold.COLOR_HIGH, label="High Reactivity"),
+        Patch(facecolor=ReactivityThreshold.COLOR_MEDIUM, label="Medium Reactivity"),
+        Patch(facecolor=ReactivityThreshold.COLOR_LOW, label="Low Reactivity"),
+        Patch(facecolor=ReactivityThreshold.COLOR_INVALID, label="Invalid Reactivity"),
+    ]
+    plt.legend(handles=legend_elements, loc="upper left")
     try:
         plt.tight_layout()
         plt.savefig(output, format=format)
@@ -425,6 +440,7 @@ def aggregate(
     min_dispersion: float = 0.05,
     fullplot: str = None,
     plot: str = None,
+    plot_title: str = None,
     err_on_dup: bool = True,
 ):
     """Aggregate reactivity files together
@@ -542,7 +558,8 @@ def aggregate(
         aggripan.to_csv(map_output, sep="\t", float_format="%.4f", header=False)
     if plot is not None or fullplot is not None:
         try:
-            plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=output)
+            title = plot_title if plot_title is not None else output
+            plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=title)
         except ValueError as e:
             print(f"Unable to save plot: {e}")
             open(fullplot, "a").close()

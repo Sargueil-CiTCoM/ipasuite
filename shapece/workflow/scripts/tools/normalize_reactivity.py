@@ -6,6 +6,8 @@ import fire
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.style.library['seaborn-dark']
+
 allowed_methods = ["simple", "interquartile"]
 
 
@@ -23,7 +25,7 @@ def plot_norm_reactivity(
         "interquartile_norm_reactivity",
     ] = 0
 
-    df.plot(
+    ax = df.plot(
         x="xlabel",
         y=["simple_norm_reactivity", "interquartile_norm_reactivity"],
         #width=0.7,
@@ -34,10 +36,12 @@ def plot_norm_reactivity(
         x_compat=True,
         xticks=np.arange(0, len(df)+1, 1)
     )
+    ax.set_xlabel("Sequence")
+    ax.set_ylabel("Normalized reactivity")
     plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
-    #plt.tight_layout()
+    plt.tight_layout()
     plt.savefig(output, format=format)
 
 
@@ -214,7 +218,8 @@ def normalize_one_path(
     simple_norm_term_avg_percentile: float = 90.0,
     low_norm_reactivity_threshold: float = -0.3,
     norm_methods: [str] = ["simple", "interquartile"],
-    plot: str = None
+    plot: str = None,
+    plot_title: str = None
 ) -> int:
 
     intensity_area_df = pd.read_csv(inputpath, sep="\t")
@@ -290,7 +295,8 @@ def normalize_one_path(
     norm_df.to_csv(outputpath, sep="\t", float_format="%.4f")
 
     if plot is not None:
-        plot_norm_reactivity(norm_df, outputpath, plot)
+        title = plot_title if plot_title is not None else outputpath
+        plot_norm_reactivity(norm_df, title, plot)
 
     return 0
 
@@ -305,6 +311,7 @@ def normalize_all(
     low_norm_reactivity_threshold: float = -0.3,
     norm_methods: [str] = ["simple", "interquartile"],
     plot: str = None,
+    plot_title: str = None
 ) -> int:
     """Normalized reactivity for each input files
 
@@ -353,7 +360,8 @@ def normalize_all(
         "simple_norm_term_avg_percentile": simple_norm_term_avg_percentile,
         "low_norm_reactivity_threshold": low_norm_reactivity_threshold,
         "norm_methods": norm_methods,
-        "plot": plot
+        "plot": plot,
+        "plot_title": plot_title
     }
 
     if output is None or not os.path.isdir(output):

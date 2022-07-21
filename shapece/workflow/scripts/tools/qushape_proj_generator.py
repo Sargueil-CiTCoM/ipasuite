@@ -10,14 +10,14 @@ import pickle
 from copy import deepcopy
 
 
-def getProjRefData(filepath):
+def getProjData(filepath):
     refproj = None
     if os.path.exists(filepath):
 
         db = bsddb.hashopen(filepath)
         try:
             refproj = pickle.loads(db[b"dProject"], encoding="latin1")
-        except:
+        except Exception:
             refproj = pickle.loads(db[b"dProject"])
 
         db.close()
@@ -66,7 +66,7 @@ def createDProject(
         dproj["RNA"] = qsff.readBaseFile(dproj["fNameSeq"])
 
     if refproj is not None and refproj != "":
-        dprojref = getProjRefData(dproj["fNameRef"])
+        dprojref = getProjData(dproj["fNameRef"])
         dproj["RNA"] = dprojref["RNA"]
         dproj["isRef"] = True
 
@@ -108,7 +108,31 @@ def createQuShapeFile(
     channels={"RX": 0, "RXS1": 2, "BG": 0, "BGS1": 2},
     ddNTP: str = "ddC",
     path: str = None,
+    overwrite="never",
 ):
+    """createQuShapeFile.
+
+    Parameters
+    ----------
+    rxfile : str
+        rxfile
+    bgfile : str
+        bgfile
+    output : str
+        output
+    refseq : str
+        refseq
+    refproj : str
+        refproj
+    channels :
+        channels
+    ddNTP : str
+        ddNTP
+    path : str
+        path
+    overwrite :
+        overwrite file (never / untreated / always)
+    """
 
     if refseq is None and refproj is None:
         print(
@@ -129,15 +153,33 @@ def createQuShapeFile(
     )
 
     if os.path.exists(output):
-        os.remove(output)
-    db = bsddb.hashopen(output)
-    dBase = shelve.BsdDbShelf(db, protocol=2)
-    dBase["dProject"] = deepcopy(dproj)
-    dBase["intervalData"] = [deepcopy(dproj)]
-    dBase["dProjRef"] = deepcopy(dprojref)
-    dBase["dVar"] = deepcopy(dvar)
-    dBase.close()
-    db.close()
+        if overwrite == "never":
+            raise FileExistsError(
+                f"{output} exists - remove the file or change `overwrite`"
+                "to 'untreated' or 'always' to proceed"
+            )
+
+        elif overwrite == "untreated":
+            proj = getProjData(output)
+            if "area" in proj["dPeakRX"] and len(proj["seqNum"]) > 0:
+                os.utime(output, None)
+                print(f"{output} is treated - updated date")
+            else:
+                print(f"{output} is not treated - overwriting")
+
+        elif overwrite == "always":
+            print(f"{output} exists - overwriting file")
+            os.remove(output)
+
+    if not os.path.exists(output):
+        db = bsddb.hashopen(output)
+        dBase = shelve.BsdDbShelf(db, protocol=2)
+        dBase["dProject"] = deepcopy(dproj)
+        dBase["intervalData"] = [deepcopy(dproj)]
+        dBase["dProjRef"] = deepcopy(dprojref)
+        dBase["dVar"] = deepcopy(dvar)
+        dBase.close()
+        db.close()
 
 
 def main():

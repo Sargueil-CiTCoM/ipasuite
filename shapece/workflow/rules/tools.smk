@@ -1,32 +1,17 @@
-TOOLS = "workflow/scripts/tools/"
 
 
 if RAW_DATA_TYPE == "fluo-ceq8000":
     rule fluo_ceq8000:
-        #conda: "../envs/tools.yml"
-        input: construct_path(step="fluo-ceq8000", results_dir=False)
-        output: protected(construct_path(step="fluo-ce", results_dir=False))
+        input: construct_path(step="fluo-ceq8000")
+        output: protected(construct_path(step="fluo-ce"))
         log: construct_path('fluo-ce', ext=".log", log_dir=True)
         message: f"Converting ceq8000 data for qushape: {MESSAGE} replicate"
                  f" {{wildcards.replicate}}"
         shell:
             f"ceq8000_to_tsv {{input}} {{output}} &> {{log}}"
 
-
-
-# If a qushape file from outside exists
-#rule import_qushape:
-#    input: construct_path("qushape", ext=".qushape", results_dir=False)
-#    output: construct_path("qushape", ext=".qushape")
-#    log: construct_path('qushape', ext=".log", log_dir=True)
-#    message: f"Importing from ressource: {MESSAGE} replicate"
-#             f"{{wildcards.replicate}}"
-#    shell:
-#        "cp {input} {output} &> {log}"
-
 if config["qushape"]["use_subsequence"]:
     rule split_fasta:
-        #conda: "../envs/tools.yml"
         input:
             ancient(get_refseq)
         output:
@@ -44,10 +29,9 @@ if config["qushape"]["use_subsequence"]:
             f" --end {{wildcards.rt_begin_pos}}"
 
 rule generate_project_qushape:
-    #conda: "../envs/tools.yml"
     input:
-        rx = ancient(construct_path("fluo-ce", results_dir = False)),
-        bg = ancient(construct_path("fluo-ce", control = True, results_dir = False)),
+        rx = ancient(construct_path("fluo-ce")),
+        bg = ancient(construct_path("fluo-ce", control = True )),
         refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True)),
         refproj = ancient(get_qushape_refproj)
     message: f"Generate QuShape project for {MESSAGE}"
@@ -56,11 +40,8 @@ rule generate_project_qushape:
         refseq=lambda wildcards, input: f"--refseq={input.refseq}",
         refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
         ddNTP=lambda wildcards: f"--ddNTP={get_ddntp_qushape(wildcards)}",
-        channels= construct_dict_param(config["qushape"], "channels")
-        #TODO channels
-        #channels=
-    #output: protected(construct_path("qushape", ext=".qushape"))
-
+        channels= construct_dict_param(config["qushape"], "channels"),
+        overwrite="--overwrite=untreated"
     log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
     output: construct_path("qushape", ext=".qushape", split_seq=True)
     shell:
@@ -68,45 +49,32 @@ rule generate_project_qushape:
         f" {{params}} --output={{output}} &> {{log}}"
 
 rule extract_reactivity:
-    #conda:  "../envs/tools.yml"
     input: 
         qushape = construct_path("qushape", ext=".qushape", split_seq=True),
         refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True))
     output:
         react=construct_path("reactivity", split_seq=True),
-        plot=report(construct_path("reactivity", ext=".reactivity.svg", 
-            figure=True, split_seq=True),
-            category="3.1-Reactivity", subcategory=CONDITION)
+        plot=report(construct_path("reactivity", ext=".reactivity.svg",  figure=True, split_seq=True), category="3.1-Reactivity", subcategory=CONDITION),
         #,protect = protected(construct_path("qushape", ext=".qushape"))
     params:
-        rna_file=lambda wildcards, input: f"--rna_file {input.refseq}" if config["qushape"]["check_integrity"] else ""
+        rna_file=lambda wildcards, input: f"--rna_file {input.refseq}" if config["qushape"]["check_integrity"] else "",
+        plot_title=lambda wildcards: f"--plot_title='Reactivity of {MESSAGE.format(wildcards=wildcards)} - replicate {wildcards.replicate}'"
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True, split_seq=True)
 
     shell:
-        f"""
-        set +e
-        qushape_extract_reactivity {{input.qushape}} {{params.rna_file}}\
-                --output={{output.react}} --plot={{output.plot}} &> {{log}}
-
-        exitcode=$?
-        if [ $exitcode != 0 ] ; then
-            echo -n 'ERROR: '
-            cat {{log}}
-        fi
-        exit $exitcode
-        """
+        f"qushape_extract_reactivity {{input.qushape}} {{params}}"
+        f" --output={{output.react}} --plot={{output.plot}} &> {{log}}"
 
 rule normalize_reactivity:
-    #conda:  "../envs/tools.yml"
     input: construct_path("reactivity", split_seq=True)
     output:
         nreact=construct_path("normreact", split_seq=True),
         plot=report(construct_path("normreact", ext=".normreact.svg",
             figure=True, split_seq=True) ,
                 category="3.2-Normalized reactivity", subcategory=CONDITION) if
-        config["normalization"]["plot"] else []
+        config["normalization"]["plot"] else [],
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
@@ -117,14 +85,14 @@ rule normalize_reactivity:
         norm_methods = construct_list_param(CNORM, "norm_methods"),
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile"),
-        plot =  lambda wildcards, output: f"--plot={output.plot}" if config["normalization"]["plot"] else ""
+        plot =  lambda wildcards, output: f"--plot={output.plot}" if config["normalization"]["plot"] else "",
+        plot_title=lambda wildcards: f"--plot_title='Normalized Reactivity of {MESSAGE.format(wildcards=wildcards)} - replicate {wildcards.replicate}'"
     shell:
         f"normalize_reactivity {{params}} {{input}}"
         f" --output={{output.nreact}}  &> {{log}}"
 
 if config["qushape"]["use_subsequence"]:
     rule align_reactivity_to_ref:
-        #conda: "../envs/tools.yml"
         input: unpack(get_align_reactivity_inputs)
         output: construct_path("alignnormreact")
         params:
@@ -140,7 +108,6 @@ if config["qushape"]["use_subsequence"]:
 
 
 rule aggregate_reactivity:
-    #conda:  "../envs/tools.yml"
     input:
         norm= lambda wildcards: expand(construct_path(aggregate_input_type()),
                 replicate=get_replicate_list(wildcards), allow_missing=True),
@@ -166,7 +133,8 @@ rule aggregate_reactivity:
         maxmp = construct_param(config["aggregate"], "max_mean_perc"),
         mind = construct_param(config["aggregate"], "min_dispersion"),
         plot = lambda wildcards, output: f"--plot={output.plot} --fullplot={output.fullplot}" if
-        config["aggregate"]["plot"] else ""
+        config["aggregate"]["plot"] else "",
+        plot_title=lambda wildcards: f"--plot_title='Aggregated reactivity of {MESSAGE.format(wildcards=wildcards)}'"
         #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
         f"aggregate_reactivity {{input.norm}}"
@@ -178,12 +146,11 @@ rule aggregate_reactivity:
 
 
 rule footprint:
-    #conda: "../envs/tools.yml"
     input:
         get_footprint_inputs,
     output:
         tsv=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.tsv",
-        plot=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.svg",
+        plot=report(f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
     log: "logs/footprint_{{rna_id}}_footprint_{foot_id}.log"
     params:
         ttest_pvalue_thres = construct_param(config["footprint"]["config"],
@@ -194,10 +161,13 @@ rule footprint:
                 "diff_thres"),
         ratio_thres = construct_param(config["footprint"]["config"],
                 "ratio_thres"),
+        cond1_name = lambda wildcards: f"--cond1_name='{get_footprint_condition_name(wildcards, 1)}'",
+        cond2_name = lambda wildcards: f"--cond2_name='{get_footprint_condition_name(wildcards, 2)}'",
+        plot_title = lambda wildcards: f"--plot_title='Compared reactivity between {get_footprint_condition_name(wildcards, 1)} and {get_footprint_condition_name(wildcards, 2)}'"
     shell:
         f"footprint {{input}}"
         f" --output={{output.tsv}} {{params}}"
-        f" --plot={{output.plot}} --plot_format=svg --plot_title='{{wildcards.foot_id}}'"
+        f" --plot={{output.plot}} --plot_format=svg "
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"
 #    input: construct_path("aggreact-ipanemap", replicate = False)

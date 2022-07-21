@@ -5,7 +5,7 @@ if config["allow_auto_import"] and not ('refactor_enabled' in config and
         input:
             get_raw_probe_input,
         output:
-            protected(construct_path(RAW_DATA_TYPE, results_dir=False, split_seq=True)),
+            protected(construct_path(RAW_DATA_TYPE, split_seq=True)),
         log:
             construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, split_seq=True),
         message:
@@ -21,7 +21,7 @@ if config["allow_auto_import"] and not ('refactor_enabled' in config and
         input:
             get_raw_control_input,
         output:
-            protected(construct_path(RAW_DATA_TYPE, control=True, results_dir=False, split_seq=True)),
+            protected(construct_path(RAW_DATA_TYPE, control=True, split_seq=True)),
         log:
             construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True, split_seq=True),
         message:
@@ -60,3 +60,4 @@ rule importraw:
 rule importqushape:
     input:
         ancient(get_all_qushape_outputs()),
+    

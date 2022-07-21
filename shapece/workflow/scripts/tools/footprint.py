@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 import scipy
@@ -7,13 +9,9 @@ import scipy.stats
 import fire
 
 
-def ratio_sig_test(
-    footprint, ttest_pvalue_thres=0.01, diff_thres=0.2, ratio_thres=0.2
-):
+def ratio_sig_test(footprint, ttest_pvalue_thres=0.01, diff_thres=0.2, ratio_thres=0.2):
     footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint[
-        "ttest"
-    ].apply(
+    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
         lambda row: row["delta"]
         if row["pvalue"] <= ttest_pvalue_thres
         and np.abs(row["delta"]) >= diff_thres
@@ -26,12 +24,9 @@ def ratio_sig_test(
 
 def zfactor_sig_test(footprint, ttest_pvalue_thres=0.01, zfactor_thres=0):
     footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint[
-        "ttest"
-    ].apply(
+    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
         lambda row: row["delta"]
-        if row["pvalue"] <= ttest_pvalue_thres
-        and row["zfactor"] > zfactor_thres
+        if row["pvalue"] <= ttest_pvalue_thres and row["zfactor"] > zfactor_thres
         else np.NaN,
         axis=1,
     )
@@ -40,12 +35,8 @@ def zfactor_sig_test(footprint, ttest_pvalue_thres=0.01, zfactor_thres=0):
 
 def ttest_only_sig_test(footprint, ttest_pvalue_thres=0.01):
     footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint[
-        "ttest"
-    ].apply(
-        lambda row: row["delta"]
-        if row["pvalue"] <= ttest_pvalue_thres
-        else np.NaN,
+    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
+        lambda row: row["delta"] if row["pvalue"] <= ttest_pvalue_thres else np.NaN,
         axis=1,
     )
     return footprint
@@ -59,9 +50,7 @@ def ratio_zfactor_sig_test(
     zfactor_thres=0,
 ):
     footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint[
-        "ttest"
-    ].apply(
+    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
         lambda row: row["delta"]
         if row["pvalue"] <= ttest_pvalue_thres
         and row["zfactor"] > zfactor_thres
@@ -111,7 +100,7 @@ def footprint_ttest(
                 row.loc[cond2_name][deviation_type],
                 row.loc[cond2_name]["used_values"],
                 equal_var=True,
-                alternative='two-sided'
+                alternative="two-sided",
             )
             delta = row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"]
             ratio = np.abs(delta) / (
@@ -156,6 +145,8 @@ def plot_reactivity(
     output="fig.svg",
     format="svg",
     deviation_type="stdev",
+    cond1_name="Condition1",
+    cond2_name="Condition2",
 ):
 
     replicates = footprint.drop("ttest", axis=1)
@@ -188,9 +179,7 @@ def plot_reactivity(
 
     ttest = ttest.reset_index()
 
-    ttest["xlabel"] = (
-        ttest["seqNum"].astype(str) + "\n" + ttest["sequence"].astype(str)
-    )
+    ttest["xlabel"] = ttest["seqNum"].astype(str) + "\n" + ttest["sequence"].astype(str)
     ttest["color"] = "white"
     ttest.loc[ttest["significant_delta"] > 0, "color"] = "yellow"
     ttest.loc[ttest["significant_delta"] < 0, "color"] = "orange"
@@ -212,6 +201,15 @@ def plot_reactivity(
     ax.axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
 
     plt.margins(0)
+    legend_elements = [
+        Patch(facecolor="green", label=f"{cond1_name}"),
+        Patch(facecolor="lime", label=f"{cond2_name}", alpha=0.5),
+        Patch(facecolor="yellow", label=f"{cond1_name} sign. Higher", alpha=0.3),
+        Patch(facecolor="orange", label=f"{cond2_name} sign. Higher", alpha=0.3),
+        Line2D([0], [0], color="red", label="High reactivity threshold"),
+        Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
+    ]
+    plt.legend(handles=legend_elements, loc="upper left")
     plt.title(title, loc="left")
     plt.tight_layout()
     plt.savefig(output, format=format)
@@ -274,9 +272,14 @@ def footprint_main(
             plot,
             plot_format,
             deviation_type=deviation_type,
+            cond1_name=cond1_name,
+            cond2_name=cond2_name,
         )
+
+
 def main():
     return fire.Fire(footprint_main)
+
 
 if __name__ == "__main__":
     main()
