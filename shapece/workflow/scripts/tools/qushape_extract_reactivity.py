@@ -8,8 +8,13 @@ import bsddb3 as bsddb
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
 
-plt.style.library['seaborn-dark']
+# Hack to access data from ill formed .qushape file
+sys.path.append(os.path.join(os.path.dirname(__file__), "qushape_helper"))
+
+plt.style.library["seaborn-dark"]
+
 
 def plot_reactivity(
     df: pd.DataFrame, title="Reactivity", output="fig.svg", format="svg"
@@ -41,7 +46,7 @@ def getProjData(filepath):
         db = bsddb.hashopen(filepath)
         try:
             proj = pickle.loads(db[b"dProject"], encoding="latin1")
-        except:
+        except UnicodeDecodeError:
             proj = pickle.loads(db[b"dProject"])
 
         db.close()

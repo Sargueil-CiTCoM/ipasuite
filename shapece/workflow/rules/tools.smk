@@ -151,7 +151,7 @@ rule footprint:
     output:
         tsv=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.tsv",
         plot=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
-    log: "logs/footprint_{{rna_id}}_footprint_{foot_id}.log"
+    log: "results/logs/footprint_{rna_id}_footprint_{foot_id}.log"
     params:
         ttest_pvalue_thres = construct_param(config["footprint"]["config"],
                 "ttest_pvalue_thres"),

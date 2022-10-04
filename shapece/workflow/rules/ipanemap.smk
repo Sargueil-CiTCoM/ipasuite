@@ -67,7 +67,7 @@ rule configure_ipanemap:
             allow_missing=True,
         ),
     log:
-        "logs/ipanemap-config-{rna_id}_pool_{pool_id}.log",
+        "results/logs/ipanemap-config-{rna_id}_pool_{pool_id}.log",
     run:
         generate_ipanemap_config_file(
             configfile_path=output.cfg[0],
@@ -100,7 +100,7 @@ checkpoint ipanemap:
             )
         ),
     log:
-        "logs/ipanemap-out-{rna_id}_pool_{pool_id}.log",
+        "results/logs/ipanemap-out-{rna_id}_pool_{pool_id}.log",
     shell:
         f"ipanemap -f {{input.config}} --log {{log}}"
 
@@ -123,7 +123,7 @@ rule structure:
             allow_missing=True,
         ),
     log:
-        "logs/ipanemap-{rna_id}_pool_{pool_id}_{idx}.log",
+        "results/logs/ipanemap-{rna_id}_pool_{pool_id}_{idx}.log",
     shell:
         "cp {input} {output} &> {log}"
 
@@ -155,7 +155,7 @@ rule varna_color_by_condition:
             allow_missing=True,
         ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
     log:
-        f"logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}_{CONDITION}.log",
+        f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}_{CONDITION}.log",
     shell:
         f"varna_wrapper -i {{input.struct}} -o {{output.varna}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
@@ -184,9 +184,9 @@ rule varna_pool_concat:
     params: 
         inputs=lambda wildcards, input: "".join(f" -i {ipt}" for ipt in input)
     log:
-        f"logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}.log",
+        "results/logs/varna-{rna_id}_pool_{pool_id}_{idx}.log",
     shell:
-        f"varna_wrapper {{params.inputs}} -o {{output.varna}} &> {{log}};"
+        "varna_wrapper {params.inputs} -o {output.varna} &> {log};"
 
 
 

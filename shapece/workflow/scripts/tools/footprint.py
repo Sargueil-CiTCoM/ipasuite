@@ -106,17 +106,20 @@ def footprint_ttest(
             ratio = np.abs(delta) / (
                 row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"]
             )
-            zfactor = (
-                1
-                - (
-                    zfactor_nsigma
-                    * (
-                        row.loc[cond2_name][deviation_type]
-                        + row.loc[cond1_name][deviation_type]
+            try:
+                zfactor = (
+                    1
+                    - (
+                        zfactor_nsigma
+                        * (
+                            row.loc[cond2_name][deviation_type]
+                            + row.loc[cond1_name][deviation_type]
+                        )
                     )
+                    / delta
                 )
-                / delta
-            )
+            except ZeroDivisionError: 
+                print("Z-factor computation failed : DivisionByZero")
 
             curres = pd.DataFrame(
                 [[index[0], index[1], stat, pvalue, delta, ratio, zfactor]],
