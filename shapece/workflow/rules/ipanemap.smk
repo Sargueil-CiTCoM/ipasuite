@@ -14,6 +14,11 @@ def generate_conditions_config(pool_id, config):
                     react_file = expand(construct_path("aggreact-ipanemap", show_replicate=False,
                     ext=".shape"), rna_id=rna_id, **cond)[0]
                     conditions[cond_name] = {"reactivity_file": react_file}
+            if "external_conditions" in pool:
+                for cond in pool["external_conditions"]:
+                    cond_name = cond["name"] 
+                    react_file = cond["path"] 
+                    conditions[cond_name] = {"reactivity_file": react_file}
             if "alignements" in pool:
                 for cond in pool["alignements"]:
                     name, file = cond.items()[0]

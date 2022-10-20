@@ -1,6 +1,2 @@
-id	rna_id	experimenter	probe	temperature	interaction	magnesium	ddNTP	folding_buffer	probing_delay	primer	rna_begin	rna_end	date	replicate	qushape_analysed	reference_qushape_file	probe_file	control_file	qushape_file
-1	gltB2	MP	1M7	37	none	noMg	ddA	150 mM KCl, 80 mM HEPES					4/14/2021	1	yes		1404gltb2D.txt	1404gltb2C.txt	14042021-GltB2-MCD-ddA.qushape
-2	gltB2	MP	1M7	37	none	noMg	ddA	150 mM KCl, 80 mM HEPES					6/5/2021	2	yes		GltB2D.txt	GltB2C.txt	060520210-GltB2-MCD-ddA.qushape
-3	gltB2	MP	1M7	37	none	noMg	ddA	150 mM KCl, 80 mM HEPES					3/5/2021	3	yes		gltB_MD1.txt	gltB_MC1.txt	03052021-gltB2-MCD-ddA-1.qushape
-4	gltB2	MP	1M7	37	none	noMg	ddA	150 mM KCl, 80 mM HEPES					3/5/2021	4	yes		gltB_MD2.txt	gltB_MC2.txt	03052021-GltB2-MCD-ddA-2.qushape
-5	gltB2	MP	1M7	37	none	noMg	ddA	150 mM KCl, 80 mM HEPES					3/5/2021	5	yes		gltB_MD3.txt	gltB_MC3.txt	03052021-GltB2-MCD-ddA-3.qushape
+id	rna_id	date	experimenter	probe	temperature	magnesium	ddNTP	rna_begin	rna_end	rt_begin_pos	rt_end_pos	replicate	probe_file	control_file	qushape_file	reference_qushape_file	discard
+1	cuterna	4/14/2021	John Doe	1M7	37	none	ddA					1	1404gltb2D.txt	1404gltb2C.txt	14042021-GltB2-MCD-ddA.qushape		

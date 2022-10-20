@@ -34,10 +34,17 @@ def get_unindexed_samples(config):
         set_default=True,
     )
     if config["qushape"]["use_subsequence"]:
-        unindexed_samples["rt_begin_pos"] = unindexed_samples["rt_begin_pos"].astype(
-            int
+        unindexed_samples["rt_begin_pos"] = (
+            pd.to_numeric(unindexed_samples["rt_begin_pos"], errors="coerce")
+            .fillna(0)
+            .astype(int)
         )
-        unindexed_samples["rt_end_pos"] = unindexed_samples["rt_end_pos"].astype(int)
+        unindexed_samples["rt_end_pos"] = (
+            pd.to_numeric(unindexed_samples["rt_end_pos"], errors="coerce")
+            .fillna(0)
+            .astype(int)
+        )
+
     return unindexed_samples
 
 

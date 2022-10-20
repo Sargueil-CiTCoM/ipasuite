@@ -298,6 +298,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Condition"
+      external_conditions:
+        type: array
+        items:
+          "$ref": "#/definitions/ExternalCondition"
       alignements:
         type: [object, null]
         nullable: True
@@ -307,6 +311,17 @@ definitions:
     - id
     - rna_id
     title: Pool
+  ExternalCondition:
+    type: object
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    title: ExternalConditions 
+    required:
+      - name
+      - path
   Condition:
     type: object
     additionalProperties: true 

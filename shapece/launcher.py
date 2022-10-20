@@ -35,7 +35,6 @@ class Launcher(object):
                 f"{config} file does not exist, please init your "
                 "project using `shapece init` command or specify another path"
             )
-        print(config)
         return config
 
     def config(self, dev=False):
@@ -84,8 +83,7 @@ class Launcher(object):
 
         if os.path.exists(project):
             fire.core.FireError(f"{project} folder already exists")
-
-        os.mkdir(os.path.join(project, "config"))
+        os.mkdir(project)
         shutil.copy(
             os.path.join(base_path, "config", "config.tpl.yaml"),
             os.path.join(project, "config.yaml"),
@@ -131,11 +129,12 @@ class Launcher(object):
         self,
         action="all",
     ):
+        self._config = self._choose_config(self._config)
         targets = ["all"]
         extra_config = dict()
 
         try:
-        #if True:
+            # if True:
             sm.snakemake(
                 os.path.join(base_path, "workflow", "Snakefile"),
                 configfiles=[self._config] if self._config else None,

@@ -50,8 +50,8 @@ conditions:
     - DMS
     - CMCT
   temperature:
-    - 37
-    - 50
+    - "37"
+    - "50"
   magnesium:
     - Mg
     - noMg
@@ -76,7 +76,7 @@ format:
   #   condition: "{probe}_{temperature}_{magnesium}"
   #   ...
   # ```
-  condition: "{probe}_{interaction}_{magnesium}_id{id}"
+  condition: "{probe}_T{temperature}C_{magnesium}_id{id}"
   ###   
   # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content 
   #
@@ -87,7 +87,7 @@ format:
   #   control_condition: "{control}_of_{probe}_{temperature}C_{magnesium}"
   #   ...
   # ```
-  control_condition: "{control}_of_{probe}_{interaction}_{magnesium}_id{id}"
+  control_condition: "{control}_of_{probe}_T{temperature}C_{magnesium}_id{id}"
   ###
   # Format use to create comprehensible Snakemake message when running workflow. conditions must be prefixed with "wildcards."
   #
@@ -98,7 +98,7 @@ format:
   #   message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.temperature}°C {wildcards.magnesium}"
   #   ...
   # ```
-  message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.interaction} {wildcards.magnesium}"
+  message: "{wildcards.rna_id} with {wildcards.probe} with {wildcards.temperature} {wildcards.magnesium}"
 
   previous:
     condition: "{probe}_{interaction}_{magnesium}"
@@ -336,6 +336,9 @@ ipanemap:
   pools:
     - id: 1M7_Mg_none
       rna_id: test
+      external_conditions:
+        - name: 1M7_noMg_T37C_map
+          path: path/to/shape 
       conditions:
         - temperature: 37
           magnesium: noMg
