@@ -1,0 +1,48 @@
+{% set name = "rnasique" %}
+{% set version = "1.0.10" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_url: https://github.com/Sargueil-CiTCoM/shape-ce
+
+build:
+  number: 0
+  script: 
+    - "{{ PYTHON }} -m pip install --no-deps --ignore-installed ."
+    # - "{{ PYTHON }} setup.py install" # --single-version-externally-managed --record=record.txt || exit 1; "
+  
+requirements:
+  host:
+    - python
+    - pip
+    - gcc 
+    - setuptools
+  run:
+    - ipywidgets
+    - ipyfilechooser
+    - scipy
+    - fire
+    - parse
+    - pandas
+    - numpy
+    - matplotlib
+    - scikit-bio
+    - snakemake
+    - wheel
+    - cython
+    - jupyterlab
+    - voila
+    - ruamel.yaml
+    - sip
+    
+#    - bsddb3
+
+
+about:
+  home: https://sargueil-citcom.github.io/shape-ce-docs/ 
+  license: GPL3
+  license_family: GPL3
+  summary: 
