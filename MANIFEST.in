@@ -1,3 +1,5 @@
-global-include *.ipynb *.schema.yaml *.smk Snakefile *.yml 
+global-include *.ipynb *.schema.yaml *.smk Snakefile *.yml *.tpl.tsv *.tpl.yaml 
 prune .snakemake
+prune examples
 include shapece/workflow/scripts/VARNAcmd.jar
+global-exclude *.ipynb_checkpoints/*
