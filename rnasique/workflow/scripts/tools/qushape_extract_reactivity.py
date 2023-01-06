@@ -4,11 +4,13 @@ from .utils import qushapeFuncReport as qsfr
 from .utils import fasta
 import os
 import fire
-import bsddb3 as bsddb
-import pickle
+
+# import berkeleydb as bsddb
+# import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
+import yaml
 
 # Hack to access data from ill formed .qushape file
 sys.path.append(os.path.join(os.path.dirname(__file__), "qushape_helper"))
@@ -43,13 +45,15 @@ def getProjData(filepath):
     proj = None
     if os.path.exists(filepath):
 
-        db = bsddb.hashopen(filepath)
-        try:
-            proj = pickle.loads(db[b"dProject"], encoding="latin1")
-        except UnicodeDecodeError:
-            proj = pickle.loads(db[b"dProject"])
+        # db = bsddb.hashopen(filepath)
+        # try:
+        #    proj = pickle.loads(db[b"dProject"], encoding="latin1")
+        # except UnicodeDecodeError:
+        #    proj = pickle.loads(db[b"dProject"])
 
-        db.close()
+        # db.close()
+        with open(filepath, "r") as fd:
+            proj = yaml.load(fd, Loader=yaml.Loader)
     else:
         raise ValueError("Project file '{0}' not found".format(filepath))
     return proj

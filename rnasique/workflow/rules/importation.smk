@@ -1,5 +1,6 @@
-if config["allow_auto_import"] and not ('refactor_enabled' in config and
-        config['refactor_enabled']):
+if config["allow_auto_import"] and not ('refactor_rename' in config and
+        config['refactor_rename']) and not ('refactor_addpositions' in config and
+        config['refactor_addpositions']):
 
     rule import_raw_probe_data:
         input:

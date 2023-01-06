@@ -43,14 +43,26 @@ rule generate_project_qushape:
         channels= construct_dict_param(config["qushape"], "channels"),
         overwrite="--overwrite=untreated"
     log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
-    output: construct_path("qushape", ext=".qushape", split_seq=True)
+    output: construct_path("qushape", ext=".qushapey", split_seq=True)
     shell:
         f"qushape_proj_generator {{input.rx}} {{input.bg}}"
         f" {{params}} --output={{output}} &> {{log}}"
 
+rule qushape_yamlify:
+    conda:
+        "../envs/qushape.yml"
+    input:
+        qushape = construct_path("qushape", ext=".qushape", split_seq=True)
+    output:
+        qushapey = construct_path("qushape", ext=".qushapey", split_seq=True)
+    shell:
+        f"qushape_yamlify {{input.qushape}} {{output.qushapey}} &> {{log}}"
+    log: construct_path('qushape_yamlify', ext=".log", log_dir=True, split_seq=True)
+
+
 rule extract_reactivity:
     input: 
-        qushape = construct_path("qushape", ext=".qushape", split_seq=True),
+        qushape = construct_path("qushape", ext=".qushapey", split_seq=True),
         refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True))
     output:
         react=construct_path("reactivity", split_seq=True),

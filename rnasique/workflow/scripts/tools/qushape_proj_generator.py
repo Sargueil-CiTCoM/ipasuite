@@ -2,11 +2,14 @@
 
 from .utils import qushapeFuncFile as qsff
 from .utils import qushapeFuncGeneral as qsfg
-import shelve
-import bsddb3 as bsddb
+
+# import shelve
+# import berkeleydb as bsddb
 import fire
 import os
-import pickle
+
+# import pickle
+import yaml
 from copy import deepcopy
 
 
@@ -14,13 +17,15 @@ def getProjData(filepath):
     refproj = None
     if os.path.exists(filepath):
 
-        db = bsddb.hashopen(filepath)
-        try:
-            refproj = pickle.loads(db[b"dProject"], encoding="latin1")
-        except Exception:
-            refproj = pickle.loads(db[b"dProject"])
+        # db = bsddb.hashopen(filepath)
+        # try:
+        #     refproj = pickle.loads(db[b"dProject"], encoding="latin1")
+        # except Exception:
+        #     refproj = pickle.loads(db[b"dProject"])
 
-        db.close()
+        # db.close()
+        with open(filepath, "r") as fd:
+            refproj = yaml.load(fd, Loader=yaml.Loader)
     else:
         raise ValueError("Ref project file '{0}' not found".format(filepath))
     return refproj
@@ -172,14 +177,15 @@ def createQuShapeFile(
             os.remove(output)
 
     if not os.path.exists(output):
-        db = bsddb.hashopen(output)
-        dBase = shelve.BsdDbShelf(db, protocol=2)
+        # db = bsddb.hashopen(output)
+        dBase = {}  # shelve.BsdDbShelf(db, protocol=2)
         dBase["dProject"] = deepcopy(dproj)
         dBase["intervalData"] = [deepcopy(dproj)]
         dBase["dProjRef"] = deepcopy(dprojref)
         dBase["dVar"] = deepcopy(dvar)
-        dBase.close()
-        db.close()
+        yaml.dump(dBase)
+        # dBase.close()
+        # db.close()
 
 
 def main():

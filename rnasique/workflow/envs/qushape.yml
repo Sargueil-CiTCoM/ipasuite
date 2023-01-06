@@ -1,0 +1,6 @@
+name: qushape 
+channels:
+  - Sargueil-CiTCoM 
+  - free
+dependencies:
+    - qushape 
