@@ -20,6 +20,9 @@ definitions:
       refactor_rename:
         type: boolean
         description: refactoring 
+      convert_qushape:
+        type: boolean
+        description: refactoring 
       refactor_addpositions:
         type: boolean
         description: refactoring 

@@ -6,7 +6,7 @@ package:
   version: "{{ version }}"
 
 source:
-  git_url: https://github.com/Sargueil-CiTCoM/shape-ce
+  git_url: https://github.com/Sargueil-CiTCoM/rnasique
 
 build:
   number: 0

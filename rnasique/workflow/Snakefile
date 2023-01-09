@@ -20,13 +20,19 @@ if "refactor_addpositions" in config and config["refactor_addpositions"]:
             get_all_raw_addpositions_outputs("fluo-ce"),
             get_all_qushape_addpositions_outputs()
 
-if "refactor_rename" in config and config["refactor_rename"]:
+elif "refactor_rename" in config and config["refactor_rename"]:
     include: "rules/refactor.smk"
     rule all_rename:
         input:
             get_all_raw_rename_outputs(),
             get_all_raw_rename_outputs("fluo-ce"),
             get_all_qushape_rename_outputs()
+
+elif "convert_qushape" in config and config["convert_qushape"]:
+    include: "rules/convert_qushape.smk"
+    rule all_convert:
+        input:
+            get_all_qushapey_outputs()
 else:
     include: "rules/tools.smk"
     include: "rules/other.smk"

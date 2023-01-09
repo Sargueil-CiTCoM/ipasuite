@@ -393,6 +393,14 @@ def get_all_qushape_addpositions_outputs():
             outputs.append(sample)
     return outputs
 
+def get_all_qushapey_outputs():
+    outputs = []
+    for idx, row in samples.reset_index().iterrows():
+        sample = construct_path(step="qushape", ext=".qushapey", split_seq=True)[
+            0
+        ].format(**row)
+        outputs.append(sample)
+    return outputs
 
 def get_all_qushape_outputs():
     outputs = []

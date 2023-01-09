@@ -28,6 +28,7 @@ if config["qushape"]["use_subsequence"]:
             f"{{wildcards.rt_end_pos}}"
             f" --end {{wildcards.rt_begin_pos}}"
 
+
 rule generate_project_qushape:
     input:
         rx = ancient(construct_path("fluo-ce")),
@@ -48,16 +49,6 @@ rule generate_project_qushape:
         f"qushape_proj_generator {{input.rx}} {{input.bg}}"
         f" {{params}} --output={{output}} &> {{log}}"
 
-rule qushape_yamlify:
-    conda:
-        "../envs/qushape.yml"
-    input:
-        qushape = construct_path("qushape", ext=".qushape", split_seq=True)
-    output:
-        qushapey = construct_path("qushape", ext=".qushapey", split_seq=True)
-    shell:
-        f"qushape_yamlify {{input.qushape}} {{output.qushapey}} &> {{log}}"
-    log: construct_path('qushape_yamlify', ext=".log", log_dir=True, split_seq=True)
 
 
 rule extract_reactivity:

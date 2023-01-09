@@ -183,7 +183,8 @@ def createQuShapeFile(
         dBase["intervalData"] = [deepcopy(dproj)]
         dBase["dProjRef"] = deepcopy(dprojref)
         dBase["dVar"] = deepcopy(dvar)
-        yaml.dump(dBase)
+        with open(output, "w") as fd:
+            fd.write(yaml.dump(dBase))
         # dBase.close()
         # db.close()
 

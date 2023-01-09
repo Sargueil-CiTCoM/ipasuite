@@ -33,7 +33,7 @@ class Launcher(object):
         if not os.path.exists(config):
             raise fire.core.FireError(
                 f"{config} file does not exist, please init your "
-                "project using `shapece init` command or specify another path"
+                "project using `rnasique init` command or specify another path"
             )
         return config
 
@@ -63,7 +63,7 @@ class Launcher(object):
     #                keepgoing=self._keepgoing,
     #                use_conda=True,
     #                verbose=self._verbose,
-    #                conda_prefix="~/.shapece/conda",
+    #                conda_prefix="~/.rnasique/conda",
     #            )
     #        except Exception as e:
     #            print(e)
@@ -120,11 +120,32 @@ class Launcher(object):
                 use_conda=True,
                 verbose=self._verbose,
                 # listrules=True,
-                conda_prefix="~/.shapece/conda",
+                conda_prefix="~/.rnasique/conda",
             )
         except Exception as e:
             print(e)
 
+    def convert_qushape(self):
+        self._config = self._choose_config(self._config)
+        extra_config = dict()
+        extra_config["convert_qushape"] = True
+        targets = ["all_convert"]
+
+        try:
+            sm.snakemake(
+                os.path.join(base_path, "workflow", "Snakefile"),
+                configfiles=[self._config] if self._config else None,
+                config=extra_config,
+                targets=targets,
+                cores=self._cores,
+                keepgoing=self._keepgoing,
+                use_conda=True,
+                verbose=self._verbose,
+                # listrules=True,
+                conda_prefix="~/.rnasique/conda",
+            )
+        except Exception as e:
+            print(e)
     def run(
         self,
         action="all",
@@ -144,7 +165,7 @@ class Launcher(object):
                 keepgoing=self._keepgoing,
                 use_conda=True,
                 verbose=self._verbose,
-                conda_prefix="~/.shapece/conda",
+                conda_prefix="~/.rnasique/conda",
             )
         except Exception as e:
             print(e)
