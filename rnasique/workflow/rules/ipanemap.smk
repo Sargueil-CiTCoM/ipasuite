@@ -20,8 +20,8 @@ def generate_conditions_config(pool_id, config):
                     react_file = cond["path"] 
                     conditions[cond_name] = {"reactivity_file": react_file}
             if "alignements" in pool:
-                for cond in pool["alignements"]:
-                    name, file = cond.items()[0]
+                print(pool["alignements"])
+                for name, file in pool["alignements"].items():
                     conditions[name] = {"alignement_file": file}
             break
     return conditions, rna_id

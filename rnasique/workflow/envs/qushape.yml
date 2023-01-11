@@ -1,6 +1,6 @@
 name: qushape 
 channels:
-  - Sargueil-CiTCoM 
+  - ixeft 
   - free
 dependencies:
     - qushape 

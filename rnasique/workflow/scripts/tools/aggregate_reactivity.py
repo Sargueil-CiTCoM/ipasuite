@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from matplotlib import cm
 import itertools
+import logging
 
+logger = logging.getLogger()
 plt.style.library["seaborn-dark"]
 
 ddof = 1
@@ -124,16 +126,21 @@ def plot_aggregate(
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
     print(meanstdev.index.get_level_values("seqNum") - 1)
-    ax.errorbar(
-        range(0, meanstdev.shape[0]),
-        meanstdev["mean"],
-        yerr=meanstdev["stdev"],
-        fmt="",
-        color="k",
-        ls="none",
-        capsize=2,
-        linewidth=0.5,
-    )
+    try:
+        ax.errorbar(
+            range(0, meanstdev.shape[0]),
+            meanstdev["mean"],
+            yerr=meanstdev["stdev"],
+            fmt="",
+            color="k",
+            ls="none",
+            capsize=2,
+            linewidth=0.5,
+        )
+    except Exception as e:
+        logger.error("fail to generate error bar")
+        logger.error(e)
+
     ax.set_xlabel("Sequence")
     ax.set_ylabel("Aggregated reactivity")
     try:
@@ -185,7 +192,7 @@ def plot_aggregate(
         kind="bar",
         width=1,
         color=aggregated["color"],
-        yerr="stdev",
+        yerr=None if aggregated["stdev"].isnull().all() else "stdev",
         capsize=2,
         stacked=False,
     )

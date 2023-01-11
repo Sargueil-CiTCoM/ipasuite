@@ -149,6 +149,7 @@ class Launcher(object):
     def run(
         self,
         action="all",
+        dry_run=False
     ):
         self._config = self._choose_config(self._config)
         targets = ["all"]
@@ -163,9 +164,11 @@ class Launcher(object):
                 targets=targets,
                 cores=self._cores,
                 keepgoing=self._keepgoing,
+                dryrun=dry_run,
                 use_conda=True,
                 verbose=self._verbose,
                 conda_prefix="~/.rnasique/conda",
+                rerun_triggers=["mtime"]
             )
         except Exception as e:
             print(e)

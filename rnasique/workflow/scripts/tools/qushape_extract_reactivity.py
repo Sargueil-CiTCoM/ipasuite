@@ -56,18 +56,19 @@ def getProjData(filepath):
             proj = yaml.load(fd, Loader=yaml.Loader)
     else:
         raise ValueError("Project file '{0}' not found".format(filepath))
-    return proj
+    return proj["dProject"]
 
 
 def check_qushape_using_correct_rna(project, rna_file):
 
     seqname, seq = fasta.get_first_fasta_seq(rna_file)
     seq = seq.replace("T", "U")
+    print(project)
     if not seq.startswith(project["RNA"]):
         print(
             "Qushape project RNA is different from provided rna_file :\n"
-            f"qushape seq ({project['fNameSeq']}) : {project['RNA']}\n"
-            f"rna_file seq {seqname} - {rna_file}: {seq}"
+            f"qushape seq ({project['fNameSeq']}) : \n{project['RNA']}\n"
+            f"rna_file seq {seqname} - {rna_file}: \n{seq}"
         )
         raise SystemExit(-1)
 
