@@ -80,22 +80,30 @@ def extract_reactivity(
     plot_title: str = None,
     rna_file: str = None,
     dry_run=False,
-    launch_qushape=False
+    launch_qushape=False,
 ):
+    failed = False
+    while True:
+        retry = launch_qushape
+        proj = getProjData(qushape_project)
 
-    
-    proj = getProjData(qushape_project)
+        if rna_file is not None:
+            check_qushape_using_correct_rna(proj, rna_file)
 
-    if rna_file is not None:
-        check_qushape_using_correct_rna(proj, rna_file)
+        #    if not "Reactivity" in proj["scriptList"][-1]:
+        if "area" not in proj["dPeakRX"] or len(proj["seqNum"]) == 0:
+            print("You must finish QuShape treatment to extract reactivity")
+            failed = True
 
-    #    if not "Reactivity" in proj["scriptList"][-1]:
-    if "area" not in proj["dPeakRX"] or len(proj["seqNum"]) == 0:
-        print("You must finish QuShape treatment to extract reactivity")
-        if launch_qushape:
+        if failed:
             print("launch qushape")
-        else:
-            raise SystemExit(-1)
+            launch_qushape = False
+
+        if not retry:
+            break
+
+    if failed:
+        raise SystemExit(-1)
 
     report = qsfr.createDReport(proj)
     if not dry_run:
