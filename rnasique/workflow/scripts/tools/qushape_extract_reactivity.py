@@ -80,8 +80,10 @@ def extract_reactivity(
     plot_title: str = None,
     rna_file: str = None,
     dry_run=False,
+    launch_qushape=False
 ):
 
+    
     proj = getProjData(qushape_project)
 
     if rna_file is not None:
@@ -90,7 +92,10 @@ def extract_reactivity(
     #    if not "Reactivity" in proj["scriptList"][-1]:
     if "area" not in proj["dPeakRX"] or len(proj["seqNum"]) == 0:
         print("You must finish QuShape treatment to extract reactivity")
-        raise SystemExit(-1)
+        if launch_qushape:
+            print("launch qushape")
+        else:
+            raise SystemExit(-1)
 
     report = qsfr.createDReport(proj)
     if not dry_run:
