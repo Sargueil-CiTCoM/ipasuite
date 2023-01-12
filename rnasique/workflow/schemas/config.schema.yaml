@@ -434,6 +434,13 @@ definitions:
       check_integrity:
         type: boolean
         default: True
+      run_qushape:
+        type: boolean
+        default: False
+      run_qushape_conda_env:
+        type: string
+        default: qushape
+
     required:
     - channels
     - use_subsequence

@@ -56,6 +56,9 @@ else:
             # The first rule should define the default target files
             # Subsequent target rules can be specified below. They should start with all_*.
     
+    rule all_reactivity:
+        input:
+            get_all_reactivity_outputs()
     
     rule all_aggregate:
         input:

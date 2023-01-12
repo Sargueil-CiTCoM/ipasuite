@@ -93,7 +93,7 @@ class Launcher(object):
             os.path.join(project, "samples.tsv"),
         )
 
-        os.makedirs(os.path.join(project, "resources"))
+        os.makedirs(os.path.join(project, "resources/raw_data"))
         os.mkdir(os.path.join(project, "results"))
 
     def refactor(self, action: str = "addpositions"):
@@ -146,14 +146,18 @@ class Launcher(object):
             )
         except Exception as e:
             print(e)
-    def run(
+
+    def qushape(
         self,
-        action="all",
-        dry_run=False
+        action="all_reactivity",
+        dry_run=False,
     ):
         self._config = self._choose_config(self._config)
-        targets = ["all"]
+        targets = ["all_reactivity"]
         extra_config = dict()
+
+        extra_config["qushape"] = {"run_qushape": True}
+        self._cores = 1
 
         try:
             # if True:
@@ -168,7 +172,34 @@ class Launcher(object):
                 use_conda=True,
                 verbose=self._verbose,
                 conda_prefix="~/.rnasique/conda",
-                rerun_triggers=["mtime"]
+                rerun_triggers=["mtime"],
+            )
+        except Exception as e:
+            print(e)
+
+    def run(self, action="all", dry_run=False, run_qushape=False):
+        self._config = self._choose_config(self._config)
+        targets = ["all"]
+        extra_config = dict()
+
+        if run_qushape:
+            extra_config["qushape"] = {"run_qushape": True}
+            self._cores = 1
+
+        try:
+            # if True:
+            sm.snakemake(
+                os.path.join(base_path, "workflow", "Snakefile"),
+                configfiles=[self._config] if self._config else None,
+                config=extra_config,
+                targets=targets,
+                cores=self._cores,
+                keepgoing=self._keepgoing,
+                dryrun=dry_run,
+                use_conda=True,
+                verbose=self._verbose,
+                conda_prefix="~/.rnasique/conda",
+                rerun_triggers=["mtime"],
             )
         except Exception as e:
             print(e)

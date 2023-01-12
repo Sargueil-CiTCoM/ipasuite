@@ -61,7 +61,8 @@ rule extract_reactivity:
         #,protect = protected(construct_path("qushape", ext=".qushape"))
     params:
         rna_file=lambda wildcards, input: f"--rna_file {input.refseq}" if config["qushape"]["check_integrity"] else "",
-        plot_title=lambda wildcards: f"--plot_title='Reactivity of {MESSAGE.format(wildcards=wildcards)} - replicate {wildcards.replicate}'"
+        plot_title=lambda wildcards: f"--plot_title='Reactivity of {MESSAGE.format(wildcards=wildcards)} - replicate {wildcards.replicate}'",
+        run_qushape=lambda wildcards: f"--launch-qushape --qushape-conda-env={config['qushape']['run_qushape_conda_env']}" if config["qushape"]["run_qushape"] else "",
     message: f"Extracting reactivity from QuShape for {MESSAGE}"
              f"- replicate {{wildcards.replicate}}"
     log: construct_path('reactivity', ext=".log", log_dir=True, split_seq=True)

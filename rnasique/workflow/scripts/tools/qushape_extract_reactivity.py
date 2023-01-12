@@ -11,6 +11,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sys
 import yaml
+import subprocess as sb
+
 
 # Hack to access data from ill formed .qushape file
 sys.path.append(os.path.join(os.path.dirname(__file__), "qushape_helper"))
@@ -81,12 +83,13 @@ def extract_reactivity(
     rna_file: str = None,
     dry_run=False,
     launch_qushape=False,
+    qushape_conda_env="qushape",
 ):
     failed = False
     while True:
         retry = launch_qushape
         proj = getProjData(qushape_project)
-
+        print("Try")
         if rna_file is not None:
             check_qushape_using_correct_rna(proj, rna_file)
 
@@ -95,11 +98,21 @@ def extract_reactivity(
             print("You must finish QuShape treatment to extract reactivity")
             failed = True
 
-        if failed:
-            print("launch qushape")
+        if failed and launch_qushape:
+            cmd = [
+                "/bin/bash",
+                "-i",
+                "-c",
+                f"conda activate {qushape_conda_env} && qushape {qushape_project}",
+            ]
+
+            print("Launch QuShape")
+            print(cmd)
+            sb.run(cmd)
+            print("End QuShape")
             launch_qushape = False
 
-        if not retry:
+        if not retry or not failed:
             break
 
     if failed:
