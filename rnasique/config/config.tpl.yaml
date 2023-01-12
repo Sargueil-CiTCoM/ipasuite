@@ -186,7 +186,7 @@ probe:
 # *Example:* 
 #
 # ```yaml
-#qushape:
+# qushape:
 #  check_integrity: true
 #  use_subsequence: false
 #  run_qushape: false
@@ -240,7 +240,7 @@ qushape:
 normalization:
   # Default value of Which nucleotide are reactive to the shape probe - this value is only used if the «probe» section is
   # not defined for the current probe.
- $reactive_nucleotides: ["A", "C", "G", "U"]
+  reactive_nucleotides: ["A", "C", "G", "U"]
   # All value above this percentile are considered as outliers, preliminarly to all other treatments.
   stop_percentile: 90. 
   # Value below this threshold are considered non-reactive (0.0)
