@@ -108,7 +108,6 @@ if config["qushape"]["use_subsequence"]:
             f"shift_reactivity {{input.norm}} {{input.refseq}}"
             f" {{output}} --begin {{params.rt_end_pos}} &> {{log}}"
             #f" --end {{params.rna_end}} &> {{log}}"
-     
 
 
 rule aggregate_reactivity:

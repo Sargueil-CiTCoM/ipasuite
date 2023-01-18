@@ -280,7 +280,7 @@ def get_footprint_comp_input(comp, cond_name):
 def get_footprint_inputs(wildcards):
     inputs = []
     for comp in config["footprint"]["compares"]:
-        if comp["id"] == wildcards.foot_id:
+        if comp["id"] == wildcards.foot_id and comp["rna_id"] == wildcards.rna_id:
             inputs.extend(get_footprint_comp_input(comp, "condition1"))
             inputs.extend(get_footprint_comp_input(comp, "condition2"))
 

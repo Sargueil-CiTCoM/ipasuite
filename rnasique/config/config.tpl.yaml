@@ -6,7 +6,7 @@
 # libreoffice and excel
 #Typically:
 #```yaml
-# samples: "config/samples.tsv" 
+# samples: "config/samples.tsv"
 #```
 samples: "samples.tsv"
 
@@ -15,7 +15,7 @@ resource_dir: resources
 
 ## General Workflow configuration ##
 
-### 
+###
 # List of studied RNA, with an identifier, and the corresponding fasta file
 # The fasta file should contain a description line containing the origin of the sequence (sequence database) with its unique identifier
 # all "rna_id" column value in samples.tsv must have a corresponding line in this section.
@@ -36,8 +36,8 @@ sequences:
 #
 # ```yaml
 # conditions:
-#   - probe 
-#   - temperature 
+#   - probe
+#   - temperature
 #   - magnesium
 #   - ...
 #```
@@ -45,7 +45,7 @@ conditions:
   probe:
     - 1M7
     - NMIA
-    - MIA
+    - NIA
     - BzCN
     - DMS
     - CMCT
@@ -62,14 +62,14 @@ conditions:
 allow_auto_import: True
 
 ###
-# Section to define filename and titles formatting 
+# Section to define filename and titles formatting
 format:
   ###
   # Format of the conditions, will be use to identify sample and construct filename.
   # All variable conditions should be referenced here
   # Name of the conditions must correspond a column header in the samples.tsv file
   #
-  # *Example:* 
+  # *Example:*
   # ```yaml
   # format:
   #   ...
@@ -77,10 +77,10 @@ format:
   #   ...
   # ```
   condition: "{probe}_T{temperature}C_{magnesium}"
-  ###   
-  # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content 
+  ###
+  # Same as condition but for control data. {control} will be replaced by the rawdata->control variable content
   #
-  # *Example:* 
+  # *Example:*
   # ```yaml
   # format:
   #   ...
@@ -91,7 +91,7 @@ format:
   ###
   # Format use to create comprehensible Snakemake message when running workflow. conditions must be prefixed with "wildcards."
   #
-  # *Example:* 
+  # *Example:*
   # ```yaml
   # format:
   #   ...
@@ -112,7 +112,7 @@ rawdata:
   ###
   # Path to the folder containing Raw experimental data, it will be prefixed to "control_file" and "probe_file" to auto import data from this folder. Absolute path, and relative path from project root are accepted.
   #
-  # *Example: 
+  # *Example:
   # ```yaml
   # rawdata:
   #   ...
@@ -124,7 +124,7 @@ rawdata:
   # Type of the raw data. It will establish the starting point of the pipeline. Either from file directly from the sequencer or already converted to csv.
   # Accepted values : "fluo-ceq8000" or "fluo-ce"
   #
-  # *Example:* 
+  # *Example:*
   # ```yaml
   # rawdata:
   #   ...
@@ -133,9 +133,9 @@ rawdata:
   # ```
   type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce"]
   ###
-  # Name of the control 
+  # Name of the control
   #
-  # *Example:* 
+  # *Example:*
   # ```yaml
   # rawdata:
   #   ...
@@ -144,7 +144,7 @@ rawdata:
   # ```
   control: "DMSO"
 
-    
+
 probe:
   1M7:
     reactive_nucleotides: ["A", "C", "G", "U"]
@@ -158,7 +158,7 @@ probe:
     reactive_nucleotides: ["A", "C"]
   CMCT:
     reactive_nucleotides: ["G", "U"]
-    
+
 ## Steps configurations ##
 
 ###
@@ -167,8 +167,8 @@ probe:
 # project. those informations must be identical to the configuration of your
 # capillary sequencer
 #
-# `channel` section corresponds to the definition of sequencer channels 
-# used for this project, here, channel start at index 0: channel 1 
+# `channel` section corresponds to the definition of sequencer channels
+# used for this project, here, channel start at index 0: channel 1
 # correspond to value 0
 # `use_subsequence` boolean tells if want the pipeline to manage RNA longer that what
 # your sequencer can manage, in which case, you use multiple reverse transcription
@@ -183,7 +183,7 @@ probe:
 # another sequence (Longer for example). In which case the test will fail. Only if you
 # know what your are doing you might want to disable this test. Warning: wrong sequences can
 # lead to incoherent data, duplicated entry in output file and other inconsistancy.
-# *Example:* 
+# *Example:*
 #
 # ```yaml
 # qushape:
@@ -210,20 +210,20 @@ qushape:
 
 ###
 # Reactivity Normalization configuration
-# 
-# items in this sections are equivalent of the flags available when running 
+#
+# items in this sections are equivalent of the flags available when running
 # ```bash
 # python workflow/scripts/tools/normalize_reactivity.py --help
 # ```
 # you can refer to this for more accurate information
-# 
+#
 #
 # ```yaml
 # normalization:
 #   # Which nucleotide are reactive to the shape probe
 #   reactive_nucleotides: ["A", "C", "G", "U"]
 #   # All value above this percentile are considered as outliers, preliminarly to all other treatments.
-#   stop_percentile: 90. 
+#   stop_percentile: 90.
 #   # Value below this threshold are considered non-reactive (0.0)
 #   low_norm_reactivity_threshold: -0.3
 #   # Which normalizations methods will be used, several are accepted. Autorized values are : simple, interquartile
@@ -242,7 +242,7 @@ normalization:
   # not defined for the current probe.
   reactive_nucleotides: ["A", "C", "G", "U"]
   # All value above this percentile are considered as outliers, preliminarly to all other treatments.
-  stop_percentile: 90. 
+  stop_percentile: 90.
   # Value below this threshold are considered non-reactive (0.0)
   low_norm_reactivity_threshold: -0.3
   # Which normalizations methods will be used, several are accepted. Autorized values are : simple, interquartile
@@ -254,22 +254,22 @@ normalization:
   # percentile of values averaged to create the normalization term
   simple_norm_term_avg_percentile: 90.
 
-### 
-# Replicate Aggregation configuration 
-# 
-# items in this sections are equivalent of the flags available when running 
+###
+# Replicate Aggregation configuration
+#
+# items in this sections are equivalent of the flags available when running
 # ```bash
 # python workflow/scripts/tools/aggregate_reactivity.py --help
 # ```
 # you can refer to this for more accurate information
-# 
+#
 #
 # ```yaml
 # aggregate:
-#   norm_method: simple # or interquartile 
-#   
-#   # You can specify the name of the column used for normalization instead of the normalization method 
-#   #norm_column: "simple_norm_reactivity" #  
+#   norm_method: simple # or interquartile
+#
+#   # You can specify the name of the column used for normalization instead of the normalization method
+#   #norm_column: "simple_norm_reactivity" #
 #   min_ndata_perc: 0.5
 #   min_nsubdata_perc: 0.66
 #   max_mean_perc: 0.682
@@ -277,16 +277,16 @@ normalization:
 # ```
 aggregate:
   plot: True
-  norm_method: simple # or interquartile 
-  
-  # You can specify the name of the column used for normalization instead of the normalization method 
-  #norm_column: "simple_norm_reactivity" #  
+  norm_method: simple # or interquartile
+
+  # You can specify the name of the column used for normalization instead of the normalization method
+  #norm_column: "simple_norm_reactivity" #
   min_ndata_perc: 0.5
   min_nsubdata_perc: 0.66
   max_mean_perc: 0.682
   min_dispersion: 0.05
 
-### 
+###
 # IPANEMAP configuration
 #
 # in order to calculate structures, you can define in which way you want to
@@ -295,48 +295,48 @@ aggregate:
 #
 # *Example:*
 #
-# ```yaml 
+# ```yaml
 # ipanemap:
 #   ...
 #   pools:
 #     - id: 1M7_noMg_37C
-#       rna_id: sequence1 
+#       rna_id: sequence1
 #       conditions:
 #         - temperature: 37
 #           magnesium: noMg
 #           probe: 1M7
 #     - id: allProbe_noMg_37C
-#       rna_id: sequence1 
+#       rna_id: sequence1
 #       conditions:
-#         - temperature: 37 
+#         - temperature: 37
 #           magnesium: noMg
 #           probe: 1M7
-#         - temperature: 37 
+#         - temperature: 37
 #           magnesium: noMg
 #           probe: NMIA
-#         - temperature: 37 
+#         - temperature: 37
 #           magnesium: noMg
 #           probe: BzCN
 #   ...
 # ```
-# 
+#
 # each run of IPANEMAP can be entirerly configure.
 # to create un new run (or `pool`) add a dash in the `pools` sections
 # each pool should have an unique `id` of your choice.
-# 
+#
 # `rna_id` correspond to the sequence to input to IPANEMAP this id must
 # correspond to and id of the `sequences` section of this configuration file.
 #
 # `conditions` correspond of the sets of conditions you want to be added to
 # IPANEMAP run. each set of condition start with a dash and must contains all
 # conditions references in the `conditions` section of this configuration file.
-# 
+#
 # *In the Example:*
 #
 # - first pool (1M7_noMg_37C) will be executed with "sequence1"
-# and with one condition: 
+# and with one condition:
 #   - all sample aggregated which have no magnesium, a temperature of 37C,
-# and 1M7 probing 
+# and 1M7 probing
 #
 # - second pool (allProbe_noMg_37C) will be executed with "sequence1"
 # and with 3 conditions :
@@ -358,7 +358,7 @@ ipanemap:
       rna_id: CHANGEME
       external_conditions:
         - name: 1M7_noMg_T37C_map
-          path: path/to/shape 
+          path: path/to/shape
       conditions:
         - temperature: 37
           magnesium: noMg
@@ -386,7 +386,7 @@ ipanemap:
       probing: true
 
 
-varna:  
+varna:
   colormapstyle: "$-10.00:#CCCCCC,$-0.31:#999999,$-0.3:#FFFFFF,$0.2:#FFFFFF,$0.4:#FFFF00,$0.69:#FFFF47,$0.7:#FF0000,$5.00:#FF0033"
 
 
@@ -402,7 +402,7 @@ footprint:
         temperature: 37
         magnesium: noMg
         probe: 1M7
-  config:    
+  config:
     deviation_type: stdev
     ttest_pvalue_thres: 0.01
     diff_thres: 0.2
@@ -410,11 +410,11 @@ footprint:
     plot_format: svg
 
 
-### 
-# Folder names 
-# 
+###
+# Folder names
+#
 # Intermediary folder naming is fully customable,
-# 
+#
 # *Default values:*
 #
 # ```yaml
@@ -425,7 +425,7 @@ footprint:
 #   reactivity: 3.1-reactivity
 #   normreact: 3.2-normreact
 #   aggreact: 4.1-aggreact
-#   aggreact-ipanemap: 4.2-aggreact-ipanemap  
+#   aggreact-ipanemap: 4.2-aggreact-ipanemap
 #   ipanemap-config: 5.1-ipanemap-config
 #   ipanemap-out: 5.2-ipanemap-out
 #   structure: 5.3-structure
@@ -440,7 +440,7 @@ folders:
   normreact: 3.2-normreact
   alignnormreact: 3.3-align-normreact
   aggreact: 4.1-aggreact
-  aggreact-ipanemap: 4.2-aggreact-ipanemap  
+  aggreact-ipanemap: 4.2-aggreact-ipanemap
   ipanemap-config: 5.1-ipanemap-config
   ipanemap-out: 5.2-ipanemap-out
   structure: 5.3-structure

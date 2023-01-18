@@ -162,12 +162,12 @@ rule varna_color_by_condition:
     log:
         f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_{{idx}}_{CONDITION}.log",
     shell:
-        f"varna_wrapper -i {{input.struct}} -o {{output.varna}}" 
+        f"varna -i {{input.struct}} -o {{output.varna}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}}_"
         f"{{wildcards.idx}} - {{wildcards.rna_id}}' "
         f"&> {{log}};"
-        f"varna_wrapper -i {{input.struct}} -o {{output.svg}}" 
+        f"varna -i {{input.struct}} -o {{output.svg}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}}_"
         f"{{wildcards.idx}} - {{wildcards.rna_id}}' "
@@ -191,7 +191,7 @@ rule varna_pool_concat:
     log:
         "results/logs/varna-{rna_id}_pool_{pool_id}_{idx}.log",
     shell:
-        "varna_wrapper {params.inputs} -o {output.varna} &> {log};"
+        "varna {params.inputs} -o {output.varna} &> {log};"
 
 
 
