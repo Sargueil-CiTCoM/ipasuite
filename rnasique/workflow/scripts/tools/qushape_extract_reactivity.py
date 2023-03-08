@@ -64,7 +64,7 @@ def getProjData(filepath):
 def check_qushape_using_correct_rna(project, rna_file):
 
     seqname, seq = fasta.get_first_fasta_seq(rna_file)
-    seq = seq.replace("T", "U")
+    seq = seq.upper().replace("T", "U")
     print(project)
     if not seq.startswith(project["RNA"]):
         print(
