@@ -65,7 +65,6 @@ def check_qushape_using_correct_rna(project, rna_file):
 
     seqname, seq = fasta.get_first_fasta_seq(rna_file)
     seq = seq.upper().replace("T", "U")
-    print(project)
     if not seq.startswith(project["RNA"]):
         print(
             "Qushape project RNA is different from provided rna_file :\n"
@@ -89,7 +88,6 @@ def extract_reactivity(
     while True:
         retry = launch_qushape
         proj = getProjData(qushape_project)
-        print("Try")
         if rna_file is not None:
             check_qushape_using_correct_rna(proj, rna_file)
 
