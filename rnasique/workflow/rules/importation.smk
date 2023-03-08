@@ -16,7 +16,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
                 + " replicate {wildcards.replicate}"
             )
         shell:
-            "cp {input} {output} &> {log}"
+            "cp '{input}' '{output}' &> {log}"
 
     rule import_raw_control_data:
         input:
@@ -32,7 +32,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
                 + " replicate {wildcards.replicate}"
             )
         shell:
-            "cp {input} {output} &> {log}"
+            "cp '{input}' '{output}' &> {log}"
 
     rule import_external_qushape:
         input:
@@ -48,7 +48,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
                 + " replicate {wildcards.replicate}"
             )
         shell:
-            "cp {input} {output} &> {log}"
+            "cp '{input}' '{output}' &> {log}"
 
     ruleorder: import_external_qushape > generate_project_qushape
 
