@@ -9,7 +9,7 @@ source:
   git_url: https://github.com/Sargueil-CiTCoM/rnasique
 
 build:
-  number: 0
+  number: 1
   script: 
     - "{{ PYTHON }} -m pip install --no-deps --ignore-installed ."
     # - "{{ PYTHON }} setup.py install" # --single-version-externally-managed --record=record.txt || exit 1; "
@@ -37,7 +37,7 @@ requirements:
     - voila
     - ruamel.yaml
     - sip
-    - ipanemap
+    - ipanemap>=0.1.8
     - varna
     
 about:
