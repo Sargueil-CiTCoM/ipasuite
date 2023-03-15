@@ -1,6 +1,7 @@
 from snakemake.utils import validate
 import pandas as pd
 import os
+import warnings
 
 
 def get_indexes(config, replicates_in_index=True):
@@ -54,7 +55,9 @@ def get_sample(config, samples, wildcards):
 
     if "replicate" in samples.index:
         sval.append(wildcards.replicate)
-    return samples.loc[tuple(sval)]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return samples.loc[tuple(sval)]
 
 
 def get_additionnal_wildcards(wildcards):
