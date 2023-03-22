@@ -312,16 +312,25 @@ class Launcher(object):
                             f"ipanemap {cond['path']} not found in {pool['id']} -"
                             "external {cond['name']}"
                         )
-            for conds in pool['conditions']:
-                sample_missing = sample_missing or self._check_conditions(
-                    samples, conds, pool["rna_id"], pool["id"], "ipanemap"
+            for conds in pool["conditions"]:
+                sample_missing = (
+                    self._check_conditions(
+                        samples, conds, pool["rna_id"], pool["id"], "ipanemap"
+                    )
+                    or sample_missing
                 )
         for comp in config["footprint"]["compares"]:
-            sample_missing = sample_missing or self._check_conditions(
-                samples, comp["condition1"], comp["rna_id"], comp["id"], "footprint"
+            sample_missing = (
+                self._check_conditions(
+                    samples, comp["condition1"], comp["rna_id"], comp["id"], "footprint"
+                )
+                or sample_missing
             )
-            sample_missing = sample_missing or self._check_conditions(
-                samples, comp["condition2"], comp["rna_id"], comp["id"], "footprint"
+            sample_missing = (
+                self._check_conditions(
+                    samples, comp["condition2"], comp["rna_id"], comp["id"], "footprint"
+                )
+                or sample_missing
             )
 
         return sample_missing
@@ -366,7 +375,7 @@ class Launcher(object):
         else:
             print("Configuration check succeed")
 
-        #return not seq_missing and not sample_missing
+        # return not seq_missing and not sample_missing
 
 
 def main_wrapper():
