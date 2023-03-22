@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import sys
 import yaml
 import subprocess as sb
-
+import logging
 
 # Hack to access data from ill formed .qushape file
 sys.path.append(os.path.join(os.path.dirname(__file__), "qushape_helper"))
@@ -66,7 +66,7 @@ def check_qushape_using_correct_rna(project, rna_file):
     seqname, seq = fasta.get_first_fasta_seq(rna_file)
     seq = seq.upper().replace("T", "U")
     if not seq.startswith(project["RNA"]):
-        print(
+        logging.error(
             "Qushape project RNA is different from provided rna_file :\n"
             f"qushape seq ({project['fNameSeq']}) : \n{project['RNA']}\n"
             f"rna_file seq {seqname} - {rna_file}: \n{seq}"
@@ -84,6 +84,7 @@ def extract_reactivity(
     launch_qushape=False,
     qushape_conda_env="qushape",
 ):
+    logging.basicConfig(format=f"{output}: %(levelname)s:%(message)s")
     failed = False
     while True:
         retry = launch_qushape
@@ -93,7 +94,8 @@ def extract_reactivity(
 
         #    if not "Reactivity" in proj["scriptList"][-1]:
         if "area" not in proj["dPeakRX"] or len(proj["seqNum"]) == 0:
-            print("You must finish QuShape treatment to extract reactivity")
+            logging.warning("You must finish QuShape treatment to extract "
+                  "reactivity")
             failed = True
 
         if failed and launch_qushape:
@@ -104,10 +106,10 @@ def extract_reactivity(
                 f"conda activate {qushape_conda_env} && qushape {qushape_project}",
             ]
 
-            print("Launch QuShape")
-            print(cmd)
+            logging.debug("Launch QuShape")
+            logging.debug(cmd)
             sb.run(cmd)
-            print("End QuShape")
+            logging.debug("End QuShape")
             launch_qushape = False
 
         if not retry or not failed:

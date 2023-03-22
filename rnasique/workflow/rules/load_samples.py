@@ -62,7 +62,6 @@ def get_sample(config, samples, wildcards):
 
 def get_additionnal_wildcards(wildcards):
     sample = dict(get_sample(wildcards).iloc[0])
-    print(sample)
     for w in wildcards:
         sample.pop(w, None)
     return sample

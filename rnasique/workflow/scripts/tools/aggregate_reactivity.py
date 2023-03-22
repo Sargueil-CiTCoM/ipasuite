@@ -10,7 +10,6 @@ from matplotlib import cm
 import itertools
 import logging
 
-logger = logging.getLogger()
 plt.style.library["seaborn-dark"]
 
 ddof = 1
@@ -31,7 +30,6 @@ class ReactivityThreshold:
 
 
 def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
-
     first_idx = aggregated.first_valid_index()[0]
     last_idx = aggregated.last_valid_index()[0]
     #    unit = (56 / 4.0) / (last_idx - first_idx)
@@ -125,7 +123,7 @@ def plot_aggregate(
     plt.margins(0)
     plt.title(title, loc="left")
     plt.legend(loc="upper left")
-    print(meanstdev.index.get_level_values("seqNum") - 1)
+    # print(meanstdev.index.get_level_values("seqNum") - 1)
     try:
         ax.errorbar(
             range(0, meanstdev.shape[0]),
@@ -138,8 +136,8 @@ def plot_aggregate(
             linewidth=0.5,
         )
     except Exception as e:
-        logger.error("fail to generate error bar")
-        logger.error(e)
+        logging.error("fail to generate error bar")
+        # logging.error(e)
 
     ax.set_xlabel("Sequence")
     ax.set_ylabel("Aggregated reactivity")
@@ -147,7 +145,7 @@ def plot_aggregate(
         plt.tight_layout()
         plt.savefig(fulloutput, format=format)
     except ValueError as e:
-        print(f"Unable to save fullplot: {e}")
+        logging.error(f"Unable to save fullplot: {e}")
         open(fulloutput, "a").close()
 
     fig, ax = plt.subplots(
@@ -220,7 +218,7 @@ def plot_aggregate(
         plt.tight_layout()
         plt.savefig(output, format=format)
     except ValueError as e:
-        print(f"Unable to save plot: {e}")
+        logging.error(f"Unable to save plot: {e}")
         open(output, "a").close()
 
     # mplcursors.cursor()
@@ -280,7 +278,9 @@ def most_uniform_subsample_mean_std(sample):
             sstdev = curstdev
             ssem = curssample.sem(ddof=ddof)
             smean = np.mean(curssample)
-            smad = curssample.mad()
+            smad = (
+                (curssample - curssample.mean()).abs().mean()
+            )  # Deprecated : curssample.mad()
             ssample = curssample
     return (ssample, smean, sstdev, ssem, smad)
 
@@ -368,7 +368,7 @@ def aggregate_replicates(
             curmean = values.mean()
             curstdev = values.std(ddof=ddof)
             cursem = values.sem(ddof=ddof)
-            curmad = values.mad()
+            curmad = (values - values.mean()).abs().mean()  # Deprecated : values.mad()
 
             if curstdev <= dispersion_threshold(curmean, max_mean_perc, min_dispersion):
                 mean = curmean
@@ -403,7 +403,7 @@ def aggregate_replicates(
                     mean = -10
                     stdev = values.std(ddof=ddof)
                     sem = values.sem(ddof=ddof)
-                    mad = values.mad()
+                    mad = (values - values.mean()).abs().mean()
         else:
             desc = "no-enough-values"
             mean = -10 if any([v == -10 for v in row]) else np.NaN
@@ -484,6 +484,7 @@ def aggregate(
 
     src = files
     dest = output
+    logging.basicConfig(format=f"{dest}: %(levelname)s:%(message)s")
 
     check_files(src, dest)
 
@@ -529,8 +530,8 @@ def aggregate(
     try:
         check_duplicated(aggregated)
     except ValueError as err:
-        print(err.args[0])
-        print(f"inputs: {files}")
+        logging.error(err.args[0])
+        logging.error(f"inputs: {files}")
         if err_on_dup:
             exit(1)
     # aggregated = aggregated.reset_index(level="seqRNA")
@@ -568,7 +569,7 @@ def aggregate(
             title = plot_title if plot_title is not None else output
             plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=title)
         except ValueError as e:
-            print(f"Unable to save plot: {e}")
+            logging.error(f"Unable to save plot: {e}")
             open(fullplot, "a").close()
             open(plot, "a").close()
 
