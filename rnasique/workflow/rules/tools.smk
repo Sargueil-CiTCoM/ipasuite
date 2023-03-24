@@ -28,26 +28,47 @@ if config["qushape"]["use_subsequence"]:
             f"{{wildcards.rt_end_pos}}"
             f" --end {{wildcards.rt_begin_pos}}"
 
+if "fluo-ce" in RAW_DATA_TYPE:
+    rule generate_project_qushape:
+        input:
+            rx = ancient(construct_path("fluo-ce")),
+            bg = ancient(construct_path("fluo-ce", control = True )),
+            refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True)),
+            refproj = ancient(get_qushape_refproj)
+        message: f"Generate QuShape project for {MESSAGE}"
+                 f"- replicate {{wildcards.replicate}}"
+        params:
+            refseq=lambda wildcards, input: f"--refseq={input.refseq}",
+            refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
+            ddNTP=lambda wildcards: f"--ddNTP={get_ddntp_qushape(wildcards)}",
+            channels= construct_dict_param(config["qushape"], "channels"),
+            overwrite="--overwrite=untreated"
+        log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
+        output: construct_path("qushape", ext=".qushapey", split_seq=True)
+        shell:
+            f"qushape_proj_generator {{input.rx}} {{input.bg}}"
+            f" {{params}} --output={{output}} &> {{log}}"
 
-rule generate_project_qushape:
-    input:
-        rx = ancient(construct_path("fluo-ce")),
-        bg = ancient(construct_path("fluo-ce", control = True )),
-        refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True)),
-        refproj = ancient(get_qushape_refproj)
-    message: f"Generate QuShape project for {MESSAGE}"
-             f"- replicate {{wildcards.replicate}}"
-    params:
-        refseq=lambda wildcards, input: f"--refseq={input.refseq}",
-        refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
-        ddNTP=lambda wildcards: f"--ddNTP={get_ddntp_qushape(wildcards)}",
-        channels= construct_dict_param(config["qushape"], "channels"),
-        overwrite="--overwrite=untreated"
-    log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
-    output: construct_path("qushape", ext=".qushapey", split_seq=True)
-    shell:
-        f"qushape_proj_generator {{input.rx}} {{input.bg}}"
-        f" {{params}} --output={{output}} &> {{log}}"
+if "fluo-fsa" in RAW_DATA_TYPE:
+    rule generate_project_qushape:
+        input:
+            rx = ancient(construct_path("fluo-fsa", ext=".fsa")),
+            bg = ancient(construct_path("fluo-fsa", control = True, ext=".fsa" )),
+            refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True)),
+            refproj = ancient(get_qushape_refproj)
+        message: f"Generate QuShape project for {MESSAGE}"
+                 f"- replicate {{wildcards.replicate}}"
+        params:
+            refseq=lambda wildcards, input: f"--refseq={input.refseq}",
+            refproj=lambda wildcards, input: expand('--refproj={refproj}', refproj=input.refproj)[0] if len(input.refproj) > 0 else "",
+            ddNTP=lambda wildcards: f"--ddNTP={get_ddntp_qushape(wildcards)}",
+            channels= construct_dict_param(config["qushape"], "channels"),
+            overwrite="--overwrite=untreated"
+        log: construct_path('qushape', ext=".log", log_dir=True, split_seq=True)
+        output: construct_path("qushape", ext=".qushapey", split_seq=True)
+        shell:
+            f"qushape_proj_generator {{input.rx}} {{input.bg}}"
+            f" {{params}} --output={{output}} &> {{log}}"
 
 
 

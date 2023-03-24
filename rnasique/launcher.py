@@ -11,7 +11,7 @@ import logging
 import pandas as pd
 from .workflow.rules import load_samples
 
-logging.basicConfig(format="%(levelname)s:%(message)s")
+# logging.basicConfig(format="%(levelname)s:%(message)s")
 yaml = YAML()
 base_path = os.path.dirname(__file__)
 
@@ -184,20 +184,20 @@ class Launcher(object):
 
         try:
             # if True:
-            self.check()
-            sm.snakemake(
-                os.path.join(base_path, "workflow", "Snakefile"),
-                configfiles=[self._config] if self._config else None,
-                config=extra_config,
-                targets=targets,
-                cores=self._cores,
-                keepgoing=self._keepgoing,
-                dryrun=dry_run,
-                use_conda=True,
-                verbose=self._verbose,
-                conda_prefix="~/.rnasique/conda",
-                rerun_triggers=["mtime"],
-            )
+            if self.check():
+                sm.snakemake(
+                    os.path.join(base_path, "workflow", "Snakefile"),
+                    configfiles=[self._config] if self._config else None,
+                    config=extra_config,
+                    targets=targets,
+                    cores=self._cores,
+                    keepgoing=self._keepgoing,
+                    dryrun=dry_run,
+                    use_conda=True,
+                    verbose=self._verbose,
+                    conda_prefix="~/.rnasique/conda",
+                    rerun_triggers=["mtime"],
+                )
         except Exception as e:
             logging.error(e)
             logging.error("to get more information, type : rnasique log")
@@ -213,22 +213,22 @@ class Launcher(object):
             extra_config["qushape"] = {"run_qushape": True}
             self._cores = 1
         try:
-            self.check()
-            # if True:
-            sm.snakemake(
-                os.path.join(base_path, "workflow", "Snakefile"),
-                configfiles=[self._config] if self._config else None,
-                config=extra_config,
-                targets=targets,
-                cores=self._cores,
-                keepgoing=self._keepgoing,
-                dryrun=dry_run,
-                use_conda=True,
-                verbose=self._verbose,
-                conda_prefix="~/.rnasique/conda",
-                rerun_triggers=["mtime"],
-                force_incomplete=rerun_incomplete,
-            )
+            if self.check():
+                # if True:
+                sm.snakemake(
+                    os.path.join(base_path, "workflow", "Snakefile"),
+                    configfiles=[self._config] if self._config else None,
+                    config=extra_config,
+                    targets=targets,
+                    cores=self._cores,
+                    keepgoing=self._keepgoing,
+                    dryrun=dry_run,
+                    use_conda=True,
+                    verbose=self._verbose,
+                    conda_prefix="~/.rnasique/conda",
+                    rerun_triggers=["mtime"],
+                    force_incomplete=rerun_incomplete,
+                )
         except Exception as e:
             logging.error(e)
             logging.error("to get more information, type : rnasique log")
@@ -309,7 +309,7 @@ class Launcher(object):
                 for cond in pool["external_conditions"]:
                     if not os.path.exists(cond["path"]):
                         logging.error(
-                            f"ipanemap {cond['path']} not found in {pool['id']} -"
+                            f"Error: ipanemap {cond['path']} not found in {pool['id']} -"
                             "external {cond['name']}"
                         )
             for conds in pool["conditions"]:
@@ -362,20 +362,20 @@ class Launcher(object):
         for file in seqs:
             if not os.path.exists(file):
                 seq_missing = True
-                logging.error(f"Sequence: {file} not found")
+                logging.error(f"Error: Sequence: {file} not found")
 
         for file in files:
             if not os.path.exists(file):
                 raw_missing = True
-                logging.warning(f"Raw data : {file} not found")
+                logging.warning(f"Warning: Raw data : {file} not found")
 
         sample_missing = self._check_samples(config, samples)
         if raw_missing or seq_missing or sample_missing:
-            logging.error("Problems where found when checking pipeline")
+            logging.error("-- Problems where found when checking pipeline --")
         else:
             print("Configuration check succeed")
 
-        # return not seq_missing and not sample_missing
+        return not seq_missing and not sample_missing
 
 
 def main_wrapper():

@@ -364,8 +364,8 @@ ipanemap:
           magnesium: noMg
           probe: 1M7
       alignements:
-        alignment_name: file.aln
-        alignement_name2: file2.aln
+        #alignment_name: .aln
+        #alignement_name2: file2.aln
 
   config:
     sampling:
@@ -432,17 +432,18 @@ footprint:
 #   varna: 5.4-varna
 # ```
 folders:
-  fluo-ceq8000: 1.1-fluo-ceq8000
-  fluo-ce: 1.2-fluo-ce
-  subseq: 1.3-subseq
+  fluo-fsa: 1.1-fluo-raw
+  fluo-ceq8000: 1.1-fluo-raw
+  fluo-ce: 1.2-fluo-ceq8000-trim
+  subseq: 1.3-sub-sequences
   qushape: 2-qushape
   reactivity: 3.1-reactivity
-  normreact: 3.2-normreact
-  alignnormreact: 3.3-align-normreact
-  aggreact: 4.1-aggreact
-  aggreact-ipanemap: 4.2-aggreact-ipanemap
+  normreact: 3.2-normalized-reactivity
+  alignnormreact: 3.3-align-normalized-reactivity
+  aggreact: 4.aggregated-reactivity
+  aggreact-ipanemap: 4.aggregated-reactivity
   ipanemap-config: 5.1-ipanemap-config
-  ipanemap-out: 5.2-ipanemap-out
+  ipanemap-out: 5.2-ipanemap-temp
   structure: 5.3-structure
   varna: 5.4-varna
   footprint: 5.5-footprint

@@ -102,12 +102,15 @@ definitions:
     type: object
     additionalProperties: false
     properties:
+      fluo-fsa:
+        type: string
+        default: "1.1-fluo-raw"
       fluo-ceq8000:
         type: string
-        default: "1.1-fluo-ceq8000"
+        default: "1.1-fluo-raw"
       fluo-ce:
         type: string
-        default: "1.2-fluo-ce"
+        default: "1.2-fluo-ceq8000-trim"
       subseq:
         type: string
         default: "1.3-subseq" 
@@ -119,22 +122,22 @@ definitions:
         default: "3.1-reactivity"
       normreact:
         type: string
-        default: "3.2-normreact" 
+        default: "3.2-normalized-reactivity" 
       alignnormreact:
         type: string
-        default: "3.3-align-normreact" 
+        default: "3.3-align-normalized-reactivity" 
       aggreact:
         type: string
-        default: "4.1-aggreact"
+        default: "4.1-aggregated-reactivity"
       aggreact-ipanemap:
         type: string
-        default: "4.2-aggreact-ipanemap"
+        default: "4.2-aggregated-reactivity"
       ipanemap-config:
         type: string
         default: "5.1-ipanemap-config" 
       ipanemap-out:
         type: string
-        default: "5.2-ipanemap-out"
+        default: "5.2-ipanemap-temp"
       structure:
         type: string
         default: "5.3-structure"
