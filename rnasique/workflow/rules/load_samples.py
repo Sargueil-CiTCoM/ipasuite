@@ -53,7 +53,7 @@ def get_sample(config, samples, wildcards):
     sval = [wildcards["rna_id"]]
     sval.extend([wildcards[cond] for cond in config["conditions"]])
 
-    if "replicate" in samples.index:
+    if "replicate" in samples.index.names:
         sval.append(wildcards.replicate)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -74,7 +74,7 @@ def get_samples(config, replicate_in_index=True):
         get_indexes(config, replicates_in_index=replicate_in_index), drop=True
     )
 
-    index_count = pd.Index(samples.index).value_counts()
+    index_count = pd.Index(samples.index.names).value_counts()
     if replicate_in_index and len(index_count[index_count > 1]) > 0:
         print("Duplicated entry in samples file")
         print(f"Entries: {index_count[index_count > 1]}")

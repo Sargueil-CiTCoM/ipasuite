@@ -169,37 +169,37 @@ def aggregate_input_type():
 
 
 def get_ddntp_qushape(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
     return sample["ddNTP"]
 
 
 def get_external_qushape(wildcards):
-    sample = get_sample(samples, wildcards)  # .iloc[0]
+    sample = get_sample(samples, wildcards)
     return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
 
 
 def get_raw_probe_input(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
     return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
 
 
 def get_raw_control_input(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
     return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
 
 
 def get_align_begin(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
     return sample["rt_end_pos"]
 
 
 def get_align_end(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
     return sample["rt_begin_pos"]
 
 
 def get_align_reactivity_inputs(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
 
     fa = f"{config['sequences'][wildcards.rna_id]}"
     # fa = f"{RESULTS_DIR}/{config['folders']['subseq']}/" \
@@ -239,7 +239,7 @@ def get_refseq(wildcards):
 
 
 def get_qushape_refproj(wildcards):
-    sample = get_sample(samples, wildcards).iloc[0]
+    sample = get_sample(samples, wildcards)
     path = None
     if isinstance(sample["reference_qushape_file"], str):
         path = os.path.join(

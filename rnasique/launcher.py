@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import snakemake as sm
+from snakemake.utils import validate
 import os
 import shutil
 import fire
@@ -8,10 +9,21 @@ import subprocess
 from glob import glob
 from ruamel.yaml import YAML
 import logging
-import pandas as pd
 from .workflow.rules import load_samples
+import filecmp
+import pathlib
+from colorlog import ColoredFormatter
 
+LOGFORMAT = (
+    "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
+)
+DATE_FORMAT = "%b %d %H:%M:%S"
+formatter = ColoredFormatter(LOGFORMAT)
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
 # logging.basicConfig(format="%(levelname)s:%(message)s")
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
 yaml = YAML()
 base_path = os.path.dirname(__file__)
 
@@ -146,7 +158,7 @@ class Launcher(object):
                 conda_prefix="~/.rnasique/conda",
             )
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
 
     def convert_qushape(self):
         self._config = self._choose_config(self._config)
@@ -168,7 +180,7 @@ class Launcher(object):
                 conda_prefix="~/.rnasique/conda",
             )
         except Exception as e:
-            logging.error(e)
+            logger.error(e)
 
     def qushape(
         self,
@@ -199,8 +211,8 @@ class Launcher(object):
                     rerun_triggers=["mtime"],
                 )
         except Exception as e:
-            logging.error(e)
-            logging.error("to get more information, type : rnasique log")
+            logger.error(e)
+            logger.error("to get more information, type : rnasique log")
 
     def run(
         self, action="all", dry_run=False, run_qushape=False, rerun_incomplete=False
@@ -230,13 +242,14 @@ class Launcher(object):
                     force_incomplete=rerun_incomplete,
                 )
         except Exception as e:
-            logging.error(e)
-            logging.error("to get more information, type : rnasique log")
+            logger.error(e)
+            logger.error("to get more information, type : rnasique log")
 
     def log(self, step=None, clean=False, print_filename=False):
         self._config = self._choose_config(self._config)
         with open(self._config, "r") as cfd:
             config = yaml.load(cfd)
+            validate(config, base_path + "/workflow/schemas/config.schema.yaml")
         if step is not None:
             pattern = f"{config['results_dir']}/logs/{step}*.log"
         else:
@@ -246,7 +259,7 @@ class Launcher(object):
             for file in gl:
                 os.remove(file)
             if len(gl) > 0:
-                logging.info("Log cleaned.")
+                logger.info("Log cleaned.")
 
         else:
             for file in gl:
@@ -262,9 +275,10 @@ class Launcher(object):
         try:
             begin = step_order.index(from_step)
         except ValueError:
-            logging.error(f"Authorized value for from_step :{step_order}")
+            logger.error(f"Authorized value for from_step :{step_order}")
         with open(self._config, "r") as cfd:
             config = yaml.load(cfd)
+            validate(config, base_path + "/workflow/schemas/config.schema.yaml")
 
         for folder in step_order[begin:]:
             try:
@@ -276,16 +290,48 @@ class Launcher(object):
                         config["results_dir"], "figures", config["folders"][folder]
                     )
                 )
-                logging.info(f"{folder} cleaned")
+                logger.info(f"{folder} cleaned")
             except FileNotFoundError:
-                logging.info(f"no folder for {folder}")
+                logger.info(f"no folder for {folder}")
 
             if not keep_log:
                 gl = glob(f"{config['results_dir']}/logs/{folder}*.log")
                 for file in gl:
                     os.remove(file)
                 if len(gl) > 0:
-                    logging.info(f"{folder} logs cleaned")
+                    logger.info(f"{folder} logs cleaned")
+
+    def _check_dup(self, path):
+        path = pathlib.Path(path)
+        if not os.path.exists(path):
+            return True
+        files = sorted(os.listdir(path))
+
+        distinctFileClass = []
+
+        for file_x in files:
+            are_identical = False
+
+            for class_ in distinctFileClass:
+                are_identical = filecmp.cmp(
+                    path / file_x, path / class_[0], shallow=False
+                )
+                if are_identical:
+                    class_.append(file_x)
+                    break
+            if not are_identical:
+                distinctFileClass.append([file_x])
+        contains_dup = False
+        for class_ in distinctFileClass:
+            if len(class_) > 1:
+                contains_dup = True
+                logger.warning(
+                    "files "
+                    + " and ".join(class_)
+                    + " are identicals. Make sur your are did not"
+                    " make a mistake while preparing you replicates",
+                )
+        return contains_dup
 
     def _check_conditions(self, samples, conditions, rna_id, name, type="ipanemap"):
         sample_missing = False
@@ -295,7 +341,7 @@ class Launcher(object):
         query = "".join(query)
         if len(samples.query(query)) == 0:
             sample_missing = True
-            logging.error(
+            logger.error(
                 f"{type} pool {name} cannot be handled because "
                 f"no sample is available for condition: {query}"
             )
@@ -308,9 +354,10 @@ class Launcher(object):
             if "external_conditions" in pool:
                 for cond in pool["external_conditions"]:
                     if not os.path.exists(cond["path"]):
-                        logging.error(
-                            f"Error: ipanemap {cond['path']} not found in {pool['id']} -"
-                            "external {cond['name']}"
+                        logger.error(
+                            f" ipanemap {cond['path']} not found in "
+                            f"{pool['id']} -"
+                            f" external {cond['name']}"
                         )
             for conds in pool["conditions"]:
                 sample_missing = (
@@ -342,6 +389,7 @@ class Launcher(object):
         self._config = self._choose_config(self._config)
         with open(self._config, "r") as cfd:
             config = yaml.load(cfd)
+            validate(config, base_path + "/workflow/schemas/config.schema.yaml")
 
         samples = load_samples.get_unindexed_samples(config)
 
@@ -362,16 +410,23 @@ class Launcher(object):
         for file in seqs:
             if not os.path.exists(file):
                 seq_missing = True
-                logging.error(f"Error: Sequence: {file} not found")
+                logger.error(f"Sequence: {file} not found")
 
         for file in files:
             if not os.path.exists(file):
                 raw_missing = True
-                logging.warning(f"Warning: Raw data : {file} not found")
+                logger.warning(f"Raw data : {file} not found")
+
+        self._check_dup(
+            os.path.join(config["results_dir"], config["folders"]["fluo-fsa"])
+        )
+        self._check_dup(
+            os.path.join(config["results_dir"], config["folders"]["fluo-ceq8000"])
+        )
 
         sample_missing = self._check_samples(config, samples)
         if raw_missing or seq_missing or sample_missing:
-            logging.error("-- Problems where found when checking pipeline --")
+            logger.error("-- Problems where found when checking pipeline --")
         else:
             print("Configuration check succeed")
 

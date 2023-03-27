@@ -39,6 +39,7 @@ requirements:
     - sip
     - ipanemap>=0.1.8
     - varna
+    - colorlog
     
 about:
   home: https://sargueil-citcom.github.io/shape-ce-docs/ 
