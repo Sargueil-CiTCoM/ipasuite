@@ -44,7 +44,7 @@ else:
         input:
             #get_final_outputs()
             #get_all_raw_outputs()
-            #get_all_qushape_outputs()
+            qushape=get_all_qushapey_outputs(),
             #get_all_reactivity_outputs()
             #get_all_aggreact_outputs()
             #get_all_structure_outputs

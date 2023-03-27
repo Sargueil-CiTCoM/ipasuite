@@ -307,7 +307,11 @@ def get_all_raw_rename_outputs(raw_data_type=RAW_DATA_TYPE):
     for idx, row in samples.reset_index().iterrows():
         sample = construct_path(results_dir=False, step=raw_data_type)[0].format(**row)
 
-        control = construct_path(results_dir=False, step=raw_data_type, control=True,)[
+        control = construct_path(
+            results_dir=False,
+            step=raw_data_type,
+            control=True,
+        )[
             0
         ].format(**row)
         sample_src = construct_path(
@@ -369,7 +373,10 @@ def get_all_raw_outputs():
 def get_all_qushape_rename_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
-        sample = construct_path(step="qushape", ext=".qushape",)[
+        sample = construct_path(
+            step="qushape",
+            ext=".qushape",
+        )[
             0
         ].format(**row)
         sample_src = construct_path(step="qushape", ext=".qushape", previous=True)[
@@ -393,6 +400,7 @@ def get_all_qushape_addpositions_outputs():
             outputs.append(sample)
     return outputs
 
+
 def get_all_qushapey_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
@@ -401,6 +409,7 @@ def get_all_qushapey_outputs():
         ].format(**row)
         outputs.append(sample)
     return outputs
+
 
 def get_all_qushape_outputs():
     outputs = []

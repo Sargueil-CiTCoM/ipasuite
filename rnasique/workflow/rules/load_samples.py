@@ -2,7 +2,7 @@ from snakemake.utils import validate
 import pandas as pd
 import os
 import warnings
-
+import logging
 
 def get_indexes(config, replicates_in_index=True):
     indexes = ["rna_id"]
@@ -74,9 +74,9 @@ def get_samples(config, replicate_in_index=True):
         get_indexes(config, replicates_in_index=replicate_in_index), drop=True
     )
 
-    index_count = pd.Index(samples.index.names).value_counts()
+    index_count = pd.Index(samples.index).value_counts()
     if replicate_in_index and len(index_count[index_count > 1]) > 0:
-        print("Duplicated entry in samples file")
-        print(f"Entries: {index_count[index_count > 1]}")
+        logging.error("Duplicated entry in samples file")
+        logging.error(f"Entries: {index_count[index_count > 1]}")
         raise Exception("Duplicated entry")
     return samples

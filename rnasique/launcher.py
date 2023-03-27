@@ -13,10 +13,9 @@ from .workflow.rules import load_samples
 import filecmp
 import pathlib
 from colorlog import ColoredFormatter
+import pandas as pd
 
-LOGFORMAT = (
-    "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
-)
+LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
 DATE_FORMAT = "%b %d %H:%M:%S"
 formatter = ColoredFormatter(LOGFORMAT)
 handler = logging.StreamHandler()
@@ -392,6 +391,15 @@ class Launcher(object):
             validate(config, base_path + "/workflow/schemas/config.schema.yaml")
 
         samples = load_samples.get_unindexed_samples(config)
+
+        indexes = load_samples.get_indexes(config, replicates_in_index=True)
+        ind_samples = samples.set_index(indexes, drop=True)
+        index_count = pd.Index(ind_samples.index).value_counts()
+        for i, val in index_count[index_count > 1].items():
+            logger.error(
+                f"Found {val} Duplicated samples for"
+                f" condition {dict(zip(indexes, i))}"
+            )
 
         files = (
             list(samples["probe_file"])

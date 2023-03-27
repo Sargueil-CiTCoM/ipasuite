@@ -17,7 +17,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
                     + " replicate {wildcards.replicate}"
                 )
             shell:
-                "set -x;cp '{input}' '{output}' &> {log}"
+                "cp '{input}' '{output}' &> {log}"
 
         rule import_raw_probe_data:
             input:
@@ -33,7 +33,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
                     + " replicate {wildcards.replicate}"
                 )
             shell:
-                "set -x; cp '{input}' '{output}' &> {log}"
+                " cp '{input}' '{output}' &> {log}"
 
 
     if "fluo-fsa" in RAW_DATA_TYPE:
