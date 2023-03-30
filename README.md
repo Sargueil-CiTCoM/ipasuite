@@ -1,8 +1,6 @@
-# SHAPE-CE Snakemake workflow
+# RNASique
 
-[![Snakemake](https://img.shields.io/badge/snakemake-≥5.7.0-brightgreen.svg)](https://snakemake.bitbucket.io)
-
-Shape-CE workflow intend to provide automation in the data treatment of SHAPE Capillary Electrophorese.
+RNAsique workflow intend to provide automation in the data treatment of SHAPE Capillary Electrophorese.
 
 It relies on :
 
@@ -23,7 +21,6 @@ All information about how to use this workflow can be found at :
 ## Usage
 
 If you use this workflow in a paper, don't forget to give credits to the authors by citing the URL of this (original) repository and, if available, its DOI (see above).
-
 
 
 ## Contribute back
