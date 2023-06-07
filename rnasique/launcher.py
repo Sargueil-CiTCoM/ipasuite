@@ -10,6 +10,7 @@ from glob import glob
 from ruamel.yaml import YAML
 import logging
 from .workflow.rules import load_samples
+from .workflow.scripts.tools.utils import fasta
 import filecmp
 import pathlib
 from colorlog import ColoredFormatter
@@ -385,6 +386,7 @@ class Launcher(object):
         seq_missing = False
         raw_missing = False
         sample_missing = False
+        seq_not_fasta = False
         self._config = self._choose_config(self._config)
         with open(self._config, "r") as cfd:
             config = yaml.load(cfd)
@@ -419,6 +421,21 @@ class Launcher(object):
             if not os.path.exists(file):
                 seq_missing = True
                 logger.error(f"Sequence: {file} not found")
+            else:
+                try:
+                    fastaseqs = fasta.fasta_iter(file)
+                    for fname, fseq in fastaseqs:
+                        if not fseq.isupper():
+                            logger.warning("Sequence contains lowercase")
+                        if "T" in fseq:
+                            logger.warning("Sequence contains 'T', it should contains "
+                                           "'U' in order to be RNA")
+                except Exception as e:
+                    print(e)
+                    logger.error(f"Sequence: {file} does not seems to be a fasta file")
+                    seq_not_fasta = True
+
+                
 
         for file in files:
             if not os.path.exists(file):
@@ -433,7 +450,7 @@ class Launcher(object):
         )
 
         sample_missing = self._check_samples(config, samples)
-        if raw_missing or seq_missing or sample_missing:
+        if raw_missing or seq_missing or sample_missing or seq_not_fasta:
             logger.error("-- Problems where found when checking pipeline --")
         else:
             print("Configuration check succeed")
