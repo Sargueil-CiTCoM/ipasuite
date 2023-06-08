@@ -180,12 +180,16 @@ def get_external_qushape(wildcards):
 
 def get_raw_probe_input(wildcards):
     sample = get_sample(samples, wildcards)
-    return os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
+    path = os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
+    print(path)
+    return path
 
 
 def get_raw_control_input(wildcards):
     sample = get_sample(samples, wildcards)
-    return os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
+    path = os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
+    print(path)
+    return path
 
 
 def get_align_begin(wildcards):

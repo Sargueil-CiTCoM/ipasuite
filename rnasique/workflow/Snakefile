@@ -34,10 +34,10 @@ elif "convert_qushape" in config and config["convert_qushape"]:
         input:
             get_all_qushapey_outputs()
 else:
+    include: "rules/importation.smk"
     include: "rules/tools.smk"
     include: "rules/other.smk"
     include: "rules/ipanemap.smk"
-    include: "rules/importation.smk"
 
 
     rule all:

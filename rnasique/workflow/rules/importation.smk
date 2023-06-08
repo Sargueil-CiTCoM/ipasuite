@@ -1,15 +1,14 @@
 if config["allow_auto_import"] and not ('refactor_rename' in config and
         config['refactor_rename']) and not ('refactor_addpositions' in config and
         config['refactor_addpositions']):
-
     if "fluo-ce" in RAW_DATA_TYPE:
         rule import_raw_control_data:
             input:
                 get_raw_control_input,
             output:
-                protected(construct_path(RAW_DATA_TYPE, control=True, split_seq=True)),
+                protected(construct_path(RAW_DATA_TYPE, control=True, split_seq=False)),
             log:
-                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True, split_seq=True),
+                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True, split_seq=False),
             message:
                 (
                     "Importing raw data from external source: "
@@ -23,9 +22,9 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
             input:
                 get_raw_probe_input,
             output:
-                protected(construct_path(RAW_DATA_TYPE, split_seq=True)),
+                protected(construct_path(RAW_DATA_TYPE, split_seq=False)),
             log:
-                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, split_seq=True),
+                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, split_seq=False),
             message:
                 (
                     "Importing raw data from external source: "
@@ -41,9 +40,9 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
             input:
                 get_raw_control_input,
             output:
-                protected(construct_path(RAW_DATA_TYPE, control=True, split_seq=True, ext=".fsa")),
+                protected(construct_path(RAW_DATA_TYPE, control=True, split_seq=False, ext=".fsa")),
             log:
-                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True, split_seq=True),
+                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, control=True, split_seq=False),
             message:
                 (
                     "Importing raw data from external source: "
@@ -57,9 +56,9 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
             input:
                 get_raw_probe_input,
             output:
-                protected(construct_path(RAW_DATA_TYPE, split_seq=True, ext=".fsa")),
+                protected(construct_path(RAW_DATA_TYPE, split_seq=False, ext=".fsa")),
             log:
-                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, split_seq=True),
+                construct_path(RAW_DATA_TYPE, ext=".log", log_dir=True, split_seq=False),
             message:
                 (
                     "Importing raw data from external source: "
