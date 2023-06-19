@@ -100,6 +100,8 @@ rule normalize_reactivity:
             figure=True, split_seq=True) ,
                 category="3.2-Normalized reactivity", subcategory=CONDITION) if
         config["normalization"]["plot"] else [],
+        shape_file = construct_path("normreact", ext=".shape"),
+        map_file = construct_path("normreact", ext=".map"),
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
@@ -108,12 +110,15 @@ rule normalize_reactivity:
         st_perc = construct_param(CNORM, "stop_percentile"),
         low_norm_reac_thres = construct_param(CNORM, "low_norm_reactivity_threshold"),
         norm_methods = construct_list_param(CNORM, "norm_methods"),
+        shape_file_normcol = construct_normcol(),
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
         snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile"),
         plot =  lambda wildcards, output: f"--plot={output.plot}" if config["normalization"]["plot"] else "",
         plot_title=lambda wildcards: f"--plot_title='Normalized Reactivity of {MESSAGE.format(wildcards=wildcards)} - replicate {wildcards.replicate}'"
     shell:
         f"normalize_reactivity {{params}} {{input}}"
+        f" --shape_output={{output.shape_file}}"
+        f" --map_output={{output.map_file}}"
         f" --output={{output.nreact}}  &> {{log}}"
 
 if config["qushape"]["use_subsequence"]:
@@ -126,8 +131,8 @@ if config["qushape"]["use_subsequence"]:
 
         log: construct_path('alignnormreact', ext=".log", log_dir=True)
         shell:
-            f"shift_reactivity {{input.norm}} {{input.refseq}}"
-            f" {{output}} --begin {{params.rt_end_pos}} &> {{log}}"
+            f"shift_reactivity {{input.norm}} {{input.refseq}} {{output}}"
+            f" --begin {{params.rt_end_pos}} &> {{log}}"
             #f" --end {{params.rna_end}} &> {{log}}"
 
 

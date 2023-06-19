@@ -28,13 +28,13 @@ def plot_norm_reactivity(
     ax = df.plot(
         x="xlabel",
         y=["simple_norm_reactivity", "interquartile_norm_reactivity"],
-        #width=0.7,
+        # width=0.7,
         rot=0,
-        #kind="line",
+        # kind="line",
         drawstyle="steps",
         figsize=(len(df) / 3.5, 4),
         x_compat=True,
-        xticks=np.arange(0, len(df)+1, 1)
+        xticks=np.arange(0, len(df) + 1, 1)
     )
     ax.set_xlabel("Sequence")
     ax.set_ylabel("Normalized reactivity")
@@ -218,8 +218,12 @@ def normalize_one_path(
     simple_norm_term_avg_percentile: float = 90.0,
     low_norm_reactivity_threshold: float = -0.3,
     norm_methods: [str] = ["simple", "interquartile"],
+    normcol: str = "simple_norm_reactivity",
     plot: str = None,
-    plot_title: str = None
+    plot_title: str = None,
+    shape_output: bool = None,
+    map_output: bool = None,
+
 ) -> int:
 
     intensity_area_df = pd.read_csv(inputpath, sep="\t")
@@ -294,6 +298,33 @@ def normalize_one_path(
         outputpath = sys.stdout
     norm_df.to_csv(outputpath, sep="\t", float_format="%.4f")
 
+    if shape_output is not None:
+        normipan = norm_df[[normcol]]
+        idxmin = normipan.index.min()
+        firstrows = pd.DataFrame(
+            {normcol: np.full(idxmin - 1, -10)}, index=range(1, idxmin)
+        )
+        firstrows.index.names = ["seqNum"]
+        normipan = pd.concat([firstrows, normipan])
+        normipan.to_csv(shape_output, sep="\t", float_format="%.4f", header=False)
+
+    if map_output is not None:
+        norm_df["stdev"] = 0
+        normipan = norm_df[[normcol, "stdev", "seqRNA"]]
+        idxmin = normipan.index.min()
+        firstrows = pd.DataFrame(
+            {
+                normcol: np.full(idxmin - 1, -10),
+                "stdev": np.zeros(idxmin - 1),
+                "seqRNA": np.full(idxmin - 1, "N"),
+            },
+            index=range(1, idxmin),
+        )
+        firstrows.index.names = ["seqNum"]
+        normipan = pd.concat([firstrows, normipan])
+        normipan["stdev"] = 0
+        normipan.to_csv(map_output, sep="\t", float_format="%.4f", header=False)
+
     if plot is not None:
         title = plot_title if plot_title is not None else outputpath
         plot_norm_reactivity(norm_df, title, plot)
@@ -310,8 +341,11 @@ def normalize_all(
     simple_norm_term_avg_percentile: float = 90.0,
     low_norm_reactivity_threshold: float = -0.3,
     norm_methods: [str] = ["simple", "interquartile"],
+    normcol: str = "simple_norm_reactivity",
     plot: str = None,
-    plot_title: str = None
+    plot_title: str = None,
+    shape_output: bool = None,
+    map_output: bool = None,
 ) -> int:
     """Normalized reactivity for each input files
 
@@ -360,8 +394,11 @@ def normalize_all(
         "simple_norm_term_avg_percentile": simple_norm_term_avg_percentile,
         "low_norm_reactivity_threshold": low_norm_reactivity_threshold,
         "norm_methods": norm_methods,
+        "normcol": normcol,
         "plot": plot,
-        "plot_title": plot_title
+        "plot_title": plot_title,
+        "shape_output": shape_output,
+        "map_output": map_output
     }
 
     if output is None or not os.path.isdir(output):
@@ -376,8 +413,10 @@ def normalize_all(
 
     # return res
 
+
 def main():
     return fire.Fire(normalize_all)
 
+
 if __name__ == "__main__":
-   main() 
+    main()

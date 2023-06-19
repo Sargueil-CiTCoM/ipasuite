@@ -92,10 +92,11 @@ def extract_reactivity(
         if rna_file is not None:
             check_qushape_using_correct_rna(proj, rna_file)
 
+        # print(proj)
         #    if not "Reactivity" in proj["scriptList"][-1]:
         if "area" not in proj["dPeakRX"] or len(proj["seqNum"]) == 0:
             logging.warning("You must finish QuShape treatment to extract "
-                  "reactivity")
+                            "reactivity")
             failed = True
 
         if failed and launch_qushape:
