@@ -202,7 +202,7 @@ class Launcher(object):
                     configfiles=[self._config] if self._config else None,
                     config=extra_config,
                     targets=targets,
-                    cores=self._cores,
+                    cores=1,
                     keepgoing=self._keepgoing,
                     dryrun=dry_run,
                     use_conda=True,
@@ -428,14 +428,14 @@ class Launcher(object):
                         if not fseq.isupper():
                             logger.warning("Sequence contains lowercase")
                         if "T" in fseq:
-                            logger.warning("Sequence contains 'T', it should contains "
-                                           "'U' in order to be RNA")
+                            logger.warning(
+                                "Sequence contains 'T', it should contains "
+                                "'U' in order to be RNA"
+                            )
                 except Exception as e:
                     print(e)
                     logger.error(f"Sequence: {file} does not seems to be a fasta file")
                     seq_not_fasta = True
-
-                
 
         for file in files:
             if not os.path.exists(file):

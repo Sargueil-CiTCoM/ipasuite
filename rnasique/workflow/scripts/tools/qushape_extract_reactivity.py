@@ -104,12 +104,12 @@ def extract_reactivity(
                 "/bin/bash",
                 "-i",
                 "-c",
-                f"conda activate {qushape_conda_env} && qushape {qushape_project}",
+                f"conda activate {qushape_conda_env} && qushape {qushape_project} < /dev/null",
             ]
 
             logging.debug("Launch QuShape")
             logging.debug(cmd)
-            sb.run(cmd)
+            sb.run(cmd, capture_output=False, stdout=None, stderr=None)
             logging.debug("End QuShape")
             launch_qushape = False
 

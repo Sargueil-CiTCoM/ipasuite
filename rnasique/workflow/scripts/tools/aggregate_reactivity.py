@@ -6,7 +6,8 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
-from matplotlib import cm
+import matplotlib as mp
+from matplotlib import colormaps as cm
 import itertools
 import logging
 
@@ -27,6 +28,31 @@ class ReactivityThreshold:
     COLOR_LOW = "yellow"
     COLOR_MEDIUM = "orange"
     COLOR_HIGH = "red"
+
+
+def prepare_sequence_axis(ax, sequence):
+    font_prop = mp.font_manager.FontProperties(
+        family="monospace", style="normal", weight="bold", size="4.5"
+    )
+    for i in range(sequence):
+        nuc = sequence[i]
+        if nuc == "T":
+            nuc = "U"
+        color_dict = {"A": "#f20000", "U": "#f28f00", "G": "#00509d", "C": "#00c200"}
+        if nuc in color_dict:
+            col = color_dict[nuc]
+        elif nuc.upper() in color_dict:
+            col = color_dict[nuc.upper()]
+        else:
+            col = "black"
+        ax.annotate(
+            nuc,
+            xy=(i + 1, -0.67),
+            fontproperties=font_prop,
+            color=col,
+            annotation_clip=False,
+            horizontalalignment="center",
+        )
 
 
 def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
@@ -113,7 +139,7 @@ def plot_aggregate(
         y="mean",
         drawstyle="steps-mid",
         ax=ax,
-        colormap=cm.cubehelix,
+        colormap=cm["cubehelix"],
         linewidth=0.5,
     )
 
@@ -135,7 +161,7 @@ def plot_aggregate(
             capsize=2,
             linewidth=0.5,
         )
-    except Exception as e:
+    except Exception:  # as e:
         logging.error("fail to generate error bar")
         # logging.error(e)
 
@@ -199,7 +225,7 @@ def plot_aggregate(
         y="mean",
         drawstyle="steps-mid",
         ax=ax,
-        colormap=cm.cubehelix,
+        colormap=cm["cubehelix"],
         linewidth=0.5,
     )
     ax.set_xlabel("Sequence")
