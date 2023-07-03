@@ -16,7 +16,7 @@ The workflow will enable you to generate structure data for a RNA fragment analy
 
 All information about how to use this workflow can be found at :
 
-[https://sargueil-citcom.github.io/shape-ce-docs](https://sargueil-citcom.github.io/rnasique)
+[https://sargueil-citcom.github.io/rnasique-docs](https://sargueil-citcom.github.io/rnasique-docs)
 
 ## Usage
 
