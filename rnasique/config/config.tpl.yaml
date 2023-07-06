@@ -131,7 +131,7 @@ rawdata:
   #   type: "fluo-ceq8000"
   #   ...
   # ```
-  type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce"]
+  type: "fluo-ceq8000" # ["fluo-ceq8000", "fluo-ce", "fluo-fsa"]
   ###
   # Name of the control
   #

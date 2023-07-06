@@ -175,19 +175,32 @@ def get_ddntp_qushape(wildcards):
 
 def get_external_qushape(wildcards):
     sample = get_sample(samples, wildcards)
-    return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
+    try:
+        return os.path.join(config["rawdata"]["path_prefix"], sample["qushape_file"])
+    except:
+        return ""
 
 
 def get_raw_probe_input(wildcards):
     sample = get_sample(samples, wildcards)
-    path = os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
-    return path
+    #print(config["rawdata"]["path_prefix"])
+    #print(sample["probe_file"])
+    #print(sample)
+    #print(wildcards)
+    try:
+        path = os.path.join(config["rawdata"]["path_prefix"], sample["probe_file"])
+        return path
+    except:
+        return ""
 
 
 def get_raw_control_input(wildcards):
     sample = get_sample(samples, wildcards)
-    path = os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
-    return path
+    try:
+        path = os.path.join(config["rawdata"]["path_prefix"], sample["control_file"])
+        return path
+    except:
+        return ""
 
 
 def get_align_begin(wildcards):

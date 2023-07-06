@@ -8,4 +8,3 @@ rule qushape_yamlify:
              f"- replicate {{wildcards.replicate}}"
     shell:
         f"qushape_yamlify {{input}} {{output}} &> {{log}}"
-

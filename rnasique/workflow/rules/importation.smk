@@ -84,7 +84,6 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
         shell:
             "cp '{input}' '{output}' &> {log}"
 
-    ruleorder: import_external_qushape > generate_project_qushape
 
 
 rule importraw:

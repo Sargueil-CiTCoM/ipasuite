@@ -15,6 +15,7 @@ import filecmp
 import pathlib
 from colorlog import ColoredFormatter
 import pandas as pd
+import traceback
 
 LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
 DATE_FORMAT = "%b %d %H:%M:%S"
@@ -158,9 +159,10 @@ class Launcher(object):
                 conda_prefix="~/.rnasique/conda",
             )
         except Exception as e:
+            logger.error(traceback.format_exc())
             logger.error(e)
 
-    def convert_qushape(self):
+    def convert_qushape(self, rerun_incomplete=False):
         self._config = self._choose_config(self._config)
         extra_config = dict()
         extra_config["convert_qushape"] = True
@@ -176,10 +178,12 @@ class Launcher(object):
                 keepgoing=self._keepgoing,
                 use_conda=True,
                 verbose=self._verbose,
+                force_incomplete=rerun_incomplete,
                 # listrules=True,
                 conda_prefix="~/.rnasique/conda",
             )
         except Exception as e:
+            logger.error(traceback.format_exc())
             logger.error(e)
 
     def qushape(
@@ -211,6 +215,7 @@ class Launcher(object):
                     rerun_triggers=["mtime"],
                 )
         except Exception as e:
+            logger.error(traceback.format_exc())
             logger.error(e)
             logger.error("to get more information, type : rnasique log")
 
@@ -242,6 +247,7 @@ class Launcher(object):
                     force_incomplete=rerun_incomplete,
                 )
         except Exception as e:
+            logger.error(traceback.format_exc())
             logger.error(e)
             logger.error("to get more information, type : rnasique log")
 
@@ -433,7 +439,8 @@ class Launcher(object):
                                 "'U' in order to be RNA"
                             )
                 except Exception as e:
-                    print(e)
+                    logger.error(traceback.format_exc())
+                    logger.error(e)
                     logger.error(f"Sequence: {file} does not seems to be a fasta file")
                     seq_not_fasta = True
 

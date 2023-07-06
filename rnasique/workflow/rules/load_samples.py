@@ -13,10 +13,16 @@ def get_indexes(config, replicates_in_index=True):
 
 
 def get_condition_types(config):
-    condition_types = {name: "str" for name in config["conditions"]}
-    condition_types["id"] = "str"
-    condition_types["rna_id"] = "str"
-    condition_types["replicate"] = "str"
+    condition_types = {name: str for name in config["conditions"]}
+    condition_types["id"] = str
+    condition_types["rna_id"] = str
+    condition_types["replicate"] = str
+    condition_types["probe_file"] = str
+    condition_types["control_file"] = str
+    condition_types["control_file"] = str
+    condition_types["qushape_file"] = str
+    condition_types["reference_qushape_file"] = str
+    condition_types["discard"] = str
     return condition_types
 
 
@@ -46,6 +52,7 @@ def get_unindexed_samples(config):
             .astype(int)
         )
 
+        print(unindexed_samples)
     return unindexed_samples
 
 

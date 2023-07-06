@@ -34,6 +34,7 @@ elif "convert_qushape" in config and config["convert_qushape"]:
         input:
             get_all_qushapey_outputs()
 else:
+    include: "rules/convert_qushape.smk"
     include: "rules/importation.smk"
     include: "rules/tools.smk"
     include: "rules/other.smk"
@@ -70,3 +71,5 @@ else:
             get_all_qushape_outputs()
 
     
+    ruleorder: import_external_qushape > generate_project_qushape
+   #ruleorder: qushape_yamlify > generate_project_qushape

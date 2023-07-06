@@ -100,8 +100,8 @@ rule normalize_reactivity:
             figure=True, split_seq=True) ,
                 category="3.2-Normalized reactivity", subcategory=CONDITION) if
         config["normalization"]["plot"] else [],
-        shape_file = construct_path("normreact", ext=".shape"),
-        map_file = construct_path("normreact", ext=".map"),
+        shape_file = construct_path("normreact", ext=".shape", split_seq=True),
+        map_file = construct_path("normreact", ext=".map", split_seq=True),
     message: f"Normalizing reactivity for {MESSAGE}"
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
