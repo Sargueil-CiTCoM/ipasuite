@@ -52,7 +52,6 @@ def get_unindexed_samples(config):
             .astype(int)
         )
 
-        print(unindexed_samples)
     return unindexed_samples
 
 
