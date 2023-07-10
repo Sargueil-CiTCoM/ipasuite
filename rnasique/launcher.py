@@ -393,6 +393,7 @@ class Launcher(object):
         raw_missing = False
         sample_missing = False
         seq_not_fasta = False
+        has_duplicate = False
         self._config = self._choose_config(self._config)
         with open(self._config, "r") as cfd:
             config = yaml.load(cfd)
@@ -402,13 +403,6 @@ class Launcher(object):
 
         indexes = load_samples.get_indexes(config, replicates_in_index=True)
         ind_samples = samples.set_index(indexes, drop=True)
-        index_count = pd.Index(ind_samples.index).value_counts()
-        for i, val in index_count[index_count > 1].items():
-            logger.error(
-                f"Found {val} Duplicated samples for"
-                f" condition {dict(zip(indexes, i))}"
-            )
-
         files = (
             list(samples["probe_file"])
             + list(samples["control_file"])
@@ -449,6 +443,19 @@ class Launcher(object):
                 raw_missing = True
                 logger.warning(f"Raw data : {file} not found")
 
+        index_count = pd.Index(ind_samples.index).value_counts()
+        for i, val in index_count[index_count > 1].items():
+            logger.error(
+                f"Found {val} Duplicated samples for"
+                f" condition {dict(zip(indexes, i))}"
+            )
+            logger.error(
+                "Every sample of the same condition must has a different replicate id. " 
+                f"You must  change replicate id in the samples.tsv file"
+
+            )
+            has_duplicate = True
+
         self._check_dup(
             os.path.join(config["results_dir"], config["folders"]["fluo-fsa"])
         )
@@ -462,7 +469,7 @@ class Launcher(object):
         else:
             print("Configuration check succeed")
 
-        return not seq_missing and not sample_missing
+        return not seq_missing and not sample_missing and not seq_not_fasta and not has_duplicate
 
 
 def main_wrapper():
