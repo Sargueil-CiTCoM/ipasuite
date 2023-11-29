@@ -387,8 +387,7 @@ ipanemap:
 
 
 varna:
-  colormapstyle: "$-10.00:#CCCCCC,$-0.31:#999999,$-0.3:#FFFFFF,$0.2:#FFFFFF,$0.4:#FFFF00,$0.69:#FFFF47,$0.7:#FF0000,$5.00:#FF0033"
-
+  colormapstyle: $-0.5:#999999,$-0.49999:#FFFFFF,$0.4:#FFFFFF,$0.40001:#FAE902,$0.7:#FAE902,$0.70001:#E80C0C,$5.00:#E80C0C
 
 footprint:
   compares:
