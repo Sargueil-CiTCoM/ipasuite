@@ -11,7 +11,8 @@ from matplotlib import colormaps as cm
 import itertools
 import logging
 
-plt.style.library["seaborn-dark"]
+import seaborn as sns
+sns.set_style("dark")
 
 ddof = 1
 
