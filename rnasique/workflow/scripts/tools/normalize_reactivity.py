@@ -6,7 +6,10 @@ import fire
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.style.library['seaborn-dark']
+#plt.style.library['seaborn-dark']
+
+import seaborn as sns
+sns.set_style("dark")
 
 allowed_methods = ["simple", "interquartile"]
 

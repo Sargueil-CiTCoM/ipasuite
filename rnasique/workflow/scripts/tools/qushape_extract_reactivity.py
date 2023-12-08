@@ -17,7 +17,10 @@ import logging
 # Hack to access data from ill formed .qushape file
 sys.path.append(os.path.join(os.path.dirname(__file__), "qushape_helper"))
 
-plt.style.library["seaborn-dark"]
+# plt.style.library["seaborn-dark"]
+
+import seaborn as sns
+sns.set_style("dark")
 
 
 def plot_reactivity(
