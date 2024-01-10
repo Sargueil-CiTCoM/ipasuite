@@ -69,13 +69,13 @@ def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
 
     for index, row in aggregated.loc[first_idx:last_idx].iterrows():
         idx = index[0]
-        if row["desc"] == "reduced":
+        if row["desc"] == "warning":
             ax.axvspan(
                 (idx - first_idx) - 0.5,
                 (idx - first_idx + 0.4),
                 alpha=0.3,
                 color="orange",
-                label="_" * fr + "Reduced value",
+                label="_" * fr + "Warning",
             )
             fr += 1
         if row["desc"] == "one-value-available":
@@ -278,20 +278,20 @@ class ShapeReactivitySeq:
         self.df = self.df.rename_axis(index={"seqRNA": "sequence"})
 
 
-def min_enough_values(nvalues: int, min_nsubdata_perc: float = 0.66):
-    if nvalues < 2:
-        return 2
-    return np.ceil(nvalues * min_nsubdata_perc)
+#def min_enough_values(nvalues: int, min_nsubdata_perc: float = 0.66):
+#    if nvalues < 2:
+#        return 2
+#    return np.ceil(nvalues * min_nsubdata_perc)
 
 
-def dispersion_threshold(
-    curmean, max_mean_perc: float = 0.682, min_dispersion: float = 0.5
-):
-    return (
-        curmean * max_mean_perc
-        if curmean * max_mean_perc > min_dispersion
-        else min_dispersion
-    )
+#def dispersion_threshold(
+#    curmean, max_mean_perc: float = 0.682, min_dispersion: float = 0.5
+#):
+#    return (
+#        curmean * max_mean_perc
+#        if curmean * max_mean_perc > min_dispersion
+#        else min_dispersion
+#    )
 
 
 def most_uniform_subsample_mean_std(sample):
@@ -315,71 +315,71 @@ def most_uniform_subsample_mean_std(sample):
 
 
 # Alternative method, not used
-def _aggregate_replicates_tscore(row, max_dispersion=0.3):
-    mean = np.NaN
-    stdev = np.NaN
-    desc = "non-consistant"
-    values = row.drop("nrep_with_value").replace(-10, np.NaN)
-    nvalues = values.count()
-    used_values = 0
+#def _aggregate_replicates_tscore(row, max_dispersion=0.3):
+#    mean = np.NaN
+#    stdev = np.NaN
+#    desc = "non-consistant"
+#    values = row.drop("nrep_with_value").replace(-10, np.NaN)
+#    nvalues = values.count()
+#    used_values = 0
 
     # if there is enough values available, we try to compute mean and stdev
-    if values.count() >= row["nrep_with_value"] / 2:
-        curmean = values.mean()
-        curstdev = values.std(ddof=ddof)
-        if curstdev <= max_dispersion:
-            mean = curmean
-            stdev = curstdev
-            used_values = nvalues
-            desc = "accepted"
-        else:
-            subvals = values
-            tscores = subvals.apply(
-                lambda x: abs((x - curmean) / (curstdev / np.sqrt(nvalues)))
-            )
-            while subvals.count() > min_enough_values(row["nrep_with_value"]):
-                tsmaxidx = tscores.idxmax()
-                tscores = tscores.drop(tsmaxidx)
-                subvals = subvals.drop(tsmaxidx)
-
-                curmean = subvals.mean()
-                curstdev = subvals.std()
-                if curstdev <= max_dispersion:
-                    mean = curmean
-                    stdev = curstdev
-                    used_values = subvals.count()
-                    desc = "reduced"
-                    break
-                tscores = subvals.apply(
-                    lambda x: abs((x - curmean) / (curstdev / np.sqrt(subvals.count())))
-                )
-    else:
-        desc = "no-enough-values"
-
-    return pd.Series(
-        {
-            "mean": mean,
-            "stdev": stdev,
-            "used_values": used_values,
-            "desc": desc,
-        },
-        index=["mean", "stdev", "used_values", "desc"],
-    )
+#    if values.count() >= row["nrep_with_value"] / 2:
+#        curmean = values.mean()
+#        curstdev = values.std(ddof=ddof)
+#        if curstdev <= max_dispersion:
+#            mean = curmean
+#            stdev = curstdev
+#            used_values = nvalues
+#            desc = "accepted"
+#        else:
+#            subvals = values
+#            tscores = subvals.apply(
+#                lambda x: abs((x - curmean) / (curstdev / np.sqrt(nvalues)))
+#            )
+#            while subvals.count() > min_enough_values(row["nrep_with_value"]):
+#                tsmaxidx = tscores.idxmax()
+#                tscores = tscores.drop(tsmaxidx)
+#                subvals = subvals.drop(tsmaxidx)
+#
+#                curmean = subvals.mean()
+#                curstdev = subvals.std()
+#                if curstdev <= max_dispersion:
+#                    mean = curmean
+#                    stdev = curstdev
+#                    used_values = subvals.count()
+#                    desc = "reduced"
+#                    break
+#                tscores = subvals.apply(
+#                    lambda x: abs((x - curmean) / (curstdev / np.sqrt(subvals.count())))
+#                )
+#    else:
+#        desc = "no-enough-values"
+#
+#    return pd.Series(
+#        {
+#            "mean": mean,
+#            "stdev": stdev,
+#            "used_values": used_values,
+#            "desc": desc,
+#        },
+#        index=["mean", "stdev", "used_values", "desc"],
+#    )
 
 
 def aggregate_replicates(
-    row,
-    max_mean_perc: float = 0.682,
-    min_ndata_perc: float = 0.5,
-    min_nsubdata_perc: float = 0.66,
-    min_dispersion: float = 0.05,
+    row
+#    max_mean_perc: float = 0.682,
+#    min_ndata_perc: float = 0.5,
+#    min_nsubdata_perc: float = 0.66,
+#    min_dispersion: float = 0.05,
 ):
     mean = np.NaN
     stdev = np.NaN
     sem = np.NaN
     mad = np.NaN
-    values = row.drop("nvalid_values").replace(-10, np.NaN).dropna()
-    nvalues = values.count()
+    values = row.drop("nvalid_values").dropna().apply(lambda x: 0 if -1 <= x < 0 else x).apply(lambda x: -10 if -10 < x < -1 else x)
+    nvalues = values.replace(-10, np.NaN).dropna().count()
     used_values = 0
     desc = "non-consistant"
 
@@ -391,51 +391,41 @@ def aggregate_replicates(
         sem = np.NaN
         mad = np.NaN
         used_values = nvalues
-    else:
-        # if there is enough values available, we try to compute mean and stdev
-        if nvalues >= row["nvalid_values"] * min_ndata_perc:
-            curmean = values.mean()
-            curstdev = values.std(ddof=ddof)
-            cursem = values.sem(ddof=ddof)
-            curmad = (values - values.mean()).abs().mean()  # Deprecated : values.mad()
+    elif list(values).count(-10) < len(list(values))/2:
+        nvalid_values = values.replace(-10, np.NaN).dropna()
+        mean = nvalid_values.mean()
+        stdev = nvalid_values.std(ddof=ddof)
+        sem = nvalid_values.sem(ddof=ddof)
+        mad = (nvalid_values - nvalid_values.mean()).abs().mean()  # Deprecated : values.mad()
 
-            if curstdev <= dispersion_threshold(curmean, max_mean_perc, min_dispersion):
-                mean = curmean
-                stdev = curstdev
-                sem = cursem
-                mad = curmad
-                used_values = nvalues
-                desc = "accepted"
-            else:
-                subsample = values
-                while len(subsample) > min_enough_values(
-                    row["nvalid_values"], min_nsubdata_perc
-                ):
-                    (
-                        subsample,
-                        curmean,
-                        curstdev,
-                        cursem,
-                        curmad,
-                    ) = most_uniform_subsample_mean_std(subsample)
-                    if curstdev <= dispersion_threshold(
-                        curmean, max_mean_perc, min_dispersion
-                    ):
-                        mean = curmean
-                        stdev = curstdev
-                        sem = cursem
-                        mad = curmad
-                        used_values = len(subsample)
-                        desc = "reduced"
-                        break
-                if desc == "non-consistant":
-                    mean = -10
-                    stdev = values.std(ddof=ddof)
-                    sem = values.sem(ddof=ddof)
-                    mad = (values - values.mean()).abs().mean()
+        mean_values = []
+        nvalid_values = list(nvalid_values)
+        for v in range(len(nvalid_values)-1):
+            for u in range(len(nvalid_values)):
+                if u > v:
+                    mean_uv = (nvalid_values[v] + nvalid_values[u])/2
+                    if 0 <= mean < 0.4:
+                        if mean_uv >= 0.4:
+                            mean_values.append(mean_uv)
+                    elif 0.4 <= mean < 0.7:
+                        if 0.4 > mean_uv or mean_uv >= 0.7:
+                            mean_values.append(mean_uv)
+                    elif mean >= 0.7:
+                        if 0.7 > mean_uv:
+                            mean_values.append(mean_uv)
+        if mean_values == []:
+            desc = "accepted"
+            used_values = nvalues
+        elif all(0 <= m < 0.4 for m in mean_values) or all(0.4 <= m < 0.7 for m in mean_values) or all(0.7 <= m for m in mean_values):
+            desc = 'warning'
+            used_values = nvalues
         else:
+            mean = -10
+            desc = "non-consistant"
+    elif list(values).count(-10) >= len(list(values))/2:
+            mean = -10
             desc = "no-enough-values"
-            mean = -10 if any([v == -10 for v in row]) else np.NaN
+
     return pd.Series(
         {
             "mean": mean,
@@ -447,6 +437,7 @@ def aggregate_replicates(
         },
         index=["mean", "stdev", "sem", "mad", "used_values", "desc"],
     )
+
 
 
 def check_duplicated(aggregated: pd.DataFrame):
@@ -470,10 +461,10 @@ def aggregate(
     shape_output=None,
     map_output=None,
     normcol="simple_norm_reactivity",
-    min_ndata_perc: float = 0.5,
-    min_nsubdata_perc: float = 0.66,
-    max_mean_perc: float = 0.682,
-    min_dispersion: float = 0.05,
+#    min_ndata_perc: float = 0.5,
+#    min_nsubdata_perc: float = 0.66,
+#    max_mean_perc: float = 0.682,
+#    min_dispersion: float = 0.05,
     fullplot: str = None,
     plot: str = None,
     plot_title: str = None,
@@ -544,11 +535,11 @@ def aggregate(
         ["mean", "stdev", "sem", "mad", "used_values", "desc"]
     ] = aggregated.apply(
         lambda row: aggregate_replicates(
-            row,
-            max_mean_perc,
-            min_ndata_perc,
-            min_nsubdata_perc,
-            min_dispersion,
+            row
+#            max_mean_perc,
+#            min_ndata_perc,
+#            min_nsubdata_perc,
+#            min_dispersion,
         ),
         axis=1,
         result_type="expand",
