@@ -413,7 +413,7 @@ def aggregate_replicates(
                     elif mean >= 0.7:
                         if 0.7 > mean_uv:
                             mean_values.append(mean_uv)
-        if mean_values == []:
+        if mean_values == [] or round(stdev,2) <= 0.1:
             desc = "accepted"
             used_values = nvalues
         elif all(0 <= m < 0.4 for m in mean_values) or all(0.4 <= m < 0.7 for m in mean_values) or all(0.7 <= m for m in mean_values):
