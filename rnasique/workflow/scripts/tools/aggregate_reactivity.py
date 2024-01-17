@@ -439,7 +439,7 @@ def aggregate_replicates(
         
         # accept, if all pairwise means are 'consistent' or std dev is
         # sufficiently small
-        if mean_values == [] or round(stdev,2) <= 0.1:
+        if mean_values == [] or stdev <= 0.15:
             desc = "accepted"
             used_values = nvalues
         # otherwise warn, if inconsistent mean values are all in the same
