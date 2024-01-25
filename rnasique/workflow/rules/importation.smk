@@ -72,7 +72,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
         input:
             get_external_qushape,
         output:
-            construct_path("qushape", ext=".qushape", split_seq=True),
+            construct_path("qushape", ext=".qushapey", split_seq=True),
         log:
             construct_path("qushape", ext=".log", log_dir=True, split_seq=True),
         message:
