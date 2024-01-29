@@ -110,6 +110,7 @@ checkpoint ipanemap:
         f"ipanemap -f {{input.config}} --log {{log}}"
 
 
+
 rule structure:
     #conda:
     #    "../envs/ipanemap.yml"
@@ -119,52 +120,53 @@ rule structure:
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}/"
             f"{{rna_id}}_pool_{{pool_id}}_optimal_1.dbn",
             folder=config["folders"]["ipanemap-out"],
-            allow_missing=True,
-           ),
-        centrioid =  expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}/"
-            f"{{rna_id}}_pool_{{pool_id}}_centroid_2.dbn",
-            folder=config["folders"]["ipanemap-out"],
-            allow_missing=True,
-           ),
+            allow_missing=True,),
 
     output:
         optimal_output = expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1.dbn",
             folder=config["folders"]["structure"],
-            allow_missing=True,
-        ),
+            allow_missing=True,),
         centrioid_output = expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_centroid_2.dbn",
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_2.dbn",
             folder=config["folders"]["structure"],
-            allow_missing=True,
-        ),
+            allow_missing=True,),
+
     log:
         log1 = "results/logs/ipanemap-{rna_id}_pool_{pool_id}_1.log",
-        log2 = "results/logs/ipanemap-{rna_id}_pool_{pool_id}_centroid_2.log",
+        log2 = "results/logs/ipanemap-{rna_id}_pool_{pool_id}_2.log",
+
     shell:
-        "cp {input.optimal} {output.optimal_output} &> {log.log1};\n"
-        "cp {input.centrioid} {output.centrioid_output} &> {log.log2}" 
+        """
+        sorted_numbers=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/* -type f -not -name '*optimal*' -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -nr);
+        second_largest=$(echo "$sorted_numbers" | awk '{{if(NR==2) print}}');
+        file_with_second_largest=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/* -type f -exec grep -l "$second_largest" {{}} +);
+        cp {input.optimal} {output.optimal_output} &> {log.log1};
+        cp $file_with_second_largest {output.centrioid_output} &> {log.log2};
+        """
 
 
 rule varna_color_by_condition:
     #conda:
     #    "../envs/ipanemap.yml"
+
     input:
         struct_optimal = expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1.dbn",
             folder=config["folders"]["structure"],
             allow_missing=True,
         ),
-        struct_centrioid = expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_centroid_2.dbn",
+        struct_2 = expand(
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_2.dbn",
             folder=config["folders"]["structure"],
             allow_missing=True,
         ),
         aggreact=construct_path("aggreact-ipanemap", show_replicate = False,
                 ext=".shape"),
+
     params:
         colorstyle= f"-colorMapStyle '{config['varna']['colormapstyle']}'",
+
     output:
         varna_optimal = expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1_cond_{{conditions}}.varna",
@@ -172,8 +174,8 @@ rule varna_color_by_condition:
             conditions=CONDITION,
             allow_missing=True,
         ),
-        varna_centrioid = expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_centroid_2_cond_{{conditions}}.varna",
+        varna_2 = expand(
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_2_cond_{{conditions}}.varna",
             folder=config["folders"]["varna"],
             conditions=CONDITION,
             allow_missing=True,
@@ -184,29 +186,31 @@ rule varna_color_by_condition:
             conditions=CONDITION,
             allow_missing=True,
         ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
-        svg_centrioid = report(expand(
-            f"{RESULTS_DIR}/figures/{{folder}}/{{rna_id}}_pool_{{pool_id}}_centroid_2_cond_{{conditions}}.svg",
+        svg_2 = report(expand(
+            f"{RESULTS_DIR}/figures/{{folder}}/{{rna_id}}_pool_{{pool_id}}_2_cond_{{conditions}}.svg",
             folder=config["folders"]["varna"],
             conditions=CONDITION,
             allow_missing=True,
         ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
+
     log:
         log1 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_1_{CONDITION}.log",
-        log2 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_centroid_2_{CONDITION}.log",
+        log2 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_2_{CONDITION}.log",
 
     shell:
-        f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}" 
+        f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_optimal' &> {{log.log1}};\n"
-        f"varna -i {{input.struct_optimal}} -o {{output.svg_optimal}}" 
+        f"varna -i {{input.struct_optimal}} -o {{output.svg_optimal}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_optimal' &> {{log.log1}};\n"
-        f"varna -i {{input.struct_centrioid}} -o {{output.varna_centrioid}}" 
+        f"varna -i {{input.struct_2}} -o {{output.varna_2}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};\n"
-        f"varna -i {{input.struct_centrioid}} -o {{output.svg_centrioid}}" 
+        f"varna -i {{input.struct_2}} -o {{output.svg_2}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};"
+
 
 
 
