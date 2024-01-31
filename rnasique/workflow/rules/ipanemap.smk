@@ -198,16 +198,16 @@ rule varna_color_by_condition:
         log2 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_2_{CONDITION}.log",
 
     shell:
-        f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}"
+        f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_optimal' &> {{log.log1}};\n"
-        f"varna -i {{input.struct_optimal}} -o {{output.svg_optimal}}"
+        f"varna -i {{input.struct_optimal}} -o {{output.svg_optimal}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_optimal' &> {{log.log1}};\n"
-        f"varna -i {{input.struct_2}} -o {{output.varna_2}}"
+        f"varna -i {{input.struct_2}} -o {{output.varna_2}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};\n"
-        f"varna -i {{input.struct_2}} -o {{output.svg_2}}"
+        f"varna -i {{input.struct_2}} -o {{output.svg_2}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};"
 
