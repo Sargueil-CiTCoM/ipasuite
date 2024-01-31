@@ -70,7 +70,7 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
 
     rule import_external_qushape:
         input:
-            get_external_qushape,
+            get_external_qushape
         output:
             construct_path("qushape", ext=".qushapey", split_seq=True),
         log:
@@ -85,6 +85,21 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
             "cp '{input}' '{output}' &> {log}"
 
 
+
+#    rule import_external_map:
+#        input:
+#            get_external_map,
+#        output:
+#            construct_path("aggreact-ipanemap", ext=".map", split_seq=True),
+#        log:
+#            construct_path("aggreact-ipanemap", ext=".log", log_dir=True, split_seq=True),
+#        message:
+#            (
+#                "Importing from external map file: "
+#                + MESSAGE
+#            )
+#        shell:
+#            "cp '{input}' '{output}' &> {log}"
 
 rule importraw:
     input:

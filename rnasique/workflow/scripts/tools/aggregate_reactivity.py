@@ -11,10 +11,11 @@ from matplotlib import colormaps as cm
 import itertools
 import logging
 
-#plt.style.library["seaborn-dark"]
 
 import seaborn as sns
 sns.set_style("dark")
+
+#plt.style.library["seaborn-dark"]
 
 ddof = 1
 
@@ -269,12 +270,6 @@ def check_files(src, dest):
 
 
 class ShapeReactivitySeq:
-    """
-    Represent contents of a reactivity.tsv or normreact.tsv file
-
-    seqNum and seqRNA entries are defined as index;
-    rename column "seqRNA" to "sequence"
-    """
     def __init__(self, filepath: str):
         self.filepath = filepath
         self.name = os.path.splitext(os.path.basename(filepath))[0]
@@ -328,8 +323,8 @@ def most_uniform_subsample_mean_std(sample):
 #    values = row.drop("nrep_with_value").replace(-10, np.NaN)
 #    nvalues = values.count()
 #    used_values = 0
-
-    # if there is enough values available, we try to compute mean and stdev
+#
+#    # if there is enough values available, we try to compute mean and stdev
 #    if values.count() >= row["nrep_with_value"] / 2:
 #        curmean = values.mean()
 #        curstdev = values.std(ddof=ddof)
@@ -371,37 +366,102 @@ def most_uniform_subsample_mean_std(sample):
 #        },
 #        index=["mean", "stdev", "used_values", "desc"],
 #    )
-
-
-def aggregate_replicates(
-    row
+#
+#
+#def aggregate_replicates(
+#    row,
 #    max_mean_perc: float = 0.682,
 #    min_ndata_perc: float = 0.5,
 #    min_nsubdata_perc: float = 0.66,
 #    min_dispersion: float = 0.05,
+#):
+#    mean = np.NaN
+#    stdev = np.NaN
+#    sem = np.NaN
+#    mad = np.NaN
+#    values = row.drop("nvalid_values").replace(-10, np.NaN).dropna()
+#    nvalues = values.count()
+#    used_values = 0
+#    desc = "non-consistant"
+#
+#    # Only one value -- no average possible
+#    if row["nvalid_values"] == 1 and nvalues == 1:
+#        desc = "one-value-available"
+#        mean = values[0]
+#        stdev = np.NaN
+#        sem = np.NaN
+#        mad = np.NaN
+#        used_values = nvalues
+#    else:
+#        # if there is enough values available, we try to compute mean and stdev
+#        if nvalues >= row["nvalid_values"] * min_ndata_perc:
+#            curmean = values.mean()
+#            curstdev = values.std(ddof=ddof)
+#            cursem = values.sem(ddof=ddof)
+#            curmad = (values - values.mean()).abs().mean()  # Deprecated : values.mad()
+#
+#            if curstdev <= dispersion_threshold(curmean, max_mean_perc, min_dispersion):
+#                mean = curmean
+#                stdev = curstdev
+#                sem = cursem
+#                mad = curmad
+#                used_values = nvalues
+#                desc = "accepted"
+#            else:
+#                subsample = values
+#                while len(subsample) > min_enough_values(
+#                    row["nvalid_values"], min_nsubdata_perc
+#                ):
+#                    (
+#                        subsample,
+#                        curmean,
+#                        curstdev,
+#                        cursem,
+#                        curmad,
+#                    ) = most_uniform_subsample_mean_std(subsample)
+#                    if curstdev <= dispersion_threshold(
+#                        curmean, max_mean_perc, min_dispersion
+#                    ):
+#                        mean = curmean
+#                        stdev = curstdev
+#                        sem = cursem
+#                        mad = curmad
+#                        used_values = len(subsample)
+#                        desc = "reduced"
+#                        break
+#                if desc == "non-consistant":
+#                    mean = -10
+#                    stdev = values.std(ddof=ddof)
+#                    sem = values.sem(ddof=ddof)
+#                    mad = (values - values.mean()).abs().mean()
+#        else:
+#            desc = "no-enough-values"
+#            mean = -10 if any([v == -10 for v in row]) else np.NaN
+#    return pd.Series(
+#        {
+#            "mean": mean,
+#            "stdev": stdev,
+#            "sem": sem,
+#            "mad": mad,
+#            "used_values": used_values,
+#            "desc": desc,
+#        },
+#        index=["mean", "stdev", "sem", "mad", "used_values", "desc"],
+#    )
+
+
+def aggregate_replicates(
+    row
 ):
-    """
-    Aggregate reactivities from several replicates
-
-    Args:
-        row: Pandas series consisting of entry "nvalid_values" and the non-empty reactivities
-
-
-    Returns:
-        statistics and classification (accepted, warning, one-value-available,
-        non-consistent, not-enough-numbers)
-
-    Note:
-        the length of row can be less than the number of replicates, if there are "empty" entries
-    """
     mean = np.NaN
     stdev = np.NaN
     sem = np.NaN
     mad = np.NaN
+    # values = row.drop("nvalid_values").replace(-10, np.NaN).dropna()
     values = row.drop("nvalid_values").dropna().apply(lambda x: 0 if -1 <= x < 0 else x).apply(lambda x: -10 if -10 < x < -1 else x)
     nvalues = values.replace(-10, np.NaN).dropna().count()
     used_values = 0
-    desc = "non-consistent"
+    desc = "non-consistant"
 
     # Only one value -- no average possible
     if row["nvalid_values"] == 1 and nvalues == 1:
@@ -412,21 +472,18 @@ def aggregate_replicates(
         mad = np.NaN
         used_values = nvalues
     elif list(values).count(-10) < len(list(values))/2:
-        valid_values = values.replace(-10, np.NaN).dropna()
-        mean = valid_values.mean()
-        stdev = valid_values.std(ddof=ddof)
-        sem = valid_values.sem(ddof=ddof)
-        mad = (valid_values - valid_values.mean()).abs().mean()  # Deprecated : values.mad()
+        nvalid_values = values.replace(-10, np.NaN).dropna()
+        mean = nvalid_values.mean()
+        stdev = nvalid_values.std(ddof=ddof)
+        sem = nvalid_values.sem(ddof=ddof)
+        mad = (nvalid_values - nvalid_values.mean()).abs().mean()  # Deprecated : values.mad()
 
-        mean_values = [] # list of inconsistent mean values
-        valid_values = list(valid_values)
-
-        # for all pairs of reactivities, record if pairwise mean is not in
-        # same class as total mean
-        for v in range(len(valid_values)-1):
-            for u in range(len(valid_values)):
+        mean_values = []
+        nvalid_values = list(nvalid_values)
+        for v in range(len(nvalid_values)-1):
+            for u in range(len(nvalid_values)):
                 if u > v:
-                    mean_uv = (valid_values[v] + valid_values[u])/2
+                    mean_uv = (nvalid_values[v] + nvalid_values[u])/2
                     if 0 <= mean < 0.4:
                         if mean_uv >= 0.4:
                             mean_values.append(mean_uv)
@@ -436,25 +493,18 @@ def aggregate_replicates(
                     elif mean >= 0.7:
                         if 0.7 > mean_uv:
                             mean_values.append(mean_uv)
-        
-        # accept, if all pairwise means are 'consistent' or std dev is
-        # sufficiently small
         if mean_values == [] or stdev <= 0.15:
             desc = "accepted"
             used_values = nvalues
-        # otherwise warn, if inconsistent mean values are all in the same
-        # class. This is guaranteed if there is only one inconsistent mean 
         elif all(0 <= m < 0.4 for m in mean_values) or all(0.4 <= m < 0.7 for m in mean_values) or all(0.7 <= m for m in mean_values):
             desc = 'warning'
             used_values = nvalues
-        # call it non-consistent, only if moreover the inconsistent pairwise means
-        # are in different classes
         else:
             mean = -10
-            desc = "non-consistent"
+            desc = "non-consistant"
     else:
             mean = -10
-            desc = "not-enough-values"
+            desc = "no-enough-values"
 
     return pd.Series(
         {
@@ -467,8 +517,6 @@ def aggregate_replicates(
         },
         index=["mean", "stdev", "sem", "mad", "used_values", "desc"],
     )
-
-
 
 def check_duplicated(aggregated: pd.DataFrame):
     dup = pd.DataFrame(aggregated)
@@ -491,10 +539,10 @@ def aggregate(
     shape_output=None,
     map_output=None,
     normcol="simple_norm_reactivity",
-    min_ndata_perc: float = 0.5,
-    min_nsubdata_perc: float = 0.66,
-    max_mean_perc: float = 0.682,
-    min_dispersion: float = 0.05,
+#    min_ndata_perc: float = 0.5,
+#    min_nsubdata_perc: float = 0.66,
+#    max_mean_perc: float = 0.682,
+#    min_dispersion: float = 0.05,
     fullplot: str = None,
     plot: str = None,
     plot_title: str = None,
@@ -541,7 +589,6 @@ def aggregate(
     shape_react_seqs = [ShapeReactivitySeq(filepath) for filepath in src]
     shape_dfs = []
 
-    # column containing the reactivity is renames to the file name
     shape_dfs.extend(
         [
             srs.df[[normcol]].rename(columns={normcol: srs.name})
@@ -551,7 +598,6 @@ def aggregate(
 
     # print(shape_dfs[2])
     reacts = pd.concat(shape_dfs, axis=1)
-
     # Remove leading and trailing empty data
 
     # reacts = reacts.sort_index()
@@ -559,8 +605,6 @@ def aggregate(
     # last_idx = reacts.last_valid_index()
     # reacts = reacts.loc[first_idx:last_idx, :]
 
-
-    # nvalid_values is the number of files / replicates
     reacts["nvalid_values"] = reacts.count(axis=1)
 
     aggregated = reacts.copy()

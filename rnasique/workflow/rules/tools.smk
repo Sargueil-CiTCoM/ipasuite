@@ -157,10 +157,10 @@ rule aggregate_reactivity:
     log: construct_path('aggreact', ext=".log", log_dir=True, show_replicate=False)
     params:
         norm_method= construct_normcol(),
-        minndp = construct_param(config["aggregate"], "min_ndata_perc"),
-        mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
-        maxmp = construct_param(config["aggregate"], "max_mean_perc"),
-        mind = construct_param(config["aggregate"], "min_dispersion"),
+#        minndp = construct_param(config["aggregate"], "min_ndata_perc"),
+#        mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
+#        maxmp = construct_param(config["aggregate"], "max_mean_perc"),
+#        mind = construct_param(config["aggregate"], "min_dispersion"),
         plot = lambda wildcards, output: f"--plot={output.plot} --fullplot={output.fullplot}" if
         config["aggregate"]["plot"] else "",
         plot_title=lambda wildcards: f"--plot_title='Aggregated reactivity of {MESSAGE.format(wildcards=wildcards)}'"

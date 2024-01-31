@@ -17,6 +17,9 @@ from colorlog import ColoredFormatter
 import pandas as pd
 import traceback
 
+import csv
+import re
+
 LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
 DATE_FORMAT = "%b %d %H:%M:%S"
 formatter = ColoredFormatter(LOGFORMAT)
@@ -132,6 +135,7 @@ class Launcher(object):
         os.makedirs(os.path.join(project, "resources/raw_data"))
         os.mkdir(os.path.join(project, "results"))
 
+
     def prep(self):
         data_folder = os.path.join("resources/raw_data")
         sample_file = os.path.join('samples.tsv')
@@ -144,7 +148,7 @@ class Launcher(object):
         data = pd.DataFrame(columns=['rna_id', 'date', 'experimenter','probe', 'temperature', 'magnesium', 'ddNTP', 'rna_begin', 'rna_end',\
             'rt_begin_pos', 'rt_end_pos', 'replicate', 'probe_file', 'control_file', 'qushape_file','reference_qushape_file','map_file','discard'])
 
-        template = ['{rna_id}_{probe_control_flag_unique_experiment_id}_{probe}_{magnesium}_{temparature}_{ddNTP}_{date}_{experimenter}.*.txt',\
+        template = ['{rna_id}_{probe_control_flag_unique_experiment_id}_{probe}_{magnesium}_{temperature}_{ddNTP}_{date}_{experimenter}.*.txt',\
             '{rna_id}_{probe}_{temperature}_{magnesium}_{condition}_{replicate}.*.qushapey','{prefix}_{probe}_{magnesium}_{temperature}_{replicate}_{rna_id}.*.map']
 
         def translate_template_to_re(template):
@@ -185,6 +189,7 @@ class Launcher(object):
                     rna_id = file.split('_')[0]
                     unique_experiment_id = file.split('_')[1][1:]
                     control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and re.match(fr'.*{unique_experiment_id}', file_name.split('_')[1][1:]) and file_name != file][0]
+
                     row = {'rna_id':rna_id, 'date':'', 'experimenter':'','probe':'', 'temperature':'', 'magnesium':'', 'ddNTP':'', 'rna_begin':'',\
                         'rna_end':'','rt_begin_pos':'', 'rt_end_pos':'', 'replicate':'', 'probe_file':file, 'control_file':control_file,\
                              'qushape_file':'','reference_qushape_file':'','map_file':'','discard':''}

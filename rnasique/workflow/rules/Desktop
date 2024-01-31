@@ -1,0 +1,6 @@
+id	rna_id	date	experimenter	probe	temperature	magnesium	ddNTP	rna_begin	rna_end	rt_begin_pos	rt_end_pos	replicate	probe_file	control_file	qushape_file	reference_qushape_file	map_file	discard
+1																	sefdsed.map	
+2															ddddddddddd.qushapey			
+3	rnaid	24-01-2023	PPP	1M7	37	Mg	ddA						rnaid_B1_1M7_Mg_T37C_ddA_24-01-2023_PPP.txt	rnaid_A1_dfes.txt				
+4	rnaid			NMIA	50	noMG						2					sd_NMIA_noMG_T50C_2_rnaid.map	
+5	rnaid			1M7	37	noMg						3			rnaid_1M7_T37C_noMg_5nM_3.qushapey			

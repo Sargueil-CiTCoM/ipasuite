@@ -88,9 +88,9 @@ def footprint_ttest(
     res = pd.DataFrame([], columns=cols).set_index(indexes)
     for index, row in footprint.iterrows():
 
-        if row.loc[cond1_name]["desc"] in ("accepted", "reduced") and row.loc[
+        if row.loc[cond1_name]["desc"] in ("accepted", "warning") and row.loc[
             cond2_name
-        ]["desc"] in ("accepted", "reduced"):
+        ]["desc"] in ("accepted", "warning"):
 
             stat, pvalue = scipy.stats.ttest_ind_from_stats(
                 row.loc[cond1_name]["mean"],
@@ -151,32 +151,32 @@ def plot_reactivity(
     cond1_name="Condition1",
     cond2_name="Condition2",
 ):
-
     replicates = footprint.drop("ttest", axis=1)
-
     means = replicates.xs("mean", level=1, axis=1).reset_index()
+    means = means.sort_values(by=["seqNum"]).reset_index().drop(["index"], axis=1)
+  
+    means["xlabel"] = ( means["seqNum"].astype(str) + "\n" + means["sequence"].astype(str))  
 
     means = means.replace(-10, np.NaN)
-
     unidmeans = means.drop(["seqNum", "sequence"], axis=1)
 
-    ax = unidmeans[unidmeans.columns[0]].plot(
-        kind="bar",
-        width=1.0,
-        align="center",
-        figsize=(len(footprint) / 3, 4),
-        # alpha=0.5,
-        color="green",
-    )
-    unidmeans[unidmeans.columns[1]].plot(
-        kind="bar",
-        width=1.0,
-        align="center",
-        figsize=(len(footprint) / 3, 4),
-        alpha=0.5,
-        color="lime",
-        ax=ax,
-    )
+   # ax = unidmeans[unidmeans.columns[0]].plot(
+   #     kind="bar",
+   #     width=1.0,
+   #     align="center",
+   #     figsize=(len(footprint) / 3, 4),
+   #     # alpha=0.5,
+   #     color="green",
+   # )
+   # unidmeans[unidmeans.columns[1]].plot(
+   #     kind="bar",
+   #     width=1.0,
+   #     align="center",
+   #     figsize=(len(footprint) / 3, 4),
+   #     alpha=0.5,
+   #     color="lime",
+   #     ax=ax,
+   # )
 
     ttest = footprint["ttest"]
 
@@ -186,27 +186,35 @@ def plot_reactivity(
     ttest["color"] = "white"
     ttest.loc[ttest["significant_delta"] > 0, "color"] = "yellow"
     ttest.loc[ttest["significant_delta"] < 0, "color"] = "orange"
-
     first_idx = ttest.first_valid_index()
     last_idx = ttest.last_valid_index()
+
+    fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4))
 
     for index, row in ttest.loc[first_idx:last_idx].iterrows():
         idx = index
         if row["color"] != "white":
             ax.axvspan(
-                (idx - first_idx) - 0.5,
-                (idx - first_idx + 0.4),
+                (idx - first_idx) - 0.45,
+               (idx - first_idx + 0.45),
                 alpha=0.3,
                 color=row["color"],
             )
+
+
+    ax.set_xticks(unidmeans.index)
+    ax.set_xticklabels(unidmeans["xlabel"])
+    ax.bar(unidmeans.index - 0.225, unidmeans.iloc[:, 0], width=0.45, color='blue', align='center', label=f"{cond1_name}")
+    ax.bar(unidmeans.index + 0.225, unidmeans.iloc[:, 1], width=0.45, color='skyblue', align='center', label=f"{cond2_name}")
+
 
     ax.axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
     ax.axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
 
     plt.margins(0)
     legend_elements = [
-        Patch(facecolor="green", label=f"{cond1_name}"),
-        Patch(facecolor="lime", label=f"{cond2_name}", alpha=0.5),
+        Patch(facecolor="blue", label=f"{cond1_name}"),
+        Patch(facecolor="skyblue", label=f"{cond2_name}", alpha=0.5),
         Patch(facecolor="yellow", label=f"{cond1_name} sign. Higher", alpha=0.3),
         Patch(facecolor="orange", label=f"{cond2_name} sign. Higher", alpha=0.3),
         Line2D([0], [0], color="red", label="High reactivity threshold"),

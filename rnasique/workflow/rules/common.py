@@ -180,6 +180,13 @@ def get_external_qushape(wildcards):
     except:
         return ""
 
+# def get_external_map(wildcards):
+#    sample = get_sample(samples, wildcards)
+#    try:
+#        return os.path.join(config["rawdata"]["path_prefix"], sample["map_file"])
+#    except:
+#        return ""
+
 
 def get_raw_probe_input(wildcards):
     sample = get_sample(samples, wildcards)

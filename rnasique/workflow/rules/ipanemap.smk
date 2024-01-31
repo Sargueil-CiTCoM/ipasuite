@@ -110,7 +110,6 @@ checkpoint ipanemap:
         f"ipanemap -f {{input.config}} --log {{log}}"
 
 
-
 rule structure:
     #conda:
     #    "../envs/ipanemap.yml"
@@ -149,7 +148,6 @@ rule structure:
 rule varna_color_by_condition:
     #conda:
     #    "../envs/ipanemap.yml"
-
     input:
         struct_optimal = expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1.dbn",
@@ -163,10 +161,8 @@ rule varna_color_by_condition:
         ),
         aggreact=construct_path("aggreact-ipanemap", show_replicate = False,
                 ext=".shape"),
-
     params:
         colorstyle= f"-colorMapStyle '{config['varna']['colormapstyle']}'",
-
     output:
         varna_optimal = expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1_cond_{{conditions}}.varna",
@@ -192,11 +188,9 @@ rule varna_color_by_condition:
             conditions=CONDITION,
             allow_missing=True,
         ), category="6.-Secondary structure", subcategory="{rna_id} - {pool_id}"),
-
     log:
         log1 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_1_{CONDITION}.log",
         log2 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_2_{CONDITION}.log",
-
     shell:
         f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
@@ -210,9 +204,6 @@ rule varna_color_by_condition:
         f"varna -i {{input.struct_2}} -o {{output.svg_2}}" 
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};"
-
-
-
 
 # Not working while Varna can't save several rna inside one session file
 rule varna_pool_concat:

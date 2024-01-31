@@ -281,10 +281,10 @@ aggregate:
 
   # You can specify the name of the column used for normalization instead of the normalization method
   #norm_column: "simple_norm_reactivity" #
-#  min_ndata_perc: 0.5
-#  min_nsubdata_perc: 0.66
-#  max_mean_perc: 0.682
-#  min_dispersion: 0.05
+  min_ndata_perc: 0.5
+  min_nsubdata_perc: 0.66
+  max_mean_perc: 0.682
+  min_dispersion: 0.05
 
 ###
 # IPANEMAP configuration
@@ -388,7 +388,9 @@ ipanemap:
 
 varna:
   colormapstyle:
-     $-0.5:#999999,$-0.49999:#FFFFFF,$0.4:#FFFFFF,$0.40001:#FAE902,$0.7:#FAE902,$0.70001:#E80C0C,$100.00:#E80C0C
+     $-0.5:#999999,$-0.49999:#FFFFFF,$0.4:#FFFFFF,$0.40001:#FAE902,$0.7:#FAE902,$0.70001:#E80C0C,$5.00:#E80C0C
+#"$-10.00:#CCCCCC,$-0.31:#999999,$-0.3:#FFFFFF,$0.2:#FFFFFF,$0.4:#FFFF00,$0.69:#FFFF47,$0.7:#FF0000,$5.00:#FF0033"
+
 
 footprint:
   compares:
