@@ -154,11 +154,15 @@ def plot_reactivity(
     replicates = footprint.drop("ttest", axis=1)
     means = replicates.xs("mean", level=1, axis=1).reset_index()
     means = means.sort_values(by=["seqNum"]).reset_index().drop(["index"], axis=1)
-  
     means["xlabel"] = ( means["seqNum"].astype(str) + "\n" + means["sequence"].astype(str))  
-
     means = means.replace(-10, np.NaN)
     unidmeans = means.drop(["seqNum", "sequence"], axis=1)
+
+    stdev = replicates.xs("stdev", level=1, axis=1).reset_index()
+    stdev = stdev.sort_values(by=["seqNum"]).reset_index().drop(["index"], axis=1)
+    stdev["xlabel"] = (stdev["seqNum"].astype(str) + "\n" + stdev["sequence"].astype(str))
+    unidstdev = stdev.drop(["seqNum", "sequence"], axis=1)
+
 
    # ax = unidmeans[unidmeans.columns[0]].plot(
    #     kind="bar",
@@ -178,50 +182,70 @@ def plot_reactivity(
    #     ax=ax,
    # )
 
-    ttest = footprint["ttest"]
+    # ttest = footprint["ttest"]
 
-    ttest = ttest.reset_index()
+    # ttest = ttest.reset_index()
 
-    ttest["xlabel"] = ttest["seqNum"].astype(str) + "\n" + ttest["sequence"].astype(str)
-    ttest["color"] = "white"
-    ttest.loc[ttest["significant_delta"] > 0, "color"] = "yellow"
-    ttest.loc[ttest["significant_delta"] < 0, "color"] = "orange"
-    first_idx = ttest.first_valid_index()
-    last_idx = ttest.last_valid_index()
+    # ttest["xlabel"] = ttest["seqNum"].astype(str) + "\n" + ttest["sequence"].astype(str)
+    # ttest["color"] = "white"
+    # ttest.loc[ttest["significant_delta"] > 0, "color"] = "yellow"
+    # ttest.loc[ttest["significant_delta"] < 0, "color"] = "orange"
+    # first_idx = ttest.first_valid_index()
+    # last_idx = ttest.last_valid_index()
+
+    # for index, row in ttest.loc[first_idx:last_idx].iterrows():
+    #     idx = index
+    #     if row["color"] != "white":
+    #         ax.axvspan(
+    #             (idx - first_idx) - 0.45,
+    #            (idx - first_idx + 0.45),
+    #             alpha=0.3,
+    #             color=row["color"],
+    #         )
+
 
     fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4))
 
-    for index, row in ttest.loc[first_idx:last_idx].iterrows():
-        idx = index
-        if row["color"] != "white":
-            ax.axvspan(
-                (idx - first_idx) - 0.45,
-               (idx - first_idx + 0.45),
-                alpha=0.3,
-                color=row["color"],
-            )
+    for i in range(len(unidmeans.index)):
+        if all(m == np.NaN for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) or all(0 <= m < 0.4 for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) \
+            or all(0.4 <= m < 0.7 for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) or all(0.7 <= m for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) \
+                or np.abs(unidmeans.iloc[i, 0] - unidmeans.iloc[i, 1]) <= 0.1:
+                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, alpha=0.3, color='white')            
+        else:
+            if unidmeans.iloc[i, 0] > unidmeans.iloc[i, 1]:
+                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, alpha=0.3, color='yellow')
+            elif unidmeans.iloc[i, 0] < unidmeans.iloc[i, 1]:
+                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, alpha=0.3, color='orange')
 
-
+    
     ax.set_xticks(unidmeans.index)
     ax.set_xticklabels(unidmeans["xlabel"])
-    ax.bar(unidmeans.index - 0.225, unidmeans.iloc[:, 0], width=0.45, color='blue', align='center', label=f"{cond1_name}")
-    ax.bar(unidmeans.index + 0.225, unidmeans.iloc[:, 1], width=0.45, color='skyblue', align='center', label=f"{cond2_name}")
-
+    ax.bar(unidmeans.index - 0.225, unidmeans.iloc[:, 0], yerr = unidstdev.iloc[:, 0], capsize = 2, width=0.45, color='skyblue', align='center', label=f"{cond1_name}")
+    ax.bar(unidmeans.index + 0.225, unidmeans.iloc[:, 1], yerr = unidstdev.iloc[:, 1], capsize = 2, width=0.45, color='royalblue', align='center', label=f"{cond2_name}")
 
     ax.axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
     ax.axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
+    ax.axhline(y=0.0, color="silver", linestyle="-")
+
 
     plt.margins(0)
     legend_elements = [
-        Patch(facecolor="blue", label=f"{cond1_name}"),
-        Patch(facecolor="skyblue", label=f"{cond2_name}", alpha=0.5),
+        Patch(facecolor="skyblue", label=f"{cond1_name}"),
+        Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
         Patch(facecolor="yellow", label=f"{cond1_name} sign. Higher", alpha=0.3),
         Patch(facecolor="orange", label=f"{cond2_name} sign. Higher", alpha=0.3),
         Line2D([0], [0], color="red", label="High reactivity threshold"),
         Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
     ]
+
+    plt.xlim([unidmeans.index[0] - 1, unidmeans.index[-1] + 1])
+    plt.ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
+        max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
     plt.legend(handles=legend_elements, loc="upper left")
     plt.title(title, loc="left")
+    ax2 = plt.twinx()
+    ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
+        max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
     plt.tight_layout()
     plt.savefig(output, format=format)
 

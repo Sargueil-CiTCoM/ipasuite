@@ -94,7 +94,7 @@ def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
                 (idx - first_idx + 0.4),
                 alpha=0.3,
                 color="blue",
-                label="_" * fnev + "Not enough value",
+                label="_" * fnev + "Undetermined",
             )
             fnev += 1
         if row["desc"] == "non-consistant":
