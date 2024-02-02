@@ -88,7 +88,7 @@ def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
                 label="_" * fone + "Only one value",
             )
             fone += 1
-        if row["desc"] == "no-enough-values":
+        if row["desc"] == "undetermined":
             ax.axvspan(
                 (idx - first_idx) - 0.5,
                 (idx - first_idx + 0.4),
@@ -504,7 +504,7 @@ def aggregate_replicates(
             desc = "non-consistant"
     else:
             mean = -10
-            desc = "no-enough-values"
+            desc = "undetermined"
 
     return pd.Series(
         {

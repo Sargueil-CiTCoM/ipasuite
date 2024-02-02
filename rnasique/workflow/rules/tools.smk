@@ -173,30 +173,33 @@ rule aggregate_reactivity:
         f" --err_on_dup={config['aggregate']['err_on_dup']} &> {{log}}"
 
 
-
 rule footprint:
     input:
         get_footprint_inputs,
     output:
         tsv=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.tsv",
         plot=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
+        diff_plot=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}_difference.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
     log: "results/logs/footprint_{rna_id}_footprint_{foot_id}.log"
     params:
         ttest_pvalue_thres = construct_param(config["footprint"]["config"],
                 "ttest_pvalue_thres"),
-        deviation_type = construct_param(config["footprint"]["config"],
-                "deviation_type"),
+   #     deviation_type = construct_param(config["footprint"]["config"],
+   #             "deviation_type"),
         diff_thres = construct_param(config["footprint"]["config"],
                 "diff_thres"),
         ratio_thres = construct_param(config["footprint"]["config"],
                 "ratio_thres"),
         cond1_name = lambda wildcards: f"--cond1_name='{get_footprint_condition_name(wildcards, 1)}'",
         cond2_name = lambda wildcards: f"--cond2_name='{get_footprint_condition_name(wildcards, 2)}'",
-        plot_title = lambda wildcards: f"--plot_title='Compared reactivity between {get_footprint_condition_name(wildcards, 1)} and {get_footprint_condition_name(wildcards, 2)}'"
+        plot_title = lambda wildcards: f"--plot_title='Compared reactivity between {get_footprint_condition_name(wildcards, 1)} and {get_footprint_condition_name(wildcards, 2)}'",
+        diff_plot_title = lambda wildcards: f"--diff_plot_title='Difference between {get_footprint_condition_name(wildcards, 1)} and {get_footprint_condition_name(wildcards, 2)}'"
     shell:
         f"footprint {{input}}"
         f" --output={{output.tsv}} {{params}}"
-        f" --plot={{output.plot}} --plot_format=svg "
+        f" --plot={{output.plot}} --diff_plot={{output.diff_plot}} --plot_format=svg"
+
+
 #rule ipanemap:
 #    conda: "../envs/ipanemap.yml"
 #    input: construct_path("aggreact-ipanemap", replicate = False)

@@ -8,58 +8,57 @@ import scipy
 import scipy.stats
 import fire
 
-
-def ratio_sig_test(footprint, ttest_pvalue_thres=0.01, diff_thres=0.2, ratio_thres=0.2):
-    footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
-        lambda row: row["delta"]
-        if row["pvalue"] <= ttest_pvalue_thres
-        and np.abs(row["delta"]) >= diff_thres
-        and row["ratio"] >= ratio_thres
-        else np.NaN,
-        axis=1,
-    )
-    return footprint
-
-
-def zfactor_sig_test(footprint, ttest_pvalue_thres=0.01, zfactor_thres=0):
-    footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
-        lambda row: row["delta"]
-        if row["pvalue"] <= ttest_pvalue_thres and row["zfactor"] > zfactor_thres
-        else np.NaN,
-        axis=1,
-    )
-    return footprint
+# def ratio_sig_test(footprint, ttest_pvalue_thres=0.05, diff_thres=0.2, ratio_thres=0.2):
+#     footprint = pd.DataFrame(footprint)
+#     footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
+#         lambda row: row["delta"]
+#         if row["pvalue"] <= ttest_pvalue_thres
+#         and np.abs(row["delta"]) >= diff_thres
+#         and row["ratio"] >= ratio_thres
+#         else np.NaN,
+#         axis=1,
+#     )
+#     return footprint
 
 
-def ttest_only_sig_test(footprint, ttest_pvalue_thres=0.01):
-    footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
-        lambda row: row["delta"] if row["pvalue"] <= ttest_pvalue_thres else np.NaN,
-        axis=1,
-    )
-    return footprint
+# def zfactor_sig_test(footprint, ttest_pvalue_thres=0.01, zfactor_thres=0):
+#     footprint = pd.DataFrame(footprint)
+#     footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
+#         lambda row: row["delta"]
+#         if row["pvalue"] <= ttest_pvalue_thres and row["zfactor"] > zfactor_thres
+#         else np.NaN,
+#         axis=1,
+#     )
+#     return footprint
 
 
-def ratio_zfactor_sig_test(
-    footprint,
-    ttest_pvalue_thres=0.01,
-    diff_thres=0.2,
-    ratio_thres=0.2,
-    zfactor_thres=0,
-):
-    footprint = pd.DataFrame(footprint)
-    footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
-        lambda row: row["delta"]
-        if row["pvalue"] <= ttest_pvalue_thres
-        and row["zfactor"] > zfactor_thres
-        and np.abs(row["delta"]) >= diff_thres
-        and row["ratio"] >= ratio_thres
-        else np.NaN,
-        axis=1,
-    )
-    return footprint
+# def ttest_only_sig_test(footprint, ttest_pvalue_thres=0.01):
+#     footprint = pd.DataFrame(footprint)
+#     footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
+#         lambda row: row["delta"] if row["pvalue"] <= ttest_pvalue_thres else np.NaN,
+#         axis=1,
+#     )
+#     return footprint
+
+
+# def ratio_zfactor_sig_test(
+#     footprint,
+#     ttest_pvalue_thres=0.01,
+#     diff_thres=0.2,
+#     ratio_thres=0.2,
+#     zfactor_thres=0,
+# ):
+#     footprint = pd.DataFrame(footprint)
+#     footprint.loc[:, ("ttest", "significant_delta")] = footprint["ttest"].apply(
+#         lambda row: row["delta"]
+#         if row["pvalue"] <= ttest_pvalue_thres
+#         and row["zfactor"] > zfactor_thres
+#         and np.abs(row["delta"]) >= diff_thres
+#         and row["ratio"] >= ratio_thres
+#         else np.NaN,
+#         axis=1,
+#     )
+#     return footprint
 
 
 def footprint_ttest(
@@ -68,16 +67,18 @@ def footprint_ttest(
     cond2_path,
     cond2_name,
     deviation_type="stdev",
-    zfactor_nsigma=3,
+    # zfactor_nsigma=3,
+    ttest_pvalue_thres=0.05,
+    diff_thres=0.2,
+    ratio_thres=0.2,
 ):
     cols = [
         "seqNum",
         "sequence",
-        "stat",
         "pvalue",
-        "delta",
+        "difference",
         "ratio",
-        "zfactor",
+        "significant",
     ]
     indexes = ["seqNum", "sequence"]
     cond1 = pd.read_csv(cond1_path, sep="\t").set_index(["seqNum", "sequence"])
@@ -87,75 +88,59 @@ def footprint_ttest(
     )
     res = pd.DataFrame([], columns=cols).set_index(indexes)
     for index, row in footprint.iterrows():
-
         if row.loc[cond1_name]["desc"] in ("accepted", "warning") and row.loc[
-            cond2_name
-        ]["desc"] in ("accepted", "warning"):
-
-            stat, pvalue = scipy.stats.ttest_ind_from_stats(
-                row.loc[cond1_name]["mean"],
-                row.loc[cond1_name][deviation_type],
-                row.loc[cond1_name]["used_values"],
-                row.loc[cond2_name]["mean"],
-                row.loc[cond2_name][deviation_type],
-                row.loc[cond2_name]["used_values"],
+            cond2_name]["desc"] in ("accepted", "warning"):
+            stat, pvalue = scipy.stats.ttest_ind(
+                list(row.loc[cond1_name].iloc[:row.loc[cond1_name].index.get_loc("mean")]),
+                list(row.loc[cond2_name].iloc[:row.loc[cond1_name].index.get_loc("mean")]),
                 equal_var=True,
-                alternative="two-sided",
-            )
-            delta = row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"]
-            ratio = np.abs(delta) / (
-                row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"]
-            )
-            try:
-                zfactor = (
-                    1
-                    - (
-                        zfactor_nsigma
-                        * (
-                            row.loc[cond2_name][deviation_type]
-                            + row.loc[cond1_name][deviation_type]
-                        )
-                    )
-                    / delta
-                )
-            except ZeroDivisionError: 
-                print("Z-factor computation failed : DivisionByZero")
+                alternative="two-sided",)
+            difference = np.abs(row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"])
+            ratio = difference / (row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"])
 
+            if pvalue < ttest_pvalue_thres and difference >= diff_thres and ratio >= ratio_thres:
+                significant = 'YES'
+            else:
+                significant = 'NO'
             curres = pd.DataFrame(
-                [[index[0], index[1], stat, pvalue, delta, ratio, zfactor]],
-                columns=cols,
-            ).set_index(indexes)
+                [[index[0], index[1], pvalue, difference, ratio, significant]],
+                columns=cols,).set_index(indexes)
             res = pd.concat([res, curres])
         else:
             curres = pd.DataFrame(
-                [[index[0], index[1], np.NaN, np.NaN, np.NaN, np.NaN, np.NaN]],
-                columns=cols,
-            ).set_index(indexes)
+                [[index[0], index[1], np.NaN, np.NaN, np.NaN, np.NaN]],
+                columns=cols,).set_index(indexes)
             res = pd.concat([res, curres])
-
     footprint = pd.concat(
         {cond1_name: cond1, cond2_name: cond2, "ttest": res},
         names=["condition"],
-        axis=1,
-    )
+        axis=1,)
 
-    return footprint
+    footprint_csv = pd.concat(
+        {cond1_name: cond1["mean"], cond2_name: cond2["mean"], "analysis": res},
+        names=["condition"],
+        axis=1,)
+    footprint_csv = footprint_csv.sort_values(by=["seqNum"]).reset_index()
+
+    return footprint, footprint_csv
 
 
 def plot_reactivity(
     footprint: pd.DataFrame,
     title="Footprint",
+    dif_title="Footprint",
     output="fig.svg",
+    diff_output="diff.svg",
     format="svg",
-    deviation_type="stdev",
     cond1_name="Condition1",
     cond2_name="Condition2",
 ):
+
     replicates = footprint.drop("ttest", axis=1)
     means = replicates.xs("mean", level=1, axis=1).reset_index()
     means = means.sort_values(by=["seqNum"]).reset_index().drop(["index"], axis=1)
-    means["xlabel"] = ( means["seqNum"].astype(str) + "\n" + means["sequence"].astype(str))  
-    means = means.replace(-10, np.NaN)
+    means["xlabel"] = (means["seqNum"].astype(str) + "\n" + means["sequence"].astype(str))
+    means = means.replace(-10, -0.1)
     unidmeans = means.drop(["seqNum", "sequence"], axis=1)
 
     stdev = replicates.xs("stdev", level=1, axis=1).reset_index()
@@ -163,105 +148,97 @@ def plot_reactivity(
     stdev["xlabel"] = (stdev["seqNum"].astype(str) + "\n" + stdev["sequence"].astype(str))
     unidstdev = stdev.drop(["seqNum", "sequence"], axis=1)
 
+    significant = footprint[('ttest', 'significant')].reset_index()
+    significant = significant.sort_values(by=[('seqNum', '')]).reset_index().drop([('index','')], axis=1)
+    significant["xlabel"] = (significant[('seqNum', '')].astype(str) + "\n" + significant[('sequence','')].astype(str))
+    unidsignificant = significant.drop([('seqNum', ''), ('sequence','')], axis=1)
+   
+    difference = footprint[('ttest', 'difference')].reset_index()
+    difference = difference.sort_values(by=[('seqNum', '')]).reset_index().drop([('index','')], axis=1)
+    difference["xlabel"] = (difference[('seqNum', '')].astype(str) + "\n" + difference[('sequence','')].astype(str))
+    difference = difference.drop([('seqNum', ''), ('sequence','')], axis=1)
+ 
+    regions = np.linspace(0, int(len(unidmeans)/100)*100, int(len(unidmeans)/100)+1)
+    regions = list(map(int, regions))
+    if 50 > len(unidmeans) - regions[-1] +1:
+        regions[-1] = len(unidmeans)
+    else:
+        regions.append(len(unidmeans))
+#    subplot_width = (len(regions)-2) * [1] + [(regions[-1]-regions[-2]+1)/100]
 
-   # ax = unidmeans[unidmeans.columns[0]].plot(
-   #     kind="bar",
-   #     width=1.0,
-   #     align="center",
-   #     figsize=(len(footprint) / 3, 4),
-   #     # alpha=0.5,
-   #     color="green",
-   # )
-   # unidmeans[unidmeans.columns[1]].plot(
-   #     kind="bar",
-   #     width=1.0,
-   #     align="center",
-   #     figsize=(len(footprint) / 3, 4),
-   #     alpha=0.5,
-   #     color="lime",
-   #     ax=ax,
-   # )
+    fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
 
-    # ttest = footprint["ttest"]
-
-    # ttest = ttest.reset_index()
-
-    # ttest["xlabel"] = ttest["seqNum"].astype(str) + "\n" + ttest["sequence"].astype(str)
-    # ttest["color"] = "white"
-    # ttest.loc[ttest["significant_delta"] > 0, "color"] = "yellow"
-    # ttest.loc[ttest["significant_delta"] < 0, "color"] = "orange"
-    # first_idx = ttest.first_valid_index()
-    # last_idx = ttest.last_valid_index()
-
-    # for index, row in ttest.loc[first_idx:last_idx].iterrows():
-    #     idx = index
-    #     if row["color"] != "white":
-    #         ax.axvspan(
-    #             (idx - first_idx) - 0.45,
-    #            (idx - first_idx + 0.45),
-    #             alpha=0.3,
-    #             color=row["color"],
-    #         )
-
-
-    fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4))
-
-    for i in range(len(unidmeans.index)):
-        if all(m == np.NaN for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) or all(0 <= m < 0.4 for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) \
-            or all(0.4 <= m < 0.7 for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) or all(0.7 <= m for m in [unidmeans.iloc[i, 0], unidmeans.iloc[i, 1]]) \
-                or np.abs(unidmeans.iloc[i, 0] - unidmeans.iloc[i, 1]) <= 0.1:
-                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, alpha=0.3, color='white')            
-        else:
-            if unidmeans.iloc[i, 0] > unidmeans.iloc[i, 1]:
-                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, alpha=0.3, color='yellow')
-            elif unidmeans.iloc[i, 0] < unidmeans.iloc[i, 1]:
-                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, alpha=0.3, color='orange')
-
+    for j in range(len(regions)-1) :
+        axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
+        axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
     
-    ax.set_xticks(unidmeans.index)
-    ax.set_xticklabels(unidmeans["xlabel"])
-    ax.bar(unidmeans.index - 0.225, unidmeans.iloc[:, 0], yerr = unidstdev.iloc[:, 0], capsize = 2, width=0.45, color='skyblue', align='center', label=f"{cond1_name}")
-    ax.bar(unidmeans.index + 0.225, unidmeans.iloc[:, 1], yerr = unidstdev.iloc[:, 1], capsize = 2, width=0.45, color='royalblue', align='center', label=f"{cond2_name}")
+        for i in range(len(unidmeans)):
+            if i >= regions[j] and i < regions[j+1]:
+                if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
+                    axes[j].axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='gold',alpha=0.3)
 
-    ax.axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
-    ax.axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
-    ax.axhline(y=0.0, color="silver", linestyle="-")
+                bar_color1 = 'skyblue' if unidmeans.iloc[i, 0] >= 0 else 'lightgrey'
+                bar_color2 = 'royalblue' if unidmeans.iloc[i, 1] >= 0 else 'lightgrey'
+                
+                axes[j].bar(unidmeans.index[i] - 0.225, unidmeans.iloc[i, 0], yerr=unidstdev.iloc[i, 0], capsize=2, width=0.45, color=bar_color1, align='center', label=f"{cond1_name}")
+                axes[j].bar(unidmeans.index[i] + 0.225, unidmeans.iloc[i, 1], yerr=unidstdev.iloc[i, 1], capsize=2, width=0.45, color=bar_color2, align='center', label=f"{cond2_name}")
 
+        axes[j].axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
+        axes[j].axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
+        axes[j].axhline(y=0.0, color="silver", linestyle="-")
 
-    plt.margins(0)
-    legend_elements = [
-        Patch(facecolor="skyblue", label=f"{cond1_name}"),
-        Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
-        Patch(facecolor="yellow", label=f"{cond1_name} sign. Higher", alpha=0.3),
-        Patch(facecolor="orange", label=f"{cond2_name} sign. Higher", alpha=0.3),
-        Line2D([0], [0], color="red", label="High reactivity threshold"),
-        Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
-    ]
-
-    plt.xlim([unidmeans.index[0] - 1, unidmeans.index[-1] + 1])
-    plt.ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
-        max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
-    plt.legend(handles=legend_elements, loc="upper left")
-    plt.title(title, loc="left")
-    ax2 = plt.twinx()
-    ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
-        max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
-    plt.tight_layout()
+        legend_elements = [
+            Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
+            Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
+            Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
+            Patch(facecolor="gold", label="Significant difference",alpha=0.5),
+            Line2D([0], [0], color="red", label="High reactivity threshold"),
+            Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
+        ]
+        axes[j].legend(handles=legend_elements, loc="upper left")
+        axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
+        axes[j].set_xlim([unidmeans.index[regions[j]] - 1, unidmeans.index[regions[j+1]-1] + 1])
+        axes[j].set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
+            max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
+        ax2 = axes[j].twinx()
+        ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
+            max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
+        plt.tight_layout()
+    plt.suptitle(title)
     plt.savefig(output, format=format)
 
+    fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
 
-# def footprint_ttest(
-#        cond1_path,
-#        cond1_name,
-#        cond2_path,
-#        cond2_name,
-#        sigtest=ratio_sig_test,
-#        deviation_type="mad",
-#        ttest_pvalue_thres=0.01,
-#        diff_thres=0.2,
-#        ratio_thres=0.2,
-#        zfactor_nsigma=3,
-#        ):
+    for j in range(len(regions)-1) :
+        axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
+        axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
+
+        for i in range(len(unidmeans)):
+            if i >= regions[j] and i < regions[j+1]:
+                if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
+                    axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.5, color = 'blue', align='center', label="Significant difference")
+                elif unidsignificant.loc[i, ('ttest', 'significant')] == 'NO':
+                    axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.5, color = 'skyblue', align='center', label="Difference")
+                else:
+                    axes[j].bar(unidmeans.index[i], -0.1, width=0.5, color = 'lightgrey', align='center', label="Undetermined")
+
+        axes[j].axhline(y=0.0, color="silver", linestyle="-")
+
+        legend_elements = [
+            Patch(facecolor="skyblue", label="Difference"),
+            Patch(facecolor="blue", label="Significant difference"),
+            Patch(facecolor="lightgrey", label="Undetermined"),
+        ]
+        axes[j].legend(handles=legend_elements, loc="upper left")
+        axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
+        axes[j].set_xlim([difference.index[regions[j]] - 1, difference.index[regions[j+1]-1] + 1])
+        axes[j].set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+        ax2 = axes[j].twinx()
+        ax2.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+        plt.tight_layout()
+    plt.suptitle(dif_title)
+    plt.savefig(diff_output, format=format)
+
 
 
 def footprint_main(
@@ -269,47 +246,48 @@ def footprint_main(
     cond2: str,
     cond1_name: str = None,
     cond2_name: str = None,
-    deviation_type: str = "stdev",
-    ttest_pvalue_thres=0.01,
+    # deviation_type: str = "stdev",
+    ttest_pvalue_thres=0.05,
     diff_thres=0.2,
     ratio_thres=0.2,
     output: str = None,
     plot: str = None,
+    diff_plot: str = None,
+    diff_plot_title="Footprint",
     plot_title="Footprint",
     plot_format="svg",
 ):
     cond1_name = cond1_name if cond1_name is not None else cond1
     cond2_name = cond2_name if cond2_name is not None else cond2
-    assert deviation_type in ["stdev", "sem", "mad"]
+    # assert deviation_type in ["stdev", "sem", "mad"]
 
-    footprint = footprint_ttest(
+    footprint, footprint_csv = footprint_ttest(
         cond1,
         cond1_name,
         cond2,
         cond2_name,
-        deviation_type=deviation_type,
-    )
-
-    footprint = ratio_sig_test(
-        footprint,
-        ttest_pvalue_thres=ttest_pvalue_thres,
-        diff_thres=diff_thres,
-        ratio_thres=ratio_thres,
+        # deviation_type=deviation_type,
+        ttest_pvalue_thres=0.05,
+        diff_thres=0.2,
+        ratio_thres=0.2,
     )
 
     if output is not None:
-        footprint.to_csv(output, sep="\t")
+        footprint_csv.to_csv(output, sep="\t")
 
-    if plot is not None:
+    if plot is not None or diff_plot is not None:
         plot_reactivity(
             footprint,
             plot_title,
+            diff_plot_title,
             plot,
+            diff_plot,
             plot_format,
-            deviation_type=deviation_type,
+            # deviation_type=deviation_type,
             cond1_name=cond1_name,
             cond2_name=cond2_name,
         )
+
 
 
 def main():
