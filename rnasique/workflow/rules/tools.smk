@@ -163,7 +163,7 @@ rule aggregate_reactivity:
 #        mind = construct_param(config["aggregate"], "min_dispersion"),
         plot = lambda wildcards, output: f"--plot={output.plot} --fullplot={output.fullplot}" if
         config["aggregate"]["plot"] else "",
-        plot_title=lambda wildcards: f"--plot_title='Aggregated reactivity of {MESSAGE.format(wildcards=wildcards)}'"
+        plot_title=lambda wildcards: f"--plot_title='Average reactivity of {MESSAGE.format(wildcards=wildcards)}'"
         #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
     shell:
         f"aggregate_reactivity {{input.norm}}"

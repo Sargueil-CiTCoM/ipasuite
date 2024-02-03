@@ -166,74 +166,140 @@ def plot_reactivity(
         regions.append(len(unidmeans))
 #    subplot_width = (len(regions)-2) * [1] + [(regions[-1]-regions[-2]+1)/100]
 
-    fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+    if len(regions) > 2:
+        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+        for j in range(len(regions)-1) :
+            axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
+            axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
 
-    for j in range(len(regions)-1) :
-        axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
-        axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
-    
+            for i in range(len(unidmeans)):
+                if i >= regions[j] and i < regions[j+1]:
+                    if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
+                        axes[j].axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='gold',alpha=0.3)
+
+                    bar_color1 = 'skyblue' if unidmeans.iloc[i, 0] >= 0 else 'lightgrey'
+                    bar_color2 = 'royalblue' if unidmeans.iloc[i, 1] >= 0 else 'lightgrey'
+
+                    axes[j].bar(unidmeans.index[i] - 0.225, unidmeans.iloc[i, 0], yerr=unidstdev.iloc[i, 0], capsize=2, width=0.45, color=bar_color1, align='center', label=f"{cond1_name}")
+                    axes[j].bar(unidmeans.index[i] + 0.225, unidmeans.iloc[i, 1], yerr=unidstdev.iloc[i, 1], capsize=2, width=0.45, color=bar_color2, align='center', label=f"{cond2_name}")
+
+            axes[j].axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
+            axes[j].axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
+            axes[j].axhline(y=0.0, color="silver", linestyle="-")
+
+            legend_elements = [
+                Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
+                Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
+                Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
+                Patch(facecolor="gold", label="Significant difference",alpha=0.5),
+                Line2D([0], [0], color="red", label="High reactivity threshold"),
+                Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
+            ]
+            axes[j].legend(handles=legend_elements, loc="upper left")
+            axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
+            axes[j].set_xlim([unidmeans.index[regions[j]] - 1, unidmeans.index[regions[j+1]-1] + 1])
+            axes[j].set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
+                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.1])
+            ax2 = axes[j].twinx()
+            ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
+                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.1])
+            plt.tight_layout()
+        plt.suptitle(title)
+        plt.savefig(output, format=format)
+
+        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+
+        for j in range(len(regions)-1) :
+            axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
+            axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
+
+            for i in range(len(unidmeans)):
+                if i >= regions[j] and i < regions[j+1]:
+                    if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
+                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'blue', align='center', label="Significant difference")
+                    elif unidsignificant.loc[i, ('ttest', 'significant')] == 'NO':
+                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'skyblue', align='center', label="Difference")
+                    else:
+                        axes[j].bar(unidmeans.index[i], -0.1, width=0.8, color = 'lightgrey', align='center', label="Undetermined")
+
+            axes[j].axhline(y=0.0, color="silver", linestyle="-")
+
+            legend_elements = [
+                Patch(facecolor="skyblue", label="Difference"),
+                Patch(facecolor="blue", label="Significant difference"),
+                Patch(facecolor="lightgrey", label="Undetermined"),
+            ]
+            axes[j].legend(handles=legend_elements, loc="upper left")
+            axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
+            axes[j].set_xlim([difference.index[regions[j]] - 1, difference.index[regions[j+1]-1] + 1])
+            axes[j].set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+            ax2 = axes[j].twinx()
+            ax2.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+            plt.tight_layout()
+    else:
+        fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+        ax.set_xticks(unidmeans.index[regions[0]:regions[1]])
+        ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
+
         for i in range(len(unidmeans)):
-            if i >= regions[j] and i < regions[j+1]:
-                if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
-                    axes[j].axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='gold',alpha=0.3)
+            if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
+                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='gold',alpha=0.3)
 
-                bar_color1 = 'skyblue' if unidmeans.iloc[i, 0] >= 0 else 'lightgrey'
-                bar_color2 = 'royalblue' if unidmeans.iloc[i, 1] >= 0 else 'lightgrey'
-                
-                axes[j].bar(unidmeans.index[i] - 0.225, unidmeans.iloc[i, 0], yerr=unidstdev.iloc[i, 0], capsize=2, width=0.45, color=bar_color1, align='center', label=f"{cond1_name}")
-                axes[j].bar(unidmeans.index[i] + 0.225, unidmeans.iloc[i, 1], yerr=unidstdev.iloc[i, 1], capsize=2, width=0.45, color=bar_color2, align='center', label=f"{cond2_name}")
+            bar_color1 = 'skyblue' if unidmeans.iloc[i, 0] >= 0 else 'lightgrey'
+            bar_color2 = 'royalblue' if unidmeans.iloc[i, 1] >= 0 else 'lightgrey'
 
-        axes[j].axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
-        axes[j].axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
-        axes[j].axhline(y=0.0, color="silver", linestyle="-")
+            ax.bar(unidmeans.index[i] - 0.225, unidmeans.iloc[i, 0], yerr=unidstdev.iloc[i, 0], capsize=2, width=0.45, color=bar_color1, align='center', label=f"{cond1_name}")
+            ax.bar(unidmeans.index[i] + 0.225, unidmeans.iloc[i, 1], yerr=unidstdev.iloc[i, 1], capsize=2, width=0.45, color=bar_color2, align='center', label=f"{cond2_name}")
 
-        legend_elements = [
-            Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
-            Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
-            Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
-            Patch(facecolor="gold", label="Significant difference",alpha=0.5),
-            Line2D([0], [0], color="red", label="High reactivity threshold"),
-            Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
-        ]
-        axes[j].legend(handles=legend_elements, loc="upper left")
-        axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
-        axes[j].set_xlim([unidmeans.index[regions[j]] - 1, unidmeans.index[regions[j+1]-1] + 1])
-        axes[j].set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
-            max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
-        ax2 = axes[j].twinx()
-        ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 1]))*1.1,0), \
-            max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 1]))*1.1])
-        plt.tight_layout()
-    plt.suptitle(title)
-    plt.savefig(output, format=format)
+            ax.axhline(y=0.4, color="orange", linestyle="-", label="Medium Reactivity")
+            ax.axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
+            ax.axhline(y=0.0, color="silver", linestyle="-")
 
-    fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+            legend_elements = [
+                Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
+                Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
+                Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
+                Patch(facecolor="gold", label="Significant difference",alpha=0.5),
+                Line2D([0], [0], color="red", label="High reactivity threshold"),
+                Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
+            ]
+            ax.legend(handles=legend_elements, loc="upper left")
+            ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
+            ax.set_xlim([unidmeans.index[regions[0]] - 1, unidmeans.index[regions[1]-1] + 1])
+            ax.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
+                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.1])
+            ax2 = ax.twinx()
+            ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
+                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.1])
+            plt.tight_layout()
+        plt.suptitle(title)
+        plt.savefig(output, format=format)
 
-    for j in range(len(regions)-1) :
-        axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
-        axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
+        fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+
+        ax.set_xticks(unidmeans.index[regions[0]:regions[1]])
+        ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
 
         for i in range(len(unidmeans)):
-            if i >= regions[j] and i < regions[j+1]:
-                if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
-                    axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.5, color = 'blue', align='center', label="Significant difference")
-                elif unidsignificant.loc[i, ('ttest', 'significant')] == 'NO':
-                    axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.5, color = 'skyblue', align='center', label="Difference")
-                else:
-                    axes[j].bar(unidmeans.index[i], -0.1, width=0.5, color = 'lightgrey', align='center', label="Undetermined")
+            if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
+                ax.bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'blue', align='center', label="Significant difference")
+            elif unidsignificant.loc[i, ('ttest', 'significant')] == 'NO':
+                ax.bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'skyblue', align='center', label="Difference")
+            else:
+                ax.bar(unidmeans.index[i], -0.1, width=0.8, color = 'lightgrey', align='center', label="Undetermined")
 
-        axes[j].axhline(y=0.0, color="silver", linestyle="-")
+        ax.axhline(y=0.0, color="silver", linestyle="-")
 
         legend_elements = [
             Patch(facecolor="skyblue", label="Difference"),
             Patch(facecolor="blue", label="Significant difference"),
             Patch(facecolor="lightgrey", label="Undetermined"),
         ]
-        axes[j].legend(handles=legend_elements, loc="upper left")
-        axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
-        axes[j].set_xlim([difference.index[regions[j]] - 1, difference.index[regions[j+1]-1] + 1])
-        axes[j].set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
-        ax2 = axes[j].twinx()
+        ax.legend(handles=legend_elements, loc="upper left")
+        ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
+        ax.set_xlim([difference.index[regions[0]] - 1, difference.index[regions[1]-1] + 1])
+        ax.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+        ax2 = ax.twinx()
         ax2.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
         plt.tight_layout()
     plt.suptitle(dif_title)

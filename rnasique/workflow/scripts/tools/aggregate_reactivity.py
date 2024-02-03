@@ -23,14 +23,14 @@ ddof = 1
 class ReactivityThreshold:
     INVALID = -0.3
 
-    LOW = 0.5
-    MEDIUM = 0.8
-    HIGH = 1.0
+ #   LOW = 0.5
+    MEDIUM = 0.4
+    HIGH = 0.7
 
     COLOR_INVALID = "grey"
     COLOR_NONE = "white"
-    COLOR_LOW = "yellow"
-    COLOR_MEDIUM = "orange"
+    COLOR_LOW = "white"
+    COLOR_MEDIUM = "yellow"
     COLOR_HIGH = "red"
 
 
@@ -178,9 +178,12 @@ def plot_aggregate(
         logging.error(f"Unable to save fullplot: {e}")
         open(fulloutput, "a").close()
 
-    fig, ax = plt.subplots(
-        nrows=1, ncols=1, sharex=True, figsize=(len(aggregated) / 4, 4)
-    )
+    regions = np.linspace(0, int(len(aggregated)/100)*100, int(len(aggregated)/100)+1)
+    regions = list(map(int, regions))
+    if 50 > len(aggregated) - regions[-1] +1:
+        regions[-1] = len(aggregated)
+    else:
+        regions.append(len(aggregated))
 
     aggregated["color"] = ReactivityThreshold.COLOR_NONE
     aggregated.loc[
@@ -196,12 +199,12 @@ def plot_aggregate(
     aggregated.loc[
         (
             (aggregated["mean"] <= ReactivityThreshold.MEDIUM)
-            & (aggregated["mean"] > ReactivityThreshold.LOW)
+            & (aggregated["mean"] > ReactivityThreshold.INVALID)
         ),
         "color",
     ] = ReactivityThreshold.COLOR_LOW
     aggregated.loc[
-        (aggregated["mean"] < ReactivityThreshold.INVALID), "color"
+        (aggregated["mean"] <= ReactivityThreshold.INVALID), "color"
     ] = ReactivityThreshold.COLOR_INVALID
 
     aggregated.loc[(aggregated["mean"] == -10), "stdev"] = np.NaN
@@ -212,38 +215,63 @@ def plot_aggregate(
         + aggregated.index.get_level_values("sequence").astype(str)
     )
 
-    aggregated.plot(
-        ax=ax,
-        x="xlabel_rot",
-        rot=70,
-        y="mean",
-        kind="bar",
-        width=1,
-        color=aggregated["color"],
-        yerr=None if aggregated["stdev"].isnull().all() else "stdev",
-        capsize=2,
-        stacked=False,
-    )
-    ax = meanstdev[["mean", "xlabel"]].plot(
-        x="xlabel",
-        y="mean",
-        drawstyle="steps-mid",
-        ax=ax,
-        colormap=cm["cubehelix"],
-        linewidth=0.5,
-    )
-    ax.set_xlabel("Sequence")
-    ax.set_ylabel("Aggregated reactivity")
+   # plt.style.use("default")
+    if len(regions) > 2:
+        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(aggregated) / 3, 4*(len(regions)-1)))
+        agg_index = [int(x[0]) for x in aggregated.index]
+        for j in range(len(regions)-1) :
+            axes[j].set_xticks(agg_index[regions[j]:regions[j+1]])
+            axes[j].set_xticklabels(aggregated["xlabel"][regions[j]:regions[j+1]])
+            for i in range(len(aggregated)):
+                if i >= regions[j] and i < regions[j+1]:
+                    if aggregated["color"][aggregated.index[i]] == 'grey':
+                        axes[j].bar(agg_index[i],-0.1, yerr = aggregated["stdev"][aggregated.index[i]], capsize=2, width=0.8, alpha = 0.5,edgecolor='black', color=aggregated["color"][aggregated.index[i]], align='center')
+                    else:
+                        axes[j].bar(agg_index[i], aggregated["mean"][aggregated.index[i]], yerr = aggregated["stdev"][aggregated.index[i]], capsize=2, width=0.8,edgecolor='grey', color=aggregated["color"][aggregated.index[i]], align='center')
+            axes[j].axhline(y=0.0, color="silver", linestyle="-")
+            legend_elements = [
+            Patch(facecolor=ReactivityThreshold.COLOR_HIGH, edgecolor='grey', label="High Reactivity"),
+            Patch(facecolor=ReactivityThreshold.COLOR_MEDIUM,edgecolor='grey', label="Medium Reactivity"),
+            Patch(facecolor=ReactivityThreshold.COLOR_LOW,edgecolor='grey', label="Low Reactivity"),
+            Patch(facecolor=ReactivityThreshold.COLOR_INVALID, alpha = 0.5,edgecolor='black',label="Undetermined"),
+            ]
+            axes[j].legend(handles=legend_elements, loc="upper left")
+            axes[j].set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[j]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[j+1]-1]].split()[0]}",loc='left')
+            axes[j].set_xlabel("Sequence")
+            axes[j].set_ylabel("Average reactivity")
+            axes[j].set_xlim([agg_index[regions[j]] - 1, agg_index[regions[j+1]-1] + 1])
+            axes[j].set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+            ax2 = axes[j].twinx()
+            ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+    else:
+        fig, ax = plt.subplots(figsize=(len(aggregated) / 3, 4*(len(regions)-1)))
+        agg_index = [int(x[0]) for x in aggregated.index]
+        ax.set_xticks(agg_index[regions[0]:regions[1]])
+        ax.set_xticklabels(aggregated["xlabel"][regions[0]:regions[1]])
+        for i in range(len(aggregated)):
+            if aggregated["color"][aggregated.index[i]] == 'grey':
+                ax.bar(agg_index[i],-0.1, yerr = aggregated["stdev"][aggregated.index[i]], capsize=2, width=0.8,edgecolor='black', alpha = 0.5, color=aggregated["color"][aggregated.index[i]], align='center')
+            else:
+                ax.bar(agg_index[i], aggregated["mean"][aggregated.index[i]], yerr = aggregated["stdev"][aggregated.index[i]], edgecolor='grey',capsize=2, width=0.8, color=aggregated["color"][aggregated.index[i]], align='center')
+        ax.axhline(y=0.0, color="silver", linestyle="-")
+        legend_elements = [
+        Patch(facecolor=ReactivityThreshold.COLOR_HIGH,edgecolor='grey', label="High Reactivity"),
+        Patch(facecolor=ReactivityThreshold.COLOR_MEDIUM, edgecolor='grey',label="Medium Reactivity"),
+        Patch(facecolor=ReactivityThreshold.COLOR_LOW, edgecolor='grey',label="Low Reactivity"),
+        Patch(facecolor=ReactivityThreshold.COLOR_INVALID, alpha = 0.5, edgecolor='black',label="Undetermined"),
+        ]
+        ax.legend(handles=legend_elements, loc="upper left")
+        ax.set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[0]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[1]-1]].split()[0]}",loc='left')
+        ax.set_xlabel("Sequence")
+        ax.set_ylabel("Average reactivity")
+        ax.set_xlim([agg_index[regions[0]] - 1, agg_index[regions[1]-1] + 1])
+        ax.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+        ax2 = ax.twinx()
+        ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
     plt.margins(0)
-    plt.title(title, loc="left")
+    plt.suptitle(title)
 
-    legend_elements = [
-        Patch(facecolor=ReactivityThreshold.COLOR_HIGH, label="High Reactivity"),
-        Patch(facecolor=ReactivityThreshold.COLOR_MEDIUM, label="Medium Reactivity"),
-        Patch(facecolor=ReactivityThreshold.COLOR_LOW, label="Low Reactivity"),
-        Patch(facecolor=ReactivityThreshold.COLOR_INVALID, label="Invalid Reactivity"),
-    ]
-    plt.legend(handles=legend_elements, loc="upper left")
+    
     try:
         plt.tight_layout()
         plt.savefig(output, format=format)
