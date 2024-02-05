@@ -405,7 +405,7 @@ footprint:
         magnesium: noMg
         probe: 1M7
   config:
-    deviation_type: stdev
+#    deviation_type: stdev
     ttest_pvalue_thres: 0.05
     diff_thres: 0.2
     ratio_thres: 0.2

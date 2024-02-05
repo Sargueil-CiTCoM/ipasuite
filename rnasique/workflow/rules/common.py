@@ -283,7 +283,7 @@ def get_ipanemap_pool_inputs(pool):
     for cond in pool["conditions"]:
         inputs.extend(
             expand(
-                construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
+                construct_path("aggreact-ipanemap", show_replicate=False, ext=".ip.shape"),
                 rna_id=pool["rna_id"],
                 **cond,
             )

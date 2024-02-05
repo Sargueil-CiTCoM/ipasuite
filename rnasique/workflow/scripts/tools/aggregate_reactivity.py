@@ -15,6 +15,8 @@ import logging
 import seaborn as sns
 sns.set_style("dark")
 
+from scipy.stats import linregress
+
 #plt.style.library["seaborn-dark"]
 
 ddof = 1
@@ -565,7 +567,9 @@ def aggregate(
     *files: [str],
     output: str,
     shape_output=None,
+    shape_IP_output=None,
     map_output=None,
+    relation_output=None,
     normcol="simple_norm_reactivity",
 #    min_ndata_perc: float = 0.5,
 #    min_nsubdata_perc: float = 0.66,
@@ -674,6 +678,18 @@ def aggregate(
         aggripan = pd.concat([firstrows, aggripan])
         aggripan.to_csv(shape_output, sep="\t", float_format="%.4f", header=False)
 
+    if shape_IP_output is not None:
+        IP_output = copy.deepcopy(aggregated)
+        IP_output.loc[IP_output['desc'] == 'warning', 'mean'] = -10
+        aggripan = IP_output.reset_index(level="sequence")[["mean"]]
+        idxmin = aggripan.index.min()
+        firstrows = pd.DataFrame(
+            {"mean": np.full(idxmin - 1, -10)}, index=range(1, idxmin)
+        )
+        firstrows.index.names = ["seqNum"]
+        aggripan = pd.concat([firstrows, aggripan])
+        aggripan.to_csv(shape_IP_output, sep="\t", float_format="%.4f", header=False)
+
     if map_output is not None:
         aggripan = aggregated.reset_index(level="sequence")[
             ["mean", "stdev", "sequence"]
@@ -690,6 +706,24 @@ def aggregate(
         firstrows.index.names = ["seqNum"]
         aggripan = pd.concat([firstrows, aggripan])
         aggripan.to_csv(map_output, sep="\t", float_format="%.4f", header=False)
+
+    if relation_output is not None:
+        rel_output = copy.deepcopy(aggregated)
+        rel_output = rel_output.iloc[:,:rel_output.columns.get_loc('mean')]
+        correlation_output = rel_output.corr(method='spearman')
+        rel_output = rel_output.dropna()
+        linear_regression = {}
+        for i in range(len(rel_output.columns)):
+            for j in range(len(rel_output.columns)):
+                if j>i:
+                    name = rel_output.columns[j] + '='+ 'f('+ rel_output.columns[i] + ')'
+                    slope, intercept, r_value, p_value, std_err = linregress(rel_output.iloc[:,i],rel_output.iloc[:,j])
+                    linear_regression[name] = {'slope':slope,'intercept':intercept,'r_value':r_value, 'r_squared':r_value**2,'p_value':p_value,'std_err':std_err}
+        linear_regression = pd.DataFrame(linear_regression).T
+        correlation_output.to_csv(relation_output, sep="\t", float_format="%.4f")
+        linear_regression.to_csv(relation_output, mode='a', sep="\t", float_format="%.4f")
+
+
     if plot is not None or fullplot is not None:
         try:
             title = plot_title if plot_title is not None else output

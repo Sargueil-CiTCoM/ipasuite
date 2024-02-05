@@ -143,9 +143,10 @@ rule aggregate_reactivity:
         refseq = lambda wildcards: get_refseq(wildcards)
     output:
         full= construct_path("aggreact", show_replicate = False),
-        shape_file = construct_path("aggreact-ipanemap", show_replicate=False,
-                ext=".shape"),
+        shape_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
+        shape_IP_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".ip.shape"),
         map_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
+        relation_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".csv"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
             show_replicate=False, figure=True),
             category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],
@@ -169,7 +170,9 @@ rule aggregate_reactivity:
         f"aggregate_reactivity {{input.norm}}"
         f" --output={{output.full}} {{params}}"
         f" --shape_output={{output.shape_file}}"
+        f" --shape_IP_output={{output.shape_IP_file}}"
         f" --map_output={{output.map_file}}"
+        f" --relation_output={{output.relation_file}}"
         f" --err_on_dup={config['aggregate']['err_on_dup']} &> {{log}}"
 
 
