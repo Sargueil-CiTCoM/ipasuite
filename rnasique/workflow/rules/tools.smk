@@ -175,7 +175,6 @@ rule aggregate_reactivity:
         f" --relation_output={{output.relation_file}}"
         f" --err_on_dup={config['aggregate']['err_on_dup']} &> {{log}}"
 
-
 rule footprint:
     input:
         get_footprint_inputs,

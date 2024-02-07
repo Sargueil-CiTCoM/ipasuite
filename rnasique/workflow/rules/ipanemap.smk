@@ -136,7 +136,7 @@ rule structure:
 
     shell:
         """
-        rm -rf {RESULTS_DIR}/4.aggregated-reactivity/*.ip.shape;
+      #  rm -rf {RESULTS_DIR}/4.aggregated-reactivity/*.ip.shape;
         sorted_numbers=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/* -type f -not -name '*optimal*' -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -nr);
         second_largest=$(echo "$sorted_numbers" | awk '{{if(NR==2) print}}');
         file_with_second_largest=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/* -type f -exec grep -l "$second_largest" {{}} +);
