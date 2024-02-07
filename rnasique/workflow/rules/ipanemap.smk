@@ -4,7 +4,7 @@ import json
 
 def generate_conditions_config(pool_id, config):
     conditions = {}
-    rna_id = None 
+    rna_id = None
     for pool in config["ipanemap"]["pools"]:
         if pool["id"] == pool_id:
             rna_id = pool["rna_id"]
@@ -16,8 +16,8 @@ def generate_conditions_config(pool_id, config):
                     conditions[cond_name] = {"reactivity_file": react_file}
             if "external_conditions" in pool:
                 for cond in pool["external_conditions"]:
-                    cond_name = cond["name"] 
-                    react_file = cond["path"] 
+                    cond_name = cond["name"]
+                    react_file = cond["path"]
                     conditions[cond_name] = {"reactivity_file": react_file}
             if "alignements" in pool:
                 print(pool["alignements"])
@@ -27,12 +27,12 @@ def generate_conditions_config(pool_id, config):
     return conditions, rna_id
 
 def generate_ipanemap_config_file(configfile_path, pool_id, output_dir):
-    
+
     ipanemap_config = json.loads(json.dumps(config["ipanemap"]["config"]))
     conditions, rna_id = generate_conditions_config(pool_id, config)
     ipanemap_config["conditions"] = conditions
     ipanemap_config["output_dir"] = output_dir
-    ipanemap_config["sequence_file"] = config["sequences"][rna_id] 
+    ipanemap_config["sequence_file"] = config["sequences"][rna_id]
 
     ipanemap_config["tmp_dir"] = f"{output_dir}/tmp"
     ipanemap_config["format"] = {
@@ -40,8 +40,8 @@ def generate_ipanemap_config_file(configfile_path, pool_id, output_dir):
             f"{output_dir}/{rna_id}_pool_{pool_id}_optimal_{{idx}}.dbn",
             'dbn_centroid_file_pattern':
             f"{output_dir}/{rna_id}_pool_{pool_id}_centroid_{{idx}}.dbn",
-            } 
-    
+            }
+
 
 
 
@@ -50,7 +50,7 @@ def generate_ipanemap_config_file(configfile_path, pool_id, output_dir):
         yaml.dump(ipanemap_config, file, default_flow_style=False)
         return configfile_path
     return None
-    
+
 
 # configfile_path: str,
 # input_softdir: str,
@@ -110,6 +110,10 @@ checkpoint ipanemap:
         f"ipanemap -f {{input.config}} --log {{log}}"
 
 rule structure:
+    """
+    Copy Ipanemap's best and second best predicted cluster centroid to
+    the ipanemap output folder
+    """
     #conda:
     #    "../envs/ipanemap.yml"
     threads: 8
@@ -125,23 +129,21 @@ rule structure:
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1.dbn",
             folder=config["folders"]["structure"],
             allow_missing=True,),
-        centrioid_output = expand(
+        secondbest_output = expand(
             f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_2.dbn",
             folder=config["folders"]["structure"],
             allow_missing=True,),
 
     log:
-        log1 = "results/logs/ipanemap-{rna_id}_pool_{pool_id}_1.log",
-        log2 = "results/logs/ipanemap-{rna_id}_pool_{pool_id}_2.log",
+        log = "results/logs/ipanemap-{rna_id}_pool_{pool_id}.log",
 
     shell:
         """
-      #  rm -rf {RESULTS_DIR}/4.aggregated-reactivity/*.ip.shape;
-        sorted_numbers=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/* -type f -not -name '*optimal*' -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -nr);
+        sorted_numbers=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -gr);
         second_largest=$(echo "$sorted_numbers" | awk '{{if(NR==2) print}}');
-        file_with_second_largest=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/* -type f -exec grep -l "$second_largest" {{}} +);
-        cp {input.optimal} {output.optimal_output} &> {log.log1};
-        cp $file_with_second_largest {output.centrioid_output} &> {log.log2};
+        file_with_second_largest="$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -l "bolzmann prob: $second_largest" {{}} +)";
+        cp {input.optimal} {output.optimal_output} &> {log.log};
+        cp "$file_with_second_largest" {output.secondbest_output} &>> {log.log};
         """
 
 
@@ -192,16 +194,16 @@ rule varna_color_by_condition:
         log1 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_1_{CONDITION}.log",
         log2 = f"results/logs/varna-{{rna_id}}_pool_{{pool_id}}_2_{CONDITION}.log",
     shell:
-        f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}" 
+        f"varna -i {{input.struct_optimal}} -o {{output.varna_optimal}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_optimal' &> {{log.log1}};\n"
-        f"varna -i {{input.struct_optimal}} -o {{output.svg_optimal}}" 
+        f"varna -i {{input.struct_optimal}} -o {{output.svg_optimal}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_optimal' &> {{log.log1}};\n"
-        f"varna -i {{input.struct_2}} -o {{output.varna_2}}" 
+        f"varna -i {{input.struct_2}} -o {{output.varna_2}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};\n"
-        f"varna -i {{input.struct_2}} -o {{output.svg_2}}" 
+        f"varna -i {{input.struct_2}} -o {{output.svg_2}}"
         f" {{params.colorstyle}} -colorMap {{input.aggreact}}"
         f" -title '{{wildcards.probe}} - {{wildcards.pool_id}} - {{wildcards.rna_id}}_centrioid' &> {{log.log2}};"
 
@@ -217,7 +219,7 @@ rule varna_pool_concat:
             folder=config["folders"]["varna"],
             allow_missing=True,
         ),
-    params: 
+    params:
         inputs=lambda wildcards, input: "".join(f" -i {ipt}" for ipt in input)
     log:
         "results/logs/varna-{rna_id}_pool_{pool_id}_{idx}.log",
