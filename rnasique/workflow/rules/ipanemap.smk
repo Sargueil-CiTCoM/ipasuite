@@ -123,6 +123,8 @@ rule structure:
             f"{{rna_id}}_pool_{{pool_id}}_optimal_1.dbn",
             folder=config["folders"]["ipanemap-out"],
             allow_missing=True,),
+    params:
+        input_folder=config["folders"]["ipanemap-out"],
 
     output:
         optimal_output = expand(
@@ -139,9 +141,9 @@ rule structure:
 
     shell:
         """
-        sorted_numbers=$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -gr);
+        sorted_numbers=$(find ./{RESULTS_DIR}/{params.input_folder}/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -gr);
         second_largest=$(echo "$sorted_numbers" | awk '{{if(NR==2) print}}');
-        file_with_second_largest="$(find ./{RESULTS_DIR}/5.2-ipanemap-temp/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -l "bolzmann prob: $second_largest" {{}} +)";
+        file_with_second_largest="$(find ./{RESULTS_DIR}/{params.input_folder}/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -l "bolzmann prob: $second_largest" {{}} +)";
         cp {input.optimal} {output.optimal_output} &> {log.log};
         cp "$file_with_second_largest" {output.secondbest_output} &>> {log.log};
         """
