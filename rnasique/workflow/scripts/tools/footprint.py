@@ -78,7 +78,8 @@ def footprint_ttest(
         "pvalue",
         "difference",
         "ratio",
-        "significant",
+        "significant_higher",
+        "significant_lower"
     ]
     indexes = ["seqNum", "sequence"]
     cond1 = pd.read_csv(cond1_path, sep="\t").set_index(["seqNum", "sequence"])
@@ -95,20 +96,26 @@ def footprint_ttest(
                 list(row.loc[cond2_name].iloc[:row.loc[cond1_name].index.get_loc("mean")]),
                 equal_var=True,
                 alternative="two-sided",)
-            difference = np.abs(row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"])
-            ratio = difference / (row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"])
+            difference = row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"]
+            ratio = np.abs(difference) / (row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"])
 
-            if pvalue < ttest_pvalue_thres and difference >= diff_thres and ratio >= ratio_thres:
-                significant = 'YES'
+            if pvalue < ttest_pvalue_thres and ratio > ratio_thres:
+                if difference > diff_thres:
+                   significant_higher = 'YES'
+                   significant_lower = 'NO'
+                elif difference < -(diff_thres):
+                   significant_lower = 'YES'
+                   significant_higher = 'NO'
             else:
-                significant = 'NO'
+                significant_higher = 'NO'
+                significant_lower = 'NO'
             curres = pd.DataFrame(
-                [[index[0], index[1], pvalue, difference, ratio, significant]],
+                [[index[0], index[1], pvalue, difference, ratio, significant_higher, significant_lower]],
                 columns=cols,).set_index(indexes)
             res = pd.concat([res, curres])
         else:
             curres = pd.DataFrame(
-                [[index[0], index[1], np.NaN, np.NaN, np.NaN, np.NaN]],
+                [[index[0], index[1], np.NaN, np.NaN, np.NaN, np.NaN, np.NaN]],
                 columns=cols,).set_index(indexes)
             res = pd.concat([res, curres])
     footprint = pd.concat(
@@ -148,7 +155,7 @@ def plot_reactivity(
     stdev["xlabel"] = (stdev["seqNum"].astype(str) + "\n" + stdev["sequence"].astype(str))
     unidstdev = stdev.drop(["seqNum", "sequence"], axis=1)
 
-    significant = footprint[('ttest', 'significant')].reset_index()
+    significant = footprint[[('ttest', 'significant_higher'),('ttest', 'significant_lower')]].reset_index()
     significant = significant.sort_values(by=[('seqNum', '')]).reset_index().drop([('index','')], axis=1)
     significant["xlabel"] = (significant[('seqNum', '')].astype(str) + "\n" + significant[('sequence','')].astype(str))
     unidsignificant = significant.drop([('seqNum', ''), ('sequence','')], axis=1)
@@ -174,8 +181,10 @@ def plot_reactivity(
 
             for i in range(len(unidmeans)):
                 if i >= regions[j] and i < regions[j+1]:
-                    if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
-                        axes[j].axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='gold',alpha=0.3)
+                    if unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'YES':
+                        axes[j].axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='yellow',alpha=0.5)
+                    elif unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'YES':
+                        axes[j].axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='orange',alpha=0.3)
 
                     bar_color1 = 'skyblue' if unidmeans.iloc[i, 0] >= 0 else 'lightgrey'
                     bar_color2 = 'royalblue' if unidmeans.iloc[i, 1] >= 0 else 'lightgrey'
@@ -191,7 +200,8 @@ def plot_reactivity(
                 Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
                 Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
                 Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
-                Patch(facecolor="gold", label="Significant difference",alpha=0.5),
+                Patch(facecolor="yellow", label=f"{cond1_name} sign. higher",alpha=0.7),
+                Patch(facecolor="orange", label=f"{cond1_name} sign. lower",alpha=0.5),
                 Line2D([0], [0], color="red", label="High reactivity threshold"),
                 Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
             ]
@@ -215,26 +225,26 @@ def plot_reactivity(
 
             for i in range(len(unidmeans)):
                 if i >= regions[j] and i < regions[j+1]:
-                    if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
-                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'blue', align='center', label="Significant difference")
-                    elif unidsignificant.loc[i, ('ttest', 'significant')] == 'NO':
-                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'skyblue', align='center', label="Difference")
+                    if unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'YES' or unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'YES':
+                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'gold',edgecolor='orange', align='center', label="Significant difference")
+                    elif unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'NO' and unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'NO':
+                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'palegreen', edgecolor='forestgreen', align='center', label="Difference")
                     else:
                         axes[j].bar(unidmeans.index[i], -0.1, width=0.8, color = 'lightgrey', align='center', label="Undetermined")
 
             axes[j].axhline(y=0.0, color="silver", linestyle="-")
 
             legend_elements = [
-                Patch(facecolor="skyblue", label="Difference"),
-                Patch(facecolor="blue", label="Significant difference"),
+                Patch(facecolor="palegreen", label="Difference"),
+                Patch(facecolor="gold", label="Significant difference"),
                 Patch(facecolor="lightgrey", label="Undetermined"),
             ]
             axes[j].legend(handles=legend_elements, loc="upper left")
             axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
             axes[j].set_xlim([difference.index[regions[j]] - 1, difference.index[regions[j+1]-1] + 1])
-            axes[j].set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+            axes[j].set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
             ax2 = axes[j].twinx()
-            ax2.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+            ax2.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
             plt.tight_layout()
     else:
         fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4*(len(regions)-1)))
@@ -242,8 +252,10 @@ def plot_reactivity(
         ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
 
         for i in range(len(unidmeans)):
-            if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
-                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='gold',alpha=0.3)
+            if unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'YES':
+                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='yellow',alpha=0.5)
+            elif unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'YES':
+                ax.axvspan(unidmeans.index[i] - 0.45, unidmeans.index[i] + 0.45, color='orange',alpha=0.3)
 
             bar_color1 = 'skyblue' if unidmeans.iloc[i, 0] >= 0 else 'lightgrey'
             bar_color2 = 'royalblue' if unidmeans.iloc[i, 1] >= 0 else 'lightgrey'
@@ -259,7 +271,8 @@ def plot_reactivity(
                 Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
                 Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
                 Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
-                Patch(facecolor="gold", label="Significant difference",alpha=0.5),
+                Patch(facecolor="yellow", label=f"{cond1_name} sign. higher",alpha=0.7),
+                Patch(facecolor="orange", label=f"{cond1_name} sign. lower",alpha=0.5),
                 Line2D([0], [0], color="red", label="High reactivity threshold"),
                 Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
             ]
@@ -281,26 +294,27 @@ def plot_reactivity(
         ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
 
         for i in range(len(unidmeans)):
-            if unidsignificant.loc[i, ('ttest', 'significant')] == 'YES':
-                ax.bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'blue', align='center', label="Significant difference")
-            elif unidsignificant.loc[i, ('ttest', 'significant')] == 'NO':
-                ax.bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'skyblue', align='center', label="Difference")
+            if unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'YES' or unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'YES':
+                ax.bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'gold',edgecolor='orange', align='center', label="Significant difference")
+            elif unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'NO' and unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'NO':
+                ax.bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'palegreen', edgecolor='forestgreen',align='center', label="Difference")
             else:
                 ax.bar(unidmeans.index[i], -0.1, width=0.8, color = 'lightgrey', align='center', label="Undetermined")
+
 
         ax.axhline(y=0.0, color="silver", linestyle="-")
 
         legend_elements = [
-            Patch(facecolor="skyblue", label="Difference"),
-            Patch(facecolor="blue", label="Significant difference"),
+            Patch(facecolor="palegreen", label="Difference"),
+            Patch(facecolor="gold", label="Significant difference"),
             Patch(facecolor="lightgrey", label="Undetermined"),
         ]
         ax.legend(handles=legend_elements, loc="upper left")
         ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
         ax.set_xlim([difference.index[regions[0]] - 1, difference.index[regions[1]-1] + 1])
-        ax.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+        ax.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
         ax2 = ax.twinx()
-        ax2.set_ylim([-0.15, np.nanmax(difference.iloc[:, 0])*1.1])
+        ax2.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
         plt.tight_layout()
     plt.suptitle(dif_title)
     plt.savefig(diff_output, format=format)
