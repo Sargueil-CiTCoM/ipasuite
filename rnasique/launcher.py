@@ -171,7 +171,7 @@ class Launcher(object):
                         row[info] = list_info[info]
                     else:
                         row[info] = ''
-                row['temperature'] = list_info['temperature'][1:-1]
+                row['temperature'] = list_info['temperature'][1:]
                 if file.split('.')[-1] == 'txt' and list_info['probe_control_flag_unique_experiment_id'][0] == 'B':
                     unique_experiment_id = file.split('_')[1][1:]
                     control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and re.match(fr'.*{unique_experiment_id}', file_name.split('_')[1][1:]) and file_name != file][0]
