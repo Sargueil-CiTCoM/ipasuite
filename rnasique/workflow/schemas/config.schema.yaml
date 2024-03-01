@@ -214,8 +214,8 @@ definitions:
         type: object
         additionalProperties: false
         properties:
-          deviation_type:
-            type: string
+        #  deviation_type:
+        #    type: string
           ttest_pvalue_thres:
             type: number
           diff_thres:
@@ -225,7 +225,7 @@ definitions:
           plot_format:
             type: string
         required:
-        - deviation_type
+        # - deviation_type
         - ttest_pvalue_thres
         - diff_thres
         - ratio_thres
