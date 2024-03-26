@@ -154,7 +154,7 @@ def plot_aggregate(
     # ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
     plt.margins(0)
     plt.title(title, loc="left")
-    plt.legend(loc="upper left")
+    plt.legend(loc="upper left", ncol=14)
     # print(meanstdev.index.get_level_values("seqNum") - 1)
     try:
         ax.errorbar(
@@ -237,14 +237,14 @@ def plot_aggregate(
             Patch(facecolor=ReactivityThreshold.COLOR_LOW,edgecolor='grey', label="Low Reactivity"),
             Patch(facecolor=ReactivityThreshold.COLOR_INVALID, alpha = 0.5,edgecolor='black',label="Undetermined"),
             ]
-            axes[j].legend(handles=legend_elements, loc="upper left")
+            axes[j].legend(handles=legend_elements, loc="upper left", ncol=16)
             axes[j].set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[j]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[j+1]-1]].split()[0]}",loc='left')
             axes[j].set_xlabel("Sequence")
             axes[j].set_ylabel("Average reactivity")
             axes[j].set_xlim([agg_index[regions[j]] - 1, agg_index[regions[j+1]-1] + 1])
-            axes[j].set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+            axes[j].set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
             ax2 = axes[j].twinx()
-            ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+            ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
     else:
         fig, ax = plt.subplots(figsize=(len(aggregated) / 3, 4*(len(regions)-1)))
         agg_index = [int(x[0]) for x in aggregated.index]
@@ -262,14 +262,14 @@ def plot_aggregate(
         Patch(facecolor=ReactivityThreshold.COLOR_LOW, edgecolor='grey',label="Low Reactivity"),
         Patch(facecolor=ReactivityThreshold.COLOR_INVALID, alpha = 0.5, edgecolor='black',label="Undetermined"),
         ]
-        ax.legend(handles=legend_elements, loc="upper left")
+        ax.legend(handles=legend_elements, loc="upper left", ncol=16)
         ax.set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[0]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[1]-1]].split()[0]}",loc='left')
         ax.set_xlabel("Sequence")
         ax.set_ylabel("Average reactivity")
         ax.set_xlim([agg_index[regions[0]] - 1, agg_index[regions[1]-1] + 1])
-        ax.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+        ax.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
         ax2 = ax.twinx()
-        ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.1])
+        ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
     plt.margins(0)
     plt.suptitle(title)
 

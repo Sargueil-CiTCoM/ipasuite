@@ -197,22 +197,22 @@ def plot_reactivity(
             axes[j].axhline(y=0.0, color="silver", linestyle="-")
 
             legend_elements = [
-                Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
-                Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
-                Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
-                Patch(facecolor="yellow", label=f"{cond1_name} sign. higher",alpha=0.7),
-                Patch(facecolor="orange", label=f"{cond1_name} sign. lower",alpha=0.5),
+                Patch(facecolor="skyblue", edgecolor='grey',label=f"{cond1_name}"),
+                Patch(facecolor="royalblue", edgecolor='grey',label=f"{cond2_name}"),
+                Patch(facecolor="lightgrey", edgecolor='grey',label="Undetermined"),
+                Patch(facecolor="yellow", edgecolor='grey',label=f"{cond2_name} sign. higher"),
+                Patch(facecolor="orange", edgecolor='grey',label=f"{cond2_name} sign. lower"),
                 Line2D([0], [0], color="red", label="High reactivity threshold"),
                 Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
             ]
-            axes[j].legend(handles=legend_elements, loc="upper left")
+            axes[j].legend(handles=legend_elements, loc="upper left", ncol=14)
             axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
             axes[j].set_xlim([unidmeans.index[regions[j]] - 1, unidmeans.index[regions[j+1]-1] + 1])
             axes[j].set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
-                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.1])
+                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
             ax2 = axes[j].twinx()
             ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
-                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.1])
+                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
             plt.tight_layout()
         plt.suptitle(title)
         plt.savefig(output, format=format)
