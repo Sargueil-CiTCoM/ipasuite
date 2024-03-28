@@ -269,7 +269,7 @@ def plot_reactivity(
 
             legend_elements = [
                 Patch(facecolor="skyblue", edgecolor='grey',label=f"{cond1_name}"),
-                Patch(facecolor="royalblue", ledgecolor='grey', label=f"{cond2_name}"),
+                Patch(facecolor="royalblue", edgecolor='grey', label=f"{cond2_name}"),
                 Patch(facecolor="lightgrey", edgecolor='grey',label="Undetermined"),
                 Patch(facecolor="yellow", edgecolor='grey',label=f"{cond2_name} sign. higher"),
                 Patch(facecolor="orange", edgecolor='grey',label=f"{cond2_name} sign. lower"),
