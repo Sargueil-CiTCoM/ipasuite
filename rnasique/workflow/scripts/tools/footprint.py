@@ -268,15 +268,15 @@ def plot_reactivity(
             ax.axhline(y=0.0, color="silver", linestyle="-")
 
             legend_elements = [
-                Patch(facecolor="skyblue", label=f"{cond1_name}", alpha=0.5),
-                Patch(facecolor="royalblue", label=f"{cond2_name}", alpha=0.5),
-                Patch(facecolor="lightgrey", label="Undetermined", alpha=0.5),
-                Patch(facecolor="yellow", label=f"{cond1_name} sign. higher",alpha=0.7),
-                Patch(facecolor="orange", label=f"{cond1_name} sign. lower",alpha=0.5),
+                Patch(facecolor="skyblue", edgecolor='grey',label=f"{cond1_name}"),
+                Patch(facecolor="royalblue", ledgecolor='grey',abel=f"{cond2_name}"),
+                Patch(facecolor="lightgrey", edgecolor='grey',label="Undetermined"),
+                Patch(facecolor="yellow", edgecolor='grey',label=f"{cond2_name} sign. higher"),
+                Patch(facecolor="orange", edgecolor='grey',label=f"{cond2_name} sign. lower"),
                 Line2D([0], [0], color="red", label="High reactivity threshold"),
                 Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
             ]
-            ax.legend(handles=legend_elements, loc="upper left")
+            ax.legend(handles=legend_elements, loc="upper left",ncol=14)
             ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
             ax.set_xlim([unidmeans.index[regions[0]] - 1, unidmeans.index[regions[1]-1] + 1])
             ax.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
