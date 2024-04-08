@@ -174,7 +174,7 @@ class Launcher(object):
                 row['temperature'] = list_info['temperature'][1:]
                 if file.split('.')[-1] == 'txt' and list_info['probe_control_flag_unique_experiment_id'][0] == 'B':
                     unique_experiment_id = file.split('_')[1][1:]
-                    control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and re.match(fr'.*{unique_experiment_id}', file_name.split('_')[1][1:]) and file_name != file][0]
+                    control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and unique_experiment_id == file_name.split('_')[1][1:] and file_name != file][0]
                     row['probe_file'] = file
                     row['control_file'] = control_file
                     file_info.append(row)
@@ -188,7 +188,7 @@ class Launcher(object):
                 if file.split('.')[-1] == 'txt' and file.split('_')[1][0] == 'B':
                     rna_id = file.split('_')[0]
                     unique_experiment_id = file.split('_')[1][1:]
-                    control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and re.match(fr'.*{unique_experiment_id}', file_name.split('_')[1][1:]) and file_name != file][0]
+                    control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and unique_experiment_id == file_name.split('_')[1][1:] and file_name != file][0]
 
                     row = {'rna_id':rna_id, 'date':'', 'experimenter':'','probe':'', 'temperature':'', 'magnesium':'', 'ddNTP':'', 'rna_begin':'',\
                         'rna_end':'','rt_begin_pos':'', 'rt_end_pos':'', 'replicate':'', 'probe_file':file, 'control_file':control_file,\
