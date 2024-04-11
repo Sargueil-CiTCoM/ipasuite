@@ -137,79 +137,90 @@ class Launcher(object):
 
 
     def prep(self):
-        data_folder = os.path.join("resources/raw_data")
-        sample_file = os.path.join('samples.tsv')
-        files = os.listdir(data_folder)
 
-        with open(sample_file, 'r', newline='') as sample:
-            reader = csv.reader(sample, delimiter='\t')
-            rows = next(reader)
+        response = input("Do you want to overwrite sample.tsv? Please enter yes or no:")
+        while response.lower() not in {'yes', 'no'}:
+            print("Please enter yes or no")
+            response = input("Do you want to overwrite sample.tsv? Please enter yes or no:")
+            
+        if response.lower() == 'yes':
 
-        data = pd.DataFrame(columns=['rna_id', 'date', 'experimenter','probe', 'temperature', 'magnesium', 'ddNTP', 'rna_begin', 'rna_end',\
-            'rt_begin_pos', 'rt_end_pos', 'replicate', 'probe_file', 'control_file', 'qushape_file','reference_qushape_file','map_file','discard'])
+            data_folder = os.path.join("resources/raw_data")
+            sample_file = os.path.join('samples.tsv')
+            files = os.listdir(data_folder)
 
-        template = ['{rna_id}_{probe_control_flag_unique_experiment_id}_{probe}_{magnesium}_{temperature}_{ddNTP}_{date}_{experimenter}.*.txt',\
-            '{rna_id}_{probe}_{temperature}_{magnesium}_{condition}_{replicate}.*.qushapey','{prefix}_{probe}_{magnesium}_{temperature}_{replicate}_{rna_id}.*.map']
+            with open(sample_file, 'r', newline='') as sample:
+                reader = csv.reader(sample, delimiter='\t')
+                rows = next(reader)
 
-        def translate_template_to_re(template):
-            template = re.sub(r'\{([^}]+)\}', r'(?P<\1>[^_\.]+)',template)
-            return template
+            data = pd.DataFrame(columns=['rna_id', 'date', 'experimenter','probe', 'temperature', 'magnesium', 'ddNTP', 'rna_begin', 'rna_end',\
+                'rt_begin_pos', 'rt_end_pos', 'replicate', 'probe_file', 'control_file', 'qushape_file','reference_qushape_file','map_file','discard'])
 
-        patterns = [translate_template_to_re(t) for t in template]
+            template = ['{rna_id}_{probe_control_flag_unique_experiment_id}_{probe}_{magnesium}_{temperature}_{ddNTP}_{date}_{experimenter}.*.txt',\
+                '{rna_id}_{probe}_{temperature}_{magnesium}_{condition}_{replicate}.*.qushapey','{prefix}_{probe}_{magnesium}_{temperature}_{replicate}_{rna_id}.*.map']
 
-        file_info = []
-        for file in files:
-            row = {}
-            m=None
-            for p in patterns:
-                m = re.match(p,file)
-                if m is not None: break
-            if m is not None:
-                list_info = m.groupdict()
-                for info in list(data):
-                    if info in list_info:
-                        row[info] = list_info[info]
-                    else:
-                        row[info] = ''
-                row['temperature'] = list_info['temperature'][1:]
-                if file.split('.')[-1] == 'txt' and list_info['probe_control_flag_unique_experiment_id'][0] == 'B':
-                    unique_experiment_id = file.split('_')[1][1:]
-                    control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and unique_experiment_id == file_name.split('_')[1][1:] and file_name != file][0]
-                    row['probe_file'] = file
-                    row['control_file'] = control_file
-                    file_info.append(row)
-                elif file.split('.')[-1] == 'qushapey':
-                    row['qushape_file'] = file
-                    file_info.append(row)
-                elif file.split('.')[-1] == 'map':
-                    row['map_file'] = file
-                    file_info.append(row)
-            else:
-                if file.split('.')[-1] == 'txt' and file.split('_')[1][0] == 'B':
-                    rna_id = file.split('_')[0]
-                    unique_experiment_id = file.split('_')[1][1:]
-                    control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and unique_experiment_id == file_name.split('_')[1][1:] and file_name != file][0]
+            def translate_template_to_re(template):
+                template = re.sub(r'\{([^}]+)\}', r'(?P<\1>[^_\.]+)',template)
+                return template
 
-                    row = {'rna_id':rna_id, 'date':'', 'experimenter':'','probe':'', 'temperature':'', 'magnesium':'', 'ddNTP':'', 'rna_begin':'',\
-                        'rna_end':'','rt_begin_pos':'', 'rt_end_pos':'', 'replicate':'', 'probe_file':file, 'control_file':control_file,\
-                             'qushape_file':'','reference_qushape_file':'','map_file':'','discard':''}
-                    file_info.append(row)
-                elif file.split('.')[-1] in ['qushapey', 'map']:
+            patterns = [translate_template_to_re(t) for t in template]
+
+            file_info = []
+            for file in files:
+                row = {}
+                m=None
+                for p in patterns:
+                    m = re.match(p,file)
+                    if m is not None: break
+                if m is not None:
+                    list_info = m.groupdict()
                     for info in list(data):
-                        if file.split('.')[-1] == 'qushapey':
-                            row['qushape_file'] = file
-                        elif file.split('.')[-1] == 'map':
-                            row['map_file'] = file
+                        if info in list_info:
+                            row[info] = list_info[info]
                         else:
                             row[info] = ''
-                    file_info.append(row)
+                    row['temperature'] = list_info['temperature'][1:]
+                    if file.split('.')[-1] == 'txt' and list_info['probe_control_flag_unique_experiment_id'][0] == 'B':
+                        replicate = file.split('_')[1][1:]
+                        control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and replicate == file_name.split('_')[1][1:] and file_name != file][0]
+                        row['probe_file'] = file
+                        row['control_file'] = control_file
+                        row['replicate'] = replicate
+                        file_info.append(row)
+                    elif file.split('.')[-1] == 'qushapey':
+                        row['qushape_file'] = file
+                        file_info.append(row)
+                    elif file.split('.')[-1] == 'map':
+                        row['map_file'] = file
+                        file_info.append(row)
+                else:
+                    if file.split('.')[-1] == 'txt' and file.split('_')[1][0] == 'B':
+                        rna_id = file.split('_')[0]
+                        replicate = file.split('_')[1][1:]
+                        control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and replicate == file_name.split('_')[1][1:] and file_name != file][0]
 
-        data = pd.concat([data, pd.DataFrame(file_info)], ignore_index=True)
+                        row = {'rna_id':rna_id, 'date':'', 'experimenter':'','probe':'', 'temperature':'', 'magnesium':'', 'ddNTP':'', 'rna_begin':'',\
+                            'rna_end':'','rt_begin_pos':'', 'rt_end_pos':'', 'replicate':replicate, 'probe_file':file, 'control_file':control_file,\
+                                'qushape_file':'','reference_qushape_file':'','map_file':'','discard':''}
+                        file_info.append(row)
+                    elif file.split('.')[-1] in ['qushapey', 'map']:
+                        for info in list(data):
+                            if file.split('.')[-1] == 'qushapey':
+                                row['qushape_file'] = file
+                            elif file.split('.')[-1] == 'map':
+                                row['map_file'] = file
+                            else:
+                                row[info] = ''
+                        file_info.append(row)
 
-        data = data.reset_index(drop=True)
-        data.index = data.index + 1
-        data.index.name = 'id'
-        data.to_csv(sample_file, sep='\t', index=True)
+            data = pd.concat([data, pd.DataFrame(file_info)], ignore_index=True)
+            data = data.reset_index(drop=True)
+            data.index = data.index + 1
+            data.index.name = 'id'
+            data.to_csv(sample_file, sep='\t', index=True)
+        else :
+            print("Operation aborted.")
+
 
     def refactor(self, action: str = "addpositions"):
         extra_config = dict()
