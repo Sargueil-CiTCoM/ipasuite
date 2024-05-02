@@ -144,9 +144,20 @@ class Launcher(object):
             response = input("Do you want to overwrite sample.tsv? Please enter yes or no:")
             
         if response.lower() == 'yes':
+            sample_file = os.path.join('samples.tsv')
+
+            # copy existing configuration to backup file
+            mydir = os.listdir('./')
+            indices = []
+            for file in mydir:
+                m = re.match(rf'{sample_file}.(\d+)',file)
+                if m:
+                    indices.append(int(m[1]))
+            bkp_file_index = max([0]+indices)+1
+            bkp_file = f"{sample_file}.{bkp_file_index}"
+            shutil.copy(sample_file, bkp_file)
 
             data_folder = os.path.join("resources/raw_data")
-            sample_file = os.path.join('samples.tsv')
             files = os.listdir(data_folder)
 
             with open(sample_file, 'r', newline='') as sample:
