@@ -85,14 +85,38 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
             "cp '{input}' '{output}' &> {log}"
 
 
+def aggreact_tsv_from_map(map_file,aggreact_tsv_file):
+    import pandas as pd
+    import os
+
+    input = pd.read_csv(map_file, names=['reactivity','error','nucleotide'], sep='\t')
+
+    map_file_base = os.path.basename(map_file)
+
+    result = list()
+    for index,row in input.iterrows():
+        df = pd.DataFrame({
+            'seqNum': index,
+            'sequence': row['nucleotide'],
+            map_file_base: row['reactivity'],
+            'mean': row['reactivity'],
+            'stdev': 0,
+            'sem': row['error'],
+            'mad': row['error'],
+            'used_values': 1,
+            'desc': 'accepted' if row['reactivity']>-1 else 'undetermined'
+        }, index=[index])
+        result.append(df)
+    result_df =pd.concat(result)
+    result_df.to_csv(aggreact_tsv_file, index=False, sep='\t')
+
 rule import_external_map:
     input:
         get_external_map
     output:
-        full= construct_path("aggreact", show_replicate = False),
+        map_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
         shape_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
         shape_IP_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".ip.shape"),
-        map_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
         #relation_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".csv"),
         #plot =report(construct_path("aggreact", ext=".aggreact.svg",
         #    show_replicate=False, figure=True),
@@ -112,6 +136,15 @@ rule import_external_map:
         "cp '{input}' '{output.map_file}' &>> {log}; "
         "cut -f1,2 '{input}' >'{output.shape_file}' 2>> {log}; "
         "cp '{output.shape_file}' '{output.shape_IP_file}' &>> {log}"
+
+rule generate_aggreact_tsv_from_map:
+    input:
+        external = get_external_map,
+        internal = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
+    output:
+        construct_path("aggreact", show_replicate = False),
+    run:
+        aggreact_tsv_from_map(input.internal[0],output[0])
 
 
 rule importraw:
