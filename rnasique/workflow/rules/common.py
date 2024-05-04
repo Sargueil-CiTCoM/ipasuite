@@ -180,12 +180,15 @@ def get_external_qushape(wildcards):
     except:
         return ""
 
-# def get_external_map(wildcards):
-#    sample = get_sample(samples, wildcards)
-#    try:
-#        return os.path.join(config["rawdata"]["path_prefix"], sample["map_file"])
-#    except:
-#        return ""
+def get_external_map(wildcards):
+   sample = get_sample(samples, wildcards)
+   try:
+       filename = sample["map_file"]
+       assert(type(filename) == str and filename !="" )
+       # print(f"get_external_map({wildcards}) -> {filename}")
+       return os.path.join(config["rawdata"]["path_prefix"], filename)
+   except:
+       return ""
 
 
 def get_raw_probe_input(wildcards):
@@ -288,6 +291,7 @@ def get_ipanemap_pool_inputs(pool):
                 **cond,
             )
         )
+    # print(f"get_ipanemap_pool_inputs({pool}) -> {inputs}")
     return inputs
 
 
@@ -426,20 +430,28 @@ def get_all_qushape_addpositions_outputs():
 def get_all_qushapey_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
+        if 'map_file' in row and type(row['map_file'])==str and row['map_file']!="":
+            continue
+
         sample = construct_path(step="qushape", ext=".qushapey", split_seq=True)[
             0
         ].format(**row)
         outputs.append(sample)
+    #print(f"get_all_qushapey_outputs() -> {outputs}")
     return outputs
 
 
 def get_all_qushape_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
+        if 'map_file' in row and type(row['map_file'])==str and row['map_file']!="":
+            continue
+
         sample = construct_path(step="qushape", ext=".qushape", split_seq=True)[
             0
         ].format(**row)
         outputs.append(sample)
+    #print(f"get_all_qushape_outputs() -> {outputs}")
     return outputs
 
 
@@ -464,6 +476,7 @@ def get_all_aggreact_outputs():
     #        else:
     #            sample = expand(construct_path("qushape", ext=".qushape"), **row)
     #            outputs.append(sample)
+    # print(f"get_all_aggreact_outputs() -> {outputs}")
     return outputs
 
 

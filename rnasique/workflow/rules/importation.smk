@@ -85,21 +85,34 @@ if config["allow_auto_import"] and not ('refactor_rename' in config and
             "cp '{input}' '{output}' &> {log}"
 
 
+rule import_external_map:
+    input:
+        get_external_map
+    output:
+        full= construct_path("aggreact", show_replicate = False),
+        shape_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
+        shape_IP_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".ip.shape"),
+        map_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
+        #relation_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".csv"),
+        #plot =report(construct_path("aggreact", ext=".aggreact.svg",
+        #    show_replicate=False, figure=True),
+        #    category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],
+        #fullplot = report(construct_path("aggreact", ext=".aggreact.full.svg",
+        #    show_replicate=False, figure=True),
+        #    category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],
+    log:
+        construct_path("aggreact-ipanemap", ext=".log", log_dir=True, split_seq=True, show_replicate=False),
+    message:
+        (
+            "Importing from external map file: "
+            + MESSAGE
+        )
+    shell:
+        "touch {output.full} &> {log}; "
+        "cp '{input}' '{output.map_file}' &>> {log}; "
+        "cut -f1,2 '{input}' >'{output.shape_file}' 2>> {log}; "
+        "cp '{output.shape_file}' '{output.shape_IP_file}' &>> {log}"
 
-#    rule import_external_map:
-#        input:
-#            get_external_map,
-#        output:
-#            construct_path("aggreact-ipanemap", ext=".map", split_seq=True),
-#        log:
-#            construct_path("aggreact-ipanemap", ext=".log", log_dir=True, split_seq=True),
-#        message:
-#            (
-#                "Importing from external map file: "
-#                + MESSAGE
-#            )
-#        shell:
-#            "cp '{input}' '{output}' &> {log}"
 
 rule importraw:
     input:
@@ -109,4 +122,3 @@ rule importraw:
 rule importqushape:
     input:
         ancient(get_all_qushape_outputs()),
-    

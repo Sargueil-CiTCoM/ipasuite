@@ -60,7 +60,13 @@ def get_sample(config, samples, wildcards):
     sval.extend([wildcards[cond] for cond in config["conditions"]])
 
     if "replicate" in samples.index.names:
-        sval.append(wildcards.replicate)
+        try:
+            sval.append(wildcards.replicate)
+        except:
+            # if no replicate in wildcards, then get replicate "1" !
+            # introduced for direct map file import
+            sval.append("1")
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         return samples.loc[tuple(sval)]

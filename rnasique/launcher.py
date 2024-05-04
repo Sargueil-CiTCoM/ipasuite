@@ -379,6 +379,7 @@ class Launcher(object):
                     conda_prefix="~/.rnasique/conda",
                     rerun_triggers=["mtime"],
                     force_incomplete=rerun_incomplete,
+                    #debug_dag = True,
                 )
         except Exception as e:
             logger.error(traceback.format_exc())

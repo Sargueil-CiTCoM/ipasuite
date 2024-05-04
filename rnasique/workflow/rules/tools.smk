@@ -200,10 +200,3 @@ rule footprint:
         f"footprint {{input}}"
         f" --output={{output.tsv}} {{params}}"
         f" --plot={{output.plot}} --diff_plot={{output.diff_plot}} --plot_format=svg"
-
-
-#rule ipanemap:
-#    conda: "../envs/ipanemap.yml"
-#    input: construct_path("aggreact-ipanemap", replicate = False)
-#    output: "python workflow/scripts/IPANEMAP/IPANEMAP.py"
-#
