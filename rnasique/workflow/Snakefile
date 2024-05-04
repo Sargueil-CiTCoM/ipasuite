@@ -73,4 +73,5 @@ else:
     
     ruleorder: import_external_qushape > generate_project_qushape
     ruleorder: import_external_map > aggregate_reactivity
+    ruleorder: aggregate_reactivity > generate_aggreact_tsv_from_map
    #ruleorder: qushape_yamlify > generate_project_qushape

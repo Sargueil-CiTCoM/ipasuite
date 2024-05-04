@@ -132,8 +132,7 @@ rule import_external_map:
             + MESSAGE
         )
     shell:
-        "touch {output.full} &> {log}; "
-        "cp '{input}' '{output.map_file}' &>> {log}; "
+        "cp '{input}' '{output.map_file}' &> {log}; "
         "cut -f1,2 '{input}' >'{output.shape_file}' 2>> {log}; "
         "cp '{output.shape_file}' '{output.shape_IP_file}' &>> {log}"
 
