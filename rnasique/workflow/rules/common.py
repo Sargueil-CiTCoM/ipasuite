@@ -458,6 +458,9 @@ def get_all_qushape_outputs():
 def get_all_reactivity_outputs():
     outputs = []
     for idx, row in samples.reset_index().iterrows():
+        if 'map_file' in row and type(row['map_file'])==str and row['map_file']!="":
+            continue
+        
         sample = construct_path(step="reactivity", split_seq=True)[0].format(**row)
         outputs.append(sample)
     return outputs
