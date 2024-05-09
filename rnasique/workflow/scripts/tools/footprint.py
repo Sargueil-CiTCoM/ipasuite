@@ -72,6 +72,22 @@ def footprint_ttest(
     diff_thres=0.2,
     ratio_thres=0.2,
 ):
+    """
+    Compares two reactivity profiles (two 'conditions')
+
+    Args:
+        cond1_path: aggreact_tsv file of condition 1
+        cond1_name: name of condition 1
+        cond2_path: aggreact_tsv file of condition 2
+        cond1_name: name of condition 2
+        
+    Returns:
+        footprint (DataFrame): results prepared for plotting by footprint.plot_reactivity()
+        footprint_csv (DataFrame): results in table format (to be written to tsv file)
+    """
+
+    #print(f"[DEBUG] footprint_ttest {cond1_name}: {cond1_path} {cond2_name}: {cond2_path}")
+
     cols = [
         "seqNum",
         "sequence",

@@ -73,7 +73,13 @@ if "fluo-fsa" in RAW_DATA_TYPE:
 
 
 rule extract_reactivity:
-    input: 
+    """
+    Extract reactivities from qushapey files
+    
+    Writes reactivity.tsv report, which directly contains the data from qushape's report.
+    Moreover, it produces a simple bar plot of the data (areas RX BG, and their difference) for each sequence position
+    """
+    input:
         qushape = construct_path("qushape", ext=".qushapey", split_seq=True),
         refseq = ancient(lambda wildcards: get_subseq(wildcards, split_seq=True))
     output:
@@ -93,6 +99,18 @@ rule extract_reactivity:
         f" --output={{output.react}} --plot={{output.plot}} &> {{log}}"
 
 rule normalize_reactivity:
+    """
+    Normalizes the 'raw' reactivities, given as areas, in the reactivity.tsv files
+
+    See rule extract_reactivity: these areas come directly from qushape
+
+    The script normalize reactivity produces a tsv file normreact.tsv (main output) as well as map and shape files
+    Moreover, it produces profile plots of position-wise normalized reactivities 
+    (comparing two ways of normalization: /simple/ and /interquartile/.)  
+    
+    Note: the shape and map files start at positions 1, even if the first reactivities are not contained in files reactivity.tsv.
+    For this purpose, the first positions of undefined reactivities are padded with 'undefined' entries in the normalize_reactivity script.
+    """
     input: construct_path("reactivity", split_seq=True)
     output:
         nreact=construct_path("normreact", split_seq=True),
