@@ -322,42 +322,18 @@ class Launcher(object):
             logger.error("to get more information, type : rnasique log")
 
     def correl(
-        self, action="all", dry_run=False, run_qushape=False, rerun_incomplete=False
+        self, dry_run=False, run_qushape=False, rerun_incomplete=False
     ):
-        self._config = self._choose_config(self._config)
-        targets = ["all"]
-        extra_config = dict()
-
-        if run_qushape:
-            extra_config["qushape"] = {"run_qushape": True}
-            self._cores = 1
-        try:
-            if self.check():
-                # if True:
-                sm.snakemake(
-                    os.path.join(base_path, "workflow", "Snakefile_agg"),
-                    configfiles=[self._config] if self._config else None,
-                    config=extra_config,
-                    targets=targets,
-                    cores=self._cores,
-                    keepgoing=self._keepgoing,
-                    dryrun=dry_run,
-                    use_conda=True,
-                    verbose=self._verbose,
-                    conda_prefix="~/.rnasique/conda",
-                    rerun_triggers=["mtime"],
-                    force_incomplete=rerun_incomplete,
-                )
-        except Exception as e:
-            logger.error(traceback.format_exc())
-            logger.error(e)
-            logger.error("to get more information, type : rnasique log")
-
+        self.run(action="all_aggregate",
+            dry_run=dry_run,
+            run_qushape=run_qushape, 
+            rerun_incomplete=rerun_incomplete)
+        
     def run(
         self, action="all", dry_run=False, run_qushape=False, rerun_incomplete=False
     ):
         self._config = self._choose_config(self._config)
-        targets = ["all"]
+        targets = [action]
         extra_config = dict()
 
         if run_qushape:
