@@ -86,8 +86,6 @@ def footprint_ttest(
         footprint_csv (DataFrame): results in table format (to be written to tsv file)
     """
 
-    #print(f"[DEBUG] footprint_ttest {cond1_name}: {cond1_path} {cond2_name}: {cond2_path}")
-
     cols = [
         "seqNum",
         "sequence",
@@ -100,6 +98,9 @@ def footprint_ttest(
     indexes = ["seqNum", "sequence"]
     cond1 = pd.read_csv(cond1_path, sep="\t").set_index(["seqNum", "sequence"])
     cond2 = pd.read_csv(cond2_path, sep="\t").set_index(["seqNum", "sequence"])
+    
+    #joins rows of the two aggreact tables with same seqNum (and nucleotide)
+    # (WARNING: if cond2 starts at lower seqNum, these positions are at the end!)
     footprint = pd.concat(
         {cond1_name: cond1, cond2_name: cond2}, names=["condition"], axis=1
     )
@@ -113,7 +114,11 @@ def footprint_ttest(
                 equal_var=True,
                 alternative="two-sided",)
             difference = row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"]
-            ratio = np.abs(difference) / (row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"])
+            mean_sum = row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"]
+            if mean_sum!=0:
+                # check again: what is the exact idea of ratio??
+                ratio = np.abs(difference) / (mean_sum)
+            else: ratio = 0
 
             if pvalue < ttest_pvalue_thres and ratio > ratio_thres:
                 if difference > diff_thres:
@@ -128,6 +133,7 @@ def footprint_ttest(
             curres = pd.DataFrame(
                 [[index[0], index[1], pvalue, difference, ratio, significant_higher, significant_lower]],
                 columns=cols,).set_index(indexes)
+            # todo: deprecated; it is inefficient to concat every row
             res = pd.concat([res, curres])
         else:
             curres = pd.DataFrame(
@@ -141,9 +147,8 @@ def footprint_ttest(
 
     footprint_csv = pd.concat(
         {cond1_name: cond1["mean"], cond2_name: cond2["mean"], "analysis": res},
-        names=["condition"],
-        axis=1,)
-    footprint_csv = footprint_csv.sort_values(by=["seqNum"]).reset_index()
+        axis=1)
+    footprint_csv = footprint_csv.sort_values(by=["seqNum"])
 
     return footprint, footprint_csv
 
@@ -157,6 +162,7 @@ def plot_reactivity(
     format="svg",
     cond1_name="Condition1",
     cond2_name="Condition2",
+    width = 100, ## sequence positions per row in plot
 ):
 
     replicates = footprint.drop("ttest", axis=1)
@@ -181,13 +187,13 @@ def plot_reactivity(
     difference["xlabel"] = (difference[('seqNum', '')].astype(str) + "\n" + difference[('sequence','')].astype(str))
     difference = difference.drop([('seqNum', ''), ('sequence','')], axis=1)
  
-    regions = np.linspace(0, int(len(unidmeans)/100)*100, int(len(unidmeans)/100)+1)
+    regions = np.linspace(0, int(len(unidmeans)/width)*width, int(len(unidmeans)/width)+1)
     regions = list(map(int, regions))
-    if 50 > len(unidmeans) - regions[-1] +1:
+    if width/2 > len(unidmeans) - regions[-1] +1:
         regions[-1] = len(unidmeans)
     else:
         regions.append(len(unidmeans))
-#    subplot_width = (len(regions)-2) * [1] + [(regions[-1]-regions[-2]+1)/100]
+#    subplot_width = (len(regions)-2) * [1] + [(regions[-1]-regions[-2]+1)/width]
 
     if len(regions) > 2:
         fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
@@ -336,6 +342,28 @@ def plot_reactivity(
     plt.savefig(diff_output, format=format)
 
 
+def footprint_2D_plot(infile, higher, lower, outfile, show=True):
+    vecs=[higher,lower]
+    for i,vec in enumerate(vecs):
+        pos=[i for i,x in vec.items() if x=='YES']
+        vecs[i] = str(pos).replace(' ','')[1:-1]
+
+    import os 
+    conda_prefix = os.environ.get("CONDA_PREFIX")
+
+    varna_cmd = ['java', '-jar', f'{conda_prefix}/lib/varna/VARNA.jar',
+                 #'-sequenceDBN', sequence,
+                 #'-structureDBN', structure,
+                 '-i', infile,
+                 '-o', outfile,
+                 '-basesStyle1', 'fill=#ff00aa',
+                 '-applyBasesStyle1on', vecs[0],
+                 '-basesStyle2', 'fill=#aaff00',
+                 '-applyBasesStyle2on', vecs[1]]
+
+    print(varna_cmd)
+    import subprocess
+    subprocess.run(varna_cmd)
 
 def footprint_main(
     cond1: str,
@@ -352,6 +380,8 @@ def footprint_main(
     diff_plot_title="Footprint",
     plot_title="Footprint",
     plot_format="svg",
+    structure = None, ## dbn structure file
+    structure_plot=None,
 ):
     cond1_name = cond1_name if cond1_name is not None else cond1
     cond2_name = cond2_name if cond2_name is not None else cond2
@@ -384,7 +414,14 @@ def footprint_main(
             cond2_name=cond2_name,
         )
 
-
+    if structure_plot is not None:
+        print(f"Write structure plot {structure_plot} based on file {structure}.")
+        assert(structure is not None)
+        footprint = footprint_csv.reset_index().set_index('seqNum')
+        higher = footprint['analysis']['significant_higher']
+        lower = footprint['analysis']['significant_lower']
+        
+        footprint_2D_plot(structure, higher, lower, outfile=structure_plot)
 
 def main():
     return fire.Fire(footprint_main)
