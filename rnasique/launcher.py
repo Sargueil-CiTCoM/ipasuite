@@ -362,6 +362,36 @@ class Launcher(object):
             logger.error(e)
             logger.error("to get more information, type : rnasique log")
 
+    def unlock(self):
+        """
+        Remove Snakemake locks on the working directory.
+        
+        This runs Snakemake with flag --unlock. It may be necessary to run 
+        this after unclean termination. In this case, Snakemake will ask you
+        to unlock, but make sure that there is no other still running job.
+        """
+        self._config = self._choose_config(self._config)
+        targets = ["all"]
+        extra_config = dict()
+        try:
+            if self.check():
+                # if True:
+                sm.snakemake(
+                    os.path.join(base_path, "workflow", "Snakefile"),
+                    configfiles=[self._config] if self._config else None,
+                    config=extra_config,
+                    targets=targets,
+                    use_conda=True,
+                    conda_prefix="~/.rnasique/conda",
+                    rerun_triggers=["mtime"],
+                    unlock = True,
+                )
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error(e)
+            logger.error("to get more information, type : rnasique log")
+
+
     def log(self, step=None, clean=False, print_filename=False):
         self._config = self._choose_config(self._config)
         with open(self._config, "r") as cfd:
