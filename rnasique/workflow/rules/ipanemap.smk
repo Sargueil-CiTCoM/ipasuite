@@ -118,13 +118,11 @@ rule structure:
     #    "../envs/ipanemap.yml"
     threads: 8
     input:
-        dir = directory(
-            expand(
+        dir = expand(
                 f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}",
                 folder=config["folders"]["ipanemap-out"],
                 allow_missing=True,
-            )
-        ),
+            ),
     params:
         input_folder=config["folders"]["ipanemap-out"],
 
