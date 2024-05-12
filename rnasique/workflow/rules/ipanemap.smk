@@ -118,36 +118,51 @@ rule structure:
     #    "../envs/ipanemap.yml"
     threads: 8
     input:
-        optimal =  expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}/"
-            f"{{rna_id}}_pool_{{pool_id}}_optimal_1.dbn",
-            folder=config["folders"]["ipanemap-out"],
-            allow_missing=True,),
+        dir = directory(
+            expand(
+                f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}",
+                folder=config["folders"]["ipanemap-out"],
+                allow_missing=True,
+            )
+        ),
     params:
         input_folder=config["folders"]["ipanemap-out"],
 
     output:
-        optimal_output = expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_1.dbn",
+        expand(
+            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_{{k}}.dbn",
             folder=config["folders"]["structure"],
-            allow_missing=True,),
-        secondbest_output = expand(
-            f"{RESULTS_DIR}/{{folder}}/{{rna_id}}_pool_{{pool_id}}_2.dbn",
-            folder=config["folders"]["structure"],
+            k = [1,2],
             allow_missing=True,),
 
     log:
         log = "results/logs/ipanemap-{rna_id}_pool_{pool_id}.log",
 
-    shell:
-        """
-        sorted_numbers=$(find ./{RESULTS_DIR}/{params.input_folder}/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -o 'bolzmann prob: [0-9]*\\.[0-9]*' {{}} + | awk '{{print $3}}' | sort -gr);
-        second_largest=$(echo "$sorted_numbers" | awk '{{if(NR==2) print}}');
-        file_with_second_largest="$(find ./{RESULTS_DIR}/{params.input_folder}/{wildcards.rna_id}_pool_{wildcards.pool_id}/{wildcards.rna_id}_pool_{wildcards.pool_id}_centroid_*.dbn -type f -exec grep -l "bolzmann prob: $second_largest" {{}} +)";
-        cp {input.optimal} {output.optimal_output} &> {log.log};
-        cp "$file_with_second_largest" {output.secondbest_output} &>> {log.log};
-        """
+    run:
+        import os
+        import re
+        import shutil
 
+        def gen_centroid_name(k,tag="_centroid"):
+            return f"{wildcards.rna_id}_pool_{wildcards.pool_id}{tag}_{k}.dbn"
+
+        def kbest_centroids(dir, k):
+            import glob
+            centroids = list(glob.glob(os.path.join(dir,gen_centroid_name("*"))))
+            pc_pairs=list()
+            for k in range(1,len(centroids)+1):
+                centroid = gen_centroid_name(k)
+                with open(os.path.join(dir,centroid)) as fh:
+                    probability = float(fh.readline().strip().split(' ')[-1])
+                    pc_pairs.append((probability,k))
+            pc_pairs = sorted(pc_pairs,key=lambda x:-x[0])
+            print(pc_pairs)
+            return [ c for (p,c) in pc_pairs[:k] ]
+
+        source_dir = str(input.dir[0])
+        target_dir = os.path.join(RESULTS_DIR,config["folders"]["structure"])
+        for i,j in enumerate(kbest_centroids(source_dir,2)):
+            shutil.copy(os.path.join(source_dir,gen_centroid_name(j)),os.path.join(target_dir,gen_centroid_name(i+1,tag="")))
 
 rule varna_color_by_condition:
     #conda:
