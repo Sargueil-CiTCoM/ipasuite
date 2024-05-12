@@ -304,12 +304,16 @@ def get_footprint_comp_input(comp, cond_name):
 
 
 def get_footprint_inputs(wildcards):
+    """
+    Input aggreact files for footprinting 
+    """
     inputs = []
     for comp in config["footprint"]["compares"]:
         if comp["id"] == wildcards.foot_id and comp["rna_id"] == wildcards.rna_id:
             inputs.extend(get_footprint_comp_input(comp, "condition1"))
             inputs.extend(get_footprint_comp_input(comp, "condition2"))
 
+    #print(f'get_footprint_inputs({wildcards}) -> {inputs}')
     return inputs
 
 
@@ -320,6 +324,12 @@ def get_footprint_condition_name(wildcards, idx):
 
     return None
 
+def get_footprint_pool_id(wildcards):
+    for comp in config["footprint"]["compares"]:
+        if comp["id"] == wildcards.foot_id:
+            return comp["pool_id"]
+
+    return None
 
 def get_ipanemap_inputs(wildcards):
     for pool in config["ipanemap"]["pools"]:
