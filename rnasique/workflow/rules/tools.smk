@@ -195,11 +195,23 @@ rule aggregate_reactivity:
 
 rule footprint:
     input:
-        get_footprint_inputs,
+        # the two aggreact.tsv files that are compared by this footprint
+        tsv = get_footprint_inputs,
+        
+        # structure as dbn to be annotated by footprinting information 
+#        struct_1 = ["results/5.3-structure/DIDY_pool_1M72A3_2.dbn"]
+        struct_1 = lambda wildcards: expand(
+            f"{RESULTS_DIR}/{{folder}}/{wildcards.rna_id}_pool_{get_footprint_pool_id(wildcards)}_1.dbn",
+            folder=config["folders"]["structure"],
+            allow_missing=True,
+        ),
+
     output:
         tsv=f"{RESULTS_DIR}/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.tsv",
         plot=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
         diff_plot=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}_difference.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
+        structure_plot_svg=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}_structure.svg", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
+        structure_plot_varna=report(f"{RESULTS_DIR}/figures/{config['folders']['footprint']}/{{rna_id}}_footprint_{{foot_id}}_structure.varna", category="5-Footprint", subcategory="{rna_id} - {foot_id}"),
     log: "results/logs/footprint_{rna_id}_footprint_{foot_id}.log"
     params:
         ttest_pvalue_thres = construct_param(config["footprint"]["config"],
@@ -215,6 +227,7 @@ rule footprint:
         plot_title = lambda wildcards: f"--plot_title='Compared reactivity between {get_footprint_condition_name(wildcards, 1)} and {get_footprint_condition_name(wildcards, 2)}'",
         diff_plot_title = lambda wildcards: f"--diff_plot_title='Difference between {get_footprint_condition_name(wildcards, 1)} and {get_footprint_condition_name(wildcards, 2)}'"
     shell:
-        f"footprint {{input}}"
-        f" --output={{output.tsv}} {{params}}"
-        f" --plot={{output.plot}} --diff_plot={{output.diff_plot}} --plot_format=svg"
+        "footprint {input.tsv} --output={output.tsv} {params}"
+        " --plot={output.plot} --diff_plot={output.diff_plot} --plot_format=svg; "
+        "footprint {input.tsv} {params} --structure={input.struct_1} --structure_plot={output.structure_plot_svg}; "
+        "footprint {input.tsv} {params} --structure={input.struct_1} --structure_plot={output.structure_plot_varna}"
