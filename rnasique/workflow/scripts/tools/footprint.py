@@ -104,7 +104,7 @@ def footprint_ttest(
     footprint = pd.concat(
         {cond1_name: cond1, cond2_name: cond2}, names=["condition"], axis=1
     )
-    res = pd.DataFrame([], columns=cols).set_index(indexes)
+    res = list()
     for index, row in footprint.iterrows():
         if row.loc[cond1_name]["desc"] in ("accepted", "warning") and row.loc[
             cond2_name]["desc"] in ("accepted", "warning"):
@@ -134,12 +134,16 @@ def footprint_ttest(
                 [[index[0], index[1], pvalue, difference, ratio, significant_higher, significant_lower]],
                 columns=cols,).set_index(indexes)
             # todo: deprecated; it is inefficient to concat every row
-            res = pd.concat([res, curres])
+            res.append(curres)
         else:
             curres = pd.DataFrame(
                 [[index[0], index[1], np.NaN, np.NaN, np.NaN, np.NaN, np.NaN]],
                 columns=cols,).set_index(indexes)
-            res = pd.concat([res, curres])
+            res.append(curres)
+
+    #res = pd.DataFrame([], columns=cols).set_index(indexes)
+    res = pd.concat(res)
+
     footprint = pd.concat(
         {cond1_name: cond1, cond2_name: cond2, "ttest": res},
         names=["condition"],
