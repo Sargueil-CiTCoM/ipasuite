@@ -199,6 +199,7 @@ def plot_reactivity(
         regions.append(len(unidmeans))
 #    subplot_width = (len(regions)-2) * [1] + [(regions[-1]-regions[-2]+1)/width]
 
+
     if len(regions) > 2:
         fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
         for j in range(len(regions)-1) :
@@ -272,7 +273,7 @@ def plot_reactivity(
             ax2 = axes[j].twinx()
             ax2.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
             plt.tight_layout()
-    else:
+    else: # <= 2 regions
         fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4*(len(regions)-1)))
         ax.set_xticks(unidmeans.index[regions[0]:regions[1]])
         ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
@@ -293,24 +294,24 @@ def plot_reactivity(
             ax.axhline(y=0.7, color="red", linestyle="-", label="High reactivity")
             ax.axhline(y=0.0, color="silver", linestyle="-")
 
-            legend_elements = [
-                Patch(facecolor="skyblue", edgecolor='grey',label=f"{cond1_name}"),
-                Patch(facecolor="royalblue", edgecolor='grey', label=f"{cond2_name}"),
-                Patch(facecolor="lightgrey", edgecolor='grey',label="Undetermined"),
-                Patch(facecolor="yellow", edgecolor='grey',label=f"{cond2_name} sign. higher"),
-                Patch(facecolor="orange", edgecolor='grey',label=f"{cond2_name} sign. lower"),
-                Line2D([0], [0], color="red", label="High reactivity threshold"),
-                Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
-            ]
-            ax.legend(handles=legend_elements, loc="upper left",ncol=14)
-            ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
-            ax.set_xlim([unidmeans.index[regions[0]] - 1, unidmeans.index[regions[1]-1] + 1])
-            ax.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
-                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
-            ax2 = ax.twinx()
-            ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
-                max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
-            plt.tight_layout()
+        legend_elements = [
+            Patch(facecolor="skyblue", edgecolor='grey',label=f"{cond1_name}"),
+            Patch(facecolor="royalblue", edgecolor='grey', label=f"{cond2_name}"),
+            Patch(facecolor="lightgrey", edgecolor='grey',label="Undetermined"),
+            Patch(facecolor="yellow", edgecolor='grey',label=f"{cond2_name} sign. higher"),
+            Patch(facecolor="orange", edgecolor='grey',label=f"{cond2_name} sign. lower"),
+            Line2D([0], [0], color="red", label="High reactivity threshold"),
+            Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
+        ]
+        ax.legend(handles=legend_elements, loc="upper left",ncol=14)
+        ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
+        ax.set_xlim([unidmeans.index[regions[0]] - 1, unidmeans.index[regions[1]-1] + 1])
+        ax.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
+            max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
+        ax2 = ax.twinx()
+        ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
+            max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
+        plt.tight_layout()
         plt.suptitle(title)
         plt.savefig(output, format=format)
 
