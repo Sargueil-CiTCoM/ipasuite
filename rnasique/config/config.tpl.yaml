@@ -396,6 +396,7 @@ footprint:
   compares:
     - id: 1M7_Mg_noMg
       rna_id: CHANGEME
+      pool_id: CHANGEME
       condition1:
         temperature: 37
         magnesium: Mg
