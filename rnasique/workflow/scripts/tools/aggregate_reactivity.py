@@ -496,7 +496,7 @@ def aggregate_replicates(
     # Only one value -- no average possible
     if row["nvalid_values"] == 1 and nvalues == 1:
         desc = "one-value-available"
-        mean = values[0]
+        mean = values.iloc[0]
         stdev = np.NaN
         sem = np.NaN
         mad = np.NaN
@@ -717,8 +717,11 @@ def aggregate(
             for j in range(len(rel_output.columns)):
                 if j>i:
                     name = rel_output.columns[j] + '='+ 'f('+ rel_output.columns[i] + ')'
-                    slope, intercept, r_value, p_value, std_err = linregress(rel_output.iloc[:,i],rel_output.iloc[:,j])
-                    linear_regression[name] = {'slope':slope,'intercept':intercept,'r_value':r_value, 'r_squared':r_value**2,'p_value':p_value,'std_err':std_err}
+                    try:
+                        slope, intercept, r_value, p_value, std_err = linregress(rel_output.iloc[:,i],rel_output.iloc[:,j])
+                        linear_regression[name] = {'slope':slope,'intercept':intercept,'r_value':r_value, 'r_squared':r_value**2,'p_value':p_value,'std_err':std_err}
+                    except ValueError:
+                        print(f"Warning: cannot compute linear regression {name}")
         linear_regression = pd.DataFrame(linear_regression).T
         correlation_output.to_csv(relation_output, sep="\t", float_format="%.4f")
         linear_regression.to_csv(relation_output, mode='a', sep="\t", float_format="%.4f")
