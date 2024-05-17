@@ -374,9 +374,9 @@ def footprint_2D_plot(infile, higher, lower, outfile, show=True):
                  #'-structureDBN', structure,
                  '-i', infile,
                  '-o', outfile,
-                 '-basesStyle1', 'fill=#ff00aa',
+                 '-basesStyle1', 'fill=#ff0000',
                  '-applyBasesStyle1on', vecs[0],
-                 '-basesStyle2', 'fill=#aaff00',
+                 '-basesStyle2', 'fill=#0000ff',
                  '-applyBasesStyle2on', vecs[1]]
 
     print(varna_cmd)
