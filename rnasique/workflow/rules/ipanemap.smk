@@ -148,11 +148,11 @@ rule structure:
             import glob
             centroids = list(glob.glob(os.path.join(dir,gen_centroid_name("*"))))
             pc_pairs=list()
-            for k in range(1,len(centroids)+1):
-                centroid = gen_centroid_name(k)
+            for i in range(1,len(centroids)+1):
+                centroid = gen_centroid_name(i)
                 with open(os.path.join(dir,centroid)) as fh:
                     probability = float(fh.readline().strip().split(' ')[-1])
-                    pc_pairs.append((probability,k))
+                    pc_pairs.append((probability,i))
             pc_pairs = sorted(pc_pairs,key=lambda x:-x[0])
             print(pc_pairs)
             return [ c for (p,c) in pc_pairs[:k] ]
