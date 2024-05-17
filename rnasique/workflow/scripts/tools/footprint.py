@@ -114,12 +114,11 @@ def footprint_ttest(
             # compare by ttest only if at least one condition has more than
             # 1 replicates
             if len(rs1)>1 or len(rs2)>1:
-                stat, pvalue = scipy.stats.ttest_ind(
+                _, pvalue = scipy.stats.ttest_ind(
                     rs1, rs2,
                     equal_var=True,
                     alternative="two-sided",)
             else:
-                stat = None
                 pvalue = 0 # set to 0 in order to leave decision to other criteria
 
             difference = row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"]
@@ -129,16 +128,15 @@ def footprint_ttest(
                 ratio = np.abs(difference) / (mean_sum)
             else: ratio = 0
 
+            significant_higher = 'NO'
+            significant_lower = 'NO'
+            
             if pvalue < ttest_pvalue_thres and ratio > ratio_thres:
                 if difference > diff_thres:
                    significant_higher = 'YES'
-                   significant_lower = 'NO'
-                elif difference < -(diff_thres):
+                elif difference < -diff_thres:
                    significant_lower = 'YES'
-                   significant_higher = 'NO'
-            else:
-                significant_higher = 'NO'
-                significant_lower = 'NO'
+
             curres = pd.DataFrame(
                 [[index[0], index[1], pvalue, difference, ratio, significant_higher, significant_lower]],
                 columns=cols,).set_index(indexes)
