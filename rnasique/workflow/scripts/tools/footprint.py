@@ -259,8 +259,10 @@ def plot_reactivity(
 
             for i in range(len(unidmeans)):
                 if i >= regions[j] and i < regions[j+1]:
-                    if unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'YES' or unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'YES':
-                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'gold',edgecolor='orange', align='center', label="Significant difference")
+                    if unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'YES':
+                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'red',edgecolor='red', align='center', label="Significant higher")
+                    elif unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'YES':
+                        axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'blue',edgecolor='blue', align='center', label="Significant lower")
                     elif unidsignificant.loc[i, ('ttest', 'significant_higher')] == 'NO' and unidsignificant.loc[i, ('ttest', 'significant_lower')] == 'NO':
                         axes[j].bar(unidmeans.index[i], difference.iloc[i, 0], width=0.8, color = 'palegreen', edgecolor='forestgreen', align='center', label="Difference")
                     else:
@@ -270,7 +272,8 @@ def plot_reactivity(
 
             legend_elements = [
                 Patch(facecolor="palegreen", label="Difference"),
-                Patch(facecolor="gold", label="Significant difference"),
+                Patch(facecolor="red", label="Significant higher"),
+                Patch(facecolor="blue", label="Significant lower"),
                 Patch(facecolor="lightgrey", label="Undetermined"),
             ]
             axes[j].legend(handles=legend_elements, loc="upper left")
