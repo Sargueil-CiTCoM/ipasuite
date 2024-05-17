@@ -108,11 +108,20 @@ def footprint_ttest(
     for index, row in footprint.iterrows():
         if row.loc[cond1_name]["desc"] in ("accepted", "warning") and row.loc[
             cond2_name]["desc"] in ("accepted", "warning"):
-            stat, pvalue = scipy.stats.ttest_ind(
-                list(row.loc[cond1_name].iloc[:row.loc[cond1_name].index.get_loc("mean")]),
-                list(row.loc[cond2_name].iloc[:row.loc[cond1_name].index.get_loc("mean")]),
-                equal_var=True,
-                alternative="two-sided",)
+            # get reactivities of the replicates
+            rs1 = list(row.loc[cond1_name].iloc[:row.loc[cond1_name].index.get_loc("mean")])
+            rs2 = list(row.loc[cond2_name].iloc[:row.loc[cond2_name].index.get_loc("mean")])
+            # compare by ttest only if at least one condition has more than
+            # 1 replicates
+            if len(rs1)>1 or len(rs2)>1:
+                stat, pvalue = scipy.stats.ttest_ind(
+                    rs1, rs2,
+                    equal_var=True,
+                    alternative="two-sided",)
+            else:
+                stat = None
+                pvalue = 0 # set to 0 in order to leave decision to other criteria
+
             difference = row.loc[cond2_name]["mean"] - row.loc[cond1_name]["mean"]
             mean_sum = row.loc[cond2_name]["mean"] + row.loc[cond1_name]["mean"]
             if mean_sum!=0:
