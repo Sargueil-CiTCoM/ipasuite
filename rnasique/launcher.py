@@ -194,7 +194,8 @@ class Launcher(object):
                     if file.split('.')[-1] == 'txt' and list_info['probe_control_flag_unique_experiment_id'][0] == 'B':
                         replicate = file.split('_')[1][1:]
                         control_file = [file_name for file_name in files if len(file_name.split('_')) >1 and replicate == file_name.split('_')[1][1:] and \
-                                        list_info['magnesium'] == file_name.split('_')[3] and file_name != file][0]
+                                        list_info['magnesium'] == file_name.split('_')[3] and list_info['temperature'] == file_name.split('_')[4] and \
+                                        len(file_name.split('_')[2].split('-')) >1 and list_info['probe'] == file_name.split('_')[2].split('-')[1] and file_name != file][0]
                         row['probe_file'] = file
                         row['control_file'] = control_file
                         row['replicate'] = replicate
