@@ -360,7 +360,7 @@ def plot_reactivity(
     plt.savefig(diff_output, format=format)
 
 
-def footprint_2D_plot(infile, higher, lower, outfile, show=True):
+def footprint_2D_plot(infile, higher, lower, outfile):
     vecs=[higher,lower]
     for i,vec in enumerate(vecs):
         pos=[i for i,x in vec.items() if x=='YES']
@@ -375,11 +375,12 @@ def footprint_2D_plot(infile, higher, lower, outfile, show=True):
                  '-i', infile,
                  '-o', outfile,
                  '-basesStyle1', 'fill=#ff0000',
-                 '-applyBasesStyle1on', vecs[0],
-                 '-basesStyle2', 'fill=#0000ff',
-                 '-applyBasesStyle2on', vecs[1]]
+                 '-basesStyle2', 'fill=#0000ff',]
 
-    print(varna_cmd)
+    for i,vec in enumerate(vecs):
+        if vec:
+            varna_cmd.extend([f'-applyBasesStyle{i+1}on', vec])
+
     import subprocess
     subprocess.run(varna_cmd)
 
@@ -433,12 +434,11 @@ def footprint_main(
         )
 
     if structure_plot is not None:
-        print(f"Write structure plot {structure_plot} based on file {structure}.")
+        # Write annotated structure plot {structure_plot} based on file {structure}
         assert(structure is not None)
         footprint = footprint_csv.reset_index().set_index('seqNum')
         higher = footprint['analysis']['significant_higher']
         lower = footprint['analysis']['significant_lower']
-        
         footprint_2D_plot(structure, higher, lower, outfile=structure_plot)
 
 def main():
