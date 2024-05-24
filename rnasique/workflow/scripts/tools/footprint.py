@@ -106,8 +106,8 @@ def footprint_ttest(
     )
     res = list()
     for index, row in footprint.iterrows():
-        if row.loc[cond1_name]["desc"] in ("accepted", "warning") and row.loc[
-            cond2_name]["desc"] in ("accepted", "warning"):
+        if row.loc[cond1_name]["desc"] in ("accepted", "warning", "one-value-available") and row.loc[
+            cond2_name]["desc"] in ("accepted", "warning", "one-value-available"):
             # get reactivities of the replicates
             rs1 = list(row.loc[cond1_name].iloc[:row.loc[cond1_name].index.get_loc("mean")])
             rs2 = list(row.loc[cond2_name].iloc[:row.loc[cond2_name].index.get_loc("mean")])
@@ -239,6 +239,12 @@ def plot_reactivity(
                 Line2D([0], [0], color="red", label="High reactivity threshold"),
                 Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
             ]
+
+            if unidstdev.iloc[:, 0].isna().all():
+                unidstdev.iloc[:, 0] = 0
+            if unidstdev.iloc[:, 1].isna().all():
+                unidstdev.iloc[:, 1] = 0
+
             axes[j].legend(handles=legend_elements, loc="upper left", ncol=14)
             axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
             axes[j].set_xlim([unidmeans.index[regions[j]] - 1, unidmeans.index[regions[j+1]-1] + 1])
@@ -276,6 +282,10 @@ def plot_reactivity(
                 Patch(facecolor="blue", label="Significant lower"),
                 Patch(facecolor="lightgrey", label="Undetermined"),
             ]
+
+            if difference.iloc[:, 0].isna().all():
+                difference.iloc[:, 0] = 0
+
             axes[j].legend(handles=legend_elements, loc="upper left", ncol=14)
             axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
             axes[j].set_xlim([difference.index[regions[j]] - 1, difference.index[regions[j+1]-1] + 1])
@@ -315,6 +325,12 @@ def plot_reactivity(
         ]
         ax.legend(handles=legend_elements, loc="upper left", ncol=14)
         ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
+
+        if unidstdev.iloc[:, 0].isna().all():
+            unidstdev.iloc[:, 0] = 0
+        if unidstdev.iloc[:, 1].isna().all():
+            unidstdev.iloc[:, 1] = 0
+
         ax.set_xlim([unidmeans.index[regions[0]] - 1, unidmeans.index[regions[1]-1] + 1])
         ax.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
             max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
@@ -349,6 +365,10 @@ def plot_reactivity(
             Patch(facecolor="blue", label="Significant lower"),
             Patch(facecolor="lightgrey", label="Undetermined"),
         ]
+
+        if difference.iloc[:, 0].isna().all():
+           difference.iloc[:, 0] = 0
+
         ax.legend(handles=legend_elements, loc="upper left", ncol=14)
         ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
         ax.set_xlim([difference.index[regions[0]] - 1, difference.index[regions[1]-1] + 1])
