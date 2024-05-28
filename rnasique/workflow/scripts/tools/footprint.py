@@ -341,7 +341,7 @@ def plot_reactivity(
         plt.suptitle(title)
         plt.savefig(output, format=format)
 
-        fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+        fig, ax = plt.subplots(figsize=(45, 4*(len(regions)-1)))
 
         ax.set_xticks(unidmeans.index[regions[0]:regions[1]])
         ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
