@@ -208,7 +208,7 @@ def plot_reactivity(
 
 
     if len(regions) > 2:
-        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(45, 4*(len(regions)-1)))
         for j in range(len(regions)-1) :
             axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
             axes[j].set_xticklabels(unidmeans["xlabel"][regions[j]:regions[j+1]])
@@ -257,7 +257,7 @@ def plot_reactivity(
         plt.suptitle(title)
         plt.savefig(output, format=format)
 
-        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(45, 4*(len(regions)-1)))
 
         for j in range(len(regions)-1) :
             axes[j].set_xticks(unidmeans.index[regions[j]:regions[j+1]])
@@ -294,7 +294,7 @@ def plot_reactivity(
             ax2.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
             plt.tight_layout()
     else: # <= 2 regions
-        fig, ax = plt.subplots(figsize=(len(footprint) / 3, 4*(len(regions)-1)))
+        fig, ax = plt.subplots(figsize=(45, 4*(len(regions)-1)))
         ax.set_xticks(unidmeans.index[regions[0]:regions[1]])
         ax.set_xticklabels(unidmeans["xlabel"][regions[0]:regions[1]])
 

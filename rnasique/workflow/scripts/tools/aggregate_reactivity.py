@@ -219,7 +219,7 @@ def plot_aggregate(
 
    # plt.style.use("default")
     if len(regions) > 2:
-        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(len(aggregated) / 3, 4*(len(regions)-1)))
+        fig, axes = plt.subplots(len(regions)-1, 1, figsize=(45, 4*(len(regions)-1)))
         agg_index = [int(x[0]) for x in aggregated.index]
         for j in range(len(regions)-1) :
             axes[j].set_xticks(agg_index[regions[j]:regions[j+1]])
@@ -246,7 +246,7 @@ def plot_aggregate(
             ax2 = axes[j].twinx()
             ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
     else:
-        fig, ax = plt.subplots(figsize=(len(aggregated) / 3, 4*(len(regions)-1)))
+        fig, ax = plt.subplots(figsize=(45, 4*(len(regions)-1)))
         agg_index = [int(x[0]) for x in aggregated.index]
         ax.set_xticks(agg_index[regions[0]:regions[1]])
         ax.set_xticklabels(aggregated["xlabel"][regions[0]:regions[1]])
