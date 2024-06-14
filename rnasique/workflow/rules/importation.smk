@@ -125,7 +125,7 @@ rule import_external_map:
         #    show_replicate=False, figure=True),
         #    category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],
     log:
-        construct_path("aggreact-ipanemap", ext=".log", log_dir=True, split_seq=True, show_replicate=False),
+        construct_path("aggreact-ipanemap", ext=".log", log_dir=True, show_replicate=False),
     message:
         (
             "Importing from external map file: "
