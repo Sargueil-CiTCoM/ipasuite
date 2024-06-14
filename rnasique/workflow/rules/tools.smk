@@ -158,7 +158,7 @@ rule aggregate_reactivity:
     input:
         norm= lambda wildcards: expand(construct_path(aggregate_input_type()),
                 replicate=get_replicate_list(wildcards), allow_missing=True),
-        refseq = lambda wildcards: get_refseq(wildcards)
+        refseq = get_refseq
     output:
         full= construct_path("aggreact", show_replicate = False),
         shape_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
@@ -182,8 +182,8 @@ rule aggregate_reactivity:
 #        mind = construct_param(config["aggregate"], "min_dispersion"),
         plot = lambda wildcards, output: f"--plot={output.plot} --fullplot={output.fullplot}" if
         config["aggregate"]["plot"] else "",
-        plot_title=lambda wildcards: f"--plot_title='Average reactivity of {MESSAGE.format(wildcards=wildcards)}'"
-        #refseq = lambda wildcards, input: expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""
+        plot_title=lambda wildcards: f"--plot_title='Average reactivity of {MESSAGE.format(wildcards=wildcards)}'",
+        refseq = lambda wildcards, input: (expand('--refseq={refseq}', refseq=input.refseq)[0] if len(input.refseq) > 0 else ""),
     shell:
         f"aggregate_reactivity {{input.norm}}"
         f" --output={{output.full}} {{params}}"

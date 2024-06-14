@@ -566,6 +566,7 @@ def check_duplicated(aggregated: pd.DataFrame):
 def aggregate(
     *files: [str],
     output: str,
+    refseq: str = None,
     shape_output=None,
     shape_IP_output=None,
     map_output=None,
@@ -591,6 +592,8 @@ def aggregate(
         Files to aggregate together
     output : str
         Output aggregated file
+    refseq : str
+        Sequence file name
     ipanemap_output :
         Output aggregated file in a compatible format for RNAFold and IPANEMAP
     normcol :
@@ -618,15 +621,17 @@ def aggregate(
 
     check_files(src, dest)
 
-    shape_react_seqs = [ShapeReactivitySeq(filepath) for filepath in src]
-    shape_dfs = []
+    sequence = None
+    if refseq is not None:
+        import skbio
+        fa = skbio.Sequence.read(refseq, format="fasta")
+        sequence = str(fa)
 
-    shape_dfs.extend(
-        [
-            srs.df[[normcol]].rename(columns={normcol: srs.name})
-            for srs in shape_react_seqs
-        ]
-    )
+    shape_react_seqs = [ShapeReactivitySeq(filepath) for filepath in src]
+    shape_dfs = [
+        srs.df[[normcol]].rename(columns={normcol: srs.name})
+        for srs in shape_react_seqs
+    ]
 
     # print(shape_dfs[2])
     reacts = pd.concat(shape_dfs, axis=1)
@@ -664,51 +669,55 @@ def aggregate(
         logging.error(f"inputs: {files}")
         if err_on_dup:
             exit(1)
-    # aggregated = aggregated.reset_index(level="seqRNA")
 
-    # print(aggregated)
+    # Write aggregate.tsv file to results folder
     aggregated.to_csv(dest, sep="\t", float_format="%.4f")
+
+    # ----------------
+    # insert/pad missing rows in aggregated
+    #
+    aggregated.reset_index(inplace=True)
+    aggregated.set_index(['seqNum'], inplace=True)
+
+    ## default values for missing rows (others: NaN)
+    undef_row = {
+        "mean": -10,
+        "stdev": 0,
+        "used_values": 0,
+        "desc": "undetermined"
+    }
+
+    ## fill in missing rows
+    aggregated_padded = aggregated.reindex(
+        list(range(1,aggregated.index[-1]+1))
+        ).fillna(undef_row)
+
+    ## set correct sequence
+    for i,row in aggregated_padded.iterrows():
+        x = row['sequence']
+        if type(x)!=str:
+            x='N'
+            if sequence is not None and 1<=i<=len(sequence):
+                x = sequence[i-1]
+        aggregated_padded.at[i,'sequence'] = x
+
     if shape_output is not None:
-        aggripan = aggregated.reset_index(level="sequence")[["mean"]]
-        idxmin = aggripan.index.min()
-        firstrows = pd.DataFrame(
-            {"mean": np.full(idxmin - 1, -10)}, index=range(1, idxmin)
-        )
-        firstrows.index.names = ["seqNum"]
-        aggripan = pd.concat([firstrows, aggripan])
+        aggripan = aggregated_padded[["mean"]]
         aggripan.to_csv(shape_output, sep="\t", float_format="%.4f", header=False)
 
     if shape_IP_output is not None:
-        IP_output = copy.deepcopy(aggregated)
+        IP_output = copy.deepcopy(aggregated_padded)
         IP_output.loc[IP_output['desc'] == 'warning', 'mean'] = -10
-        aggripan = IP_output.reset_index(level="sequence")[["mean"]]
-        idxmin = aggripan.index.min()
-        firstrows = pd.DataFrame(
-            {"mean": np.full(idxmin - 1, -10)}, index=range(1, idxmin)
-        )
-        firstrows.index.names = ["seqNum"]
-        aggripan = pd.concat([firstrows, aggripan])
+        aggripan = IP_output[["mean"]]
         aggripan.to_csv(shape_IP_output, sep="\t", float_format="%.4f", header=False)
 
     if map_output is not None:
-        aggripan = aggregated.reset_index(level="sequence")[
-            ["mean", "stdev", "sequence"]
-        ]
-        idxmin = aggripan.index.min()
-        firstrows = pd.DataFrame(
-            {
-                "mean": np.full(idxmin - 1, -10),
-                "stdev": np.zeros(idxmin - 1),
-                "sequence": np.full(idxmin - 1, "N"),
-            },
-            index=range(1, idxmin),
-        )
-        firstrows.index.names = ["seqNum"]
-        aggripan = pd.concat([firstrows, aggripan])
+        aggripan = aggregated_padded[["mean", "stdev", "sequence"]]
         aggripan.to_csv(map_output, sep="\t", float_format="%.4f", header=False)
 
     if relation_output is not None:
         rel_output = copy.deepcopy(aggregated)
+        rel_output.set_index(['sequence'],inplace=True, append=True)
         rel_output = rel_output.iloc[:,:rel_output.columns.get_loc('mean')]
         correlation_output = rel_output.corr(method='spearman')
         rel_output = rel_output.dropna()
@@ -728,6 +737,7 @@ def aggregate(
 
 
     if plot is not None or fullplot is not None:
+        aggregated.set_index(['sequence'],inplace=True, append=True)
         try:
             title = plot_title if plot_title is not None else output
             plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=title)
