@@ -78,6 +78,9 @@ class Launcher(object):
         return config
 
     def config(self, dev=False):
+        """
+        Configure the pipeline using the configurator.
+        """
         self._config = self._choose_config(self._config)
         path = os.path.join(base_path, "configurator.ipynb")
         env = os.environ.copy()
@@ -120,6 +123,9 @@ class Launcher(object):
             subprocess.Popen(["voila", path], env=env)
 
     def init(self, project: str):
+        """
+        Generate the project folder.
+        """
         if os.path.exists(project):
             fire.core.FireError(f"{project} folder already exists")
         os.mkdir(project)
@@ -137,7 +143,9 @@ class Launcher(object):
 
 
     def prep(self):
-
+        """
+        Autofill samples.tsv file.
+        """
         response = input("Do you want to overwrite sample.tsv? Please enter yes or no:")
         while response.lower() not in {'yes', 'no'}:
             print("Please enter yes or no")
@@ -294,6 +302,9 @@ class Launcher(object):
         action="all_reactivity",
         dry_run=False,
     ):
+        """
+        Open QuShape for each file to treat.
+        """
         self._config = self._choose_config(self._config)
         targets = ["all_reactivity"]
         extra_config = dict()
@@ -322,17 +333,19 @@ class Launcher(object):
             logger.error(e)
             logger.error("to get more information, type : rnasique log")
 
-    def correl(
-        self, dry_run=False, run_qushape=False, rerun_incomplete=False
-    ):
+    def correl(self, dry_run=False, run_qushape=False, rerun_incomplete=False):
+        """
+        Execute the RNAsique pipeline and stop before the IPANEMAP prediction step.
+        """
         self.run(action="all_aggregate",
             dry_run=dry_run,
             run_qushape=run_qushape, 
             rerun_incomplete=rerun_incomplete)
         
-    def run(
-        self, action="all", dry_run=False, run_qushape=False, rerun_incomplete=False
-    ):
+    def run(self, action="all", dry_run=False, run_qushape=False, rerun_incomplete=False):
+        """
+        Execute the RNAsique pipeline.
+        """
         self._config = self._choose_config(self._config)
         targets = [action]
         extra_config = dict()
@@ -394,6 +407,9 @@ class Launcher(object):
 
 
     def log(self, step=None, clean=False, print_filename=False):
+        """
+        Show pipeline scripts log.
+        """
         self._config = self._choose_config(self._config)
         with open(self._config, "r") as cfd:
             config = yaml.load(cfd)
@@ -419,6 +435,9 @@ class Launcher(object):
                         print(read[:-1])
 
     def clean(self, from_step="reactivity", keep_log=False):
+        """
+        Clean pipeline files.
+        """
         self._config = self._choose_config(self._config)
         try:
             begin = step_order.index(from_step)
@@ -531,6 +550,9 @@ class Launcher(object):
         return sample_missing
 
     def check(self, verbose=False):
+        """
+        Verify input files, sample availability, duplicates, and identical raw files.
+        """
         seq_missing = False
         raw_missing = False
         sample_missing = False
