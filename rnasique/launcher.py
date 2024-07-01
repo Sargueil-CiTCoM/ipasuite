@@ -112,6 +112,9 @@ class Launcher(object):
     #            print(e)
     #        webbrowser.open_new_tab(report_path)
     def report(self, dev=False):
+        """
+        Generate a summary report of results.
+        """
         self._config = self._choose_config(self._config)
         path = os.path.join(base_path, "report.ipynb")
         env = os.environ.copy()
@@ -244,6 +247,9 @@ class Launcher(object):
 
 
     def refactor(self, action: str = "addpositions"):
+        """
+        Rename result files to include new conditions.
+        """
         extra_config = dict()
 
         if action == "addpositions":
@@ -274,6 +280,9 @@ class Launcher(object):
             logger.error(e)
 
     def convert_qushape(self, rerun_incomplete=False):
+        """
+        Convert qushape to qushapey files.
+        """
         self._config = self._choose_config(self._config)
         extra_config = dict()
         extra_config["convert_qushape"] = True
