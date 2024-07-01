@@ -73,7 +73,7 @@ class Launcher(object):
         if not os.path.exists(config):
             raise fire.core.FireError(
                 f"{config} file does not exist, please init your "
-                "project using `rnasique init` command or specify another path"
+                "project using `ipasuite init` command or specify another path"
             )
         return config
 
@@ -106,7 +106,7 @@ class Launcher(object):
     #                keepgoing=self._keepgoing,
     #                use_conda=True,
     #                verbose=self._verbose,
-    #                conda_prefix="~/.rnasique/conda",
+    #                conda_prefix="~/.ipasuite/conda",
     #            )
     #        except Exception as e:
     #            print(e)
@@ -273,7 +273,7 @@ class Launcher(object):
                 use_conda=True,
                 verbose=self._verbose,
                 # listrules=True,
-                conda_prefix="~/.rnasique/conda",
+                conda_prefix="~/.ipasuite/conda",
             )
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -300,7 +300,7 @@ class Launcher(object):
                 verbose=self._verbose,
                 force_incomplete=rerun_incomplete,
                 # listrules=True,
-                conda_prefix="~/.rnasique/conda",
+                conda_prefix="~/.ipasuite/conda",
             )
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -334,17 +334,17 @@ class Launcher(object):
                     dryrun=dry_run,
                     use_conda=True,
                     verbose=self._verbose,
-                    conda_prefix="~/.rnasique/conda",
+                    conda_prefix="~/.ipasuite/conda",
                     rerun_triggers=["mtime"],
                 )
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error(e)
-            logger.error("to get more information, type : rnasique log")
+            logger.error("to get more information, type : ipasuite log")
 
     def correl(self, dry_run=False, run_qushape=False, rerun_incomplete=False):
         """
-        Execute the RNAsique pipeline and stop before the IPANEMAP prediction step.
+        Execute the Ipanemap suite pipeline and stop before the IPANEMAP prediction step.
         """
         self.run(action="all_aggregate",
             dry_run=dry_run,
@@ -353,7 +353,7 @@ class Launcher(object):
         
     def run(self, action="all", dry_run=False, run_qushape=False, rerun_incomplete=False):
         """
-        Execute the RNAsique pipeline.
+        Execute the Ipanemap suite pipeline.
         """
         self._config = self._choose_config(self._config)
         targets = [action]
@@ -375,7 +375,7 @@ class Launcher(object):
                     dryrun=dry_run,
                     use_conda=True,
                     verbose=self._verbose,
-                    conda_prefix="~/.rnasique/conda",
+                    conda_prefix="~/.ipasuite/conda",
                     rerun_triggers=["mtime"],
                     force_incomplete=rerun_incomplete,
                     #debug_dag = True,
@@ -383,7 +383,7 @@ class Launcher(object):
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error(e)
-            logger.error("to get more information, type : rnasique log")
+            logger.error("to get more information, type : ipasuite log")
 
     def unlock(self):
         """
@@ -405,14 +405,14 @@ class Launcher(object):
                     config=extra_config,
                     targets=targets,
                     use_conda=True,
-                    conda_prefix="~/.rnasique/conda",
+                    conda_prefix="~/.ipasuite/conda",
                     rerun_triggers=["mtime"],
                     unlock = True,
                 )
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error(e)
-            logger.error("to get more information, type : rnasique log")
+            logger.error("to get more information, type : ipasuite log")
 
 
     def log(self, step=None, clean=False, print_filename=False):

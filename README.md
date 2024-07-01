@@ -1,6 +1,6 @@
-# RNASique
+# Ipanemap suite
 
-RNAsique workflow intend to provide automation in the data treatment of SHAPE Capillary Electrophorese.
+Ipanemap suite workflow intend to provide automation in the data treatment of SHAPE Capillary Electrophorese.
 
 It relies on :
 
@@ -16,7 +16,7 @@ The workflow will enable you to generate structure data for a RNA fragment analy
 
 All information about how to use this workflow can be found at :
 
-[https://sargueil-citcom.github.io/rnasique-docs](https://sargueil-citcom.github.io/rnasique-docs)
+[https://sargueil-citcom.github.io/ipasuite-docs](https://sargueil-citcom.github.io/ipasuite-docs)
 
 ## Usage
 
