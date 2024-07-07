@@ -1,0 +1,65 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: An entry in shape-ce samples file 
+
+# columns that the config/samples.tsv file can have and which type they should be
+properties:
+  date:
+    type: string
+    description: date of the sample
+  probe:
+    type: string
+    description: name of the probe used with this sample 
+  rna_id:
+    type: string
+    description: name of the current RNA fragment. Must be a string 
+  ddNTP:
+    type: string
+    description: which ddNTP was used during capilary eletrophorese
+    enum:
+      - ddA
+      - ddATP
+      - ddC
+      - ddCTP
+      - ddT
+      - ddTTP
+      - ddG 
+      - ddGTP
+  replicate:
+    type: string
+    description: identifier of the replicate for the current condition. generally a integer, can be a string
+  reference_qushape_file:
+    type: string
+    description: QuShape analysis can be simplify using an already existing QuShape project analysed with the same RNA molecule. path to the QuShape Project
+  probe_file:
+    type: string
+    description: path to an external raw data file, will be used only if allow_auto_import is True  
+  control_file:
+    type: string
+    description: path to an external control raw data file, will be used only if allow_auto_import is True  
+  qushape_file:
+    type: string
+    description: path to an external already analysed qushape file, will be used only if allow_auto_import is True  
+  discard:
+    type: string
+    description: if set to "yes" the sample will be discarded from analysis
+    default: "no"
+    enum:
+      - "yes"
+      - "no"
+#  rna_fragment_id:
+#    type: float
+#    description: name of the dna fragment 
+
+# columns that the config/samples.tsv file must have to pass schema validation
+required:
+  - id
+  - date
+  - rna_id
+  - ddNTP
+  - replicate
+#  - reference_qushape_file
+#  - probe_file
+#  - control_file
+#  - qushape_file
+  - discard

@@ -1,6 +1,0 @@
-name: qushape 
-channels:
-  - ixeft 
-  - free
-dependencies:
-    - qushape 

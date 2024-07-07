@@ -1,0 +1,500 @@
+---
+"$schema": http://json-schema.org/draft-06/schema#
+"$ref": "#/definitions/ShapeCEConfig"
+definitions:
+  ShapeCEConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      project_name:
+        type: string
+      samples:
+        type: string
+      sequences:
+        "$ref": "#/definitions/Sequences"
+      conditions:
+        "$ref": "#/definitions/Conditions"
+      allow_auto_import:
+        type: boolean
+        description: allow the data to be imported from external sources
+      refactor_rename:
+        type: boolean
+        description: refactoring 
+      convert_qushape:
+        type: boolean
+        description: refactoring 
+      refactor_addpositions:
+        type: boolean
+        description: refactoring 
+      results_dir:
+        type: string
+        default: results
+      resource_dir:
+        type: string
+        default: resources
+      format:
+        "$ref": "#/definitions/Format"
+      rawdata:
+        "$ref": "#/definitions/Rawdata"
+      qushape:
+        "$ref": "#/definitions/Qushape"
+      normalization:
+        "$ref": "#/definitions/Normalization"
+      probe:
+        "$ref": "#/definitions/Probe"
+      aggregate:
+        "$ref": "#/definitions/Aggregate"
+      ipanemap:
+        "$ref": "#/definitions/Ipanemap"
+      folders:
+        "$ref": "#/definitions/Folders"
+      footprint:
+        "$ref": "#/definitions/Footprint"
+      varna:
+        "$ref": "#/definitions/Varna"
+    required:
+    - aggregate
+    - allow_auto_import
+    - conditions
+    - folders
+    - format
+    - ipanemap
+    - normalization
+    - qushape
+    - rawdata
+    - samples
+    - sequences
+    - varna
+    - probe
+    - footprint
+    title: Shape-CE Config
+  Aggregate:
+    description: "Aggregate script configuration"
+    type: object
+    additionalProperties: false
+    properties:
+      plot: 
+        type: boolean
+        default: True
+      norm_method:
+        type: string
+      min_ndata_perc:
+        type: number
+      min_nsubdata_perc:
+        type: number
+      max_mean_perc:
+        type: number
+      min_dispersion:
+        type: number
+      err_on_dup:
+        type: boolean
+        default: False
+    required:
+    - max_mean_perc
+    - min_dispersion
+    - min_ndata_perc
+    - min_nsubdata_perc
+    - norm_method
+    - err_on_dup
+    - plot
+    title: Aggregate
+  Folders:
+    type: object
+    additionalProperties: false
+    properties:
+      fluo-fsa:
+        type: string
+        default: "1.1-fluo-raw"
+      fluo-ceq8000:
+        type: string
+        default: "1.1-fluo-raw"
+      fluo-ce:
+        type: string
+        default: "1.2-fluo-ceq8000-trim"
+      subseq:
+        type: string
+        default: "1.3-subseq" 
+      qushape:
+        type: string
+        default: "2-qushape"
+      reactivity:
+        type: string
+        default: "3.1-reactivity"
+      normreact:
+        type: string
+        default: "3.2-normalized-reactivity" 
+      alignnormreact:
+        type: string
+        default: "3.3-align-normalized-reactivity" 
+      aggreact:
+        type: string
+        default: "4.1-aggregated-reactivity"
+      aggreact-ipanemap:
+        type: string
+        default: "4.2-aggregated-reactivity"
+      ipanemap-config:
+        type: string
+        default: "5.1-ipanemap-config" 
+      ipanemap-out:
+        type: string
+        default: "5.2-ipanemap-temp"
+      structure:
+        type: string
+        default: "5.3-structure"
+      varna:
+        type: string
+        default: "5.4-varna" 
+      footprint:
+        type: string
+        default: "5.5-footprint" 
+    required:
+    - aggreact
+    - aggreact-ipanemap
+    - alignnormreact
+    - fluo-ce
+    - fluo-ceq8000
+    - subseq
+    - ipanemap-config
+    - ipanemap-out
+    - normreact
+    - qushape
+    - reactivity
+    - structure
+    - varna
+    - footprint
+    title: Folders
+  Format:
+    type: object
+    additionalProperties: false
+    properties:
+      condition:
+        type: string
+      control_condition:
+        type: string
+      message:
+        type: string
+      previous:
+        nullable: true
+        type: object
+        items:
+          condition:
+            type: string
+          control_condition:
+            type: string
+
+    required:
+    - condition
+    - control_condition
+    - message
+    title: Format
+  Footprint:
+    type: object
+    additionalProperties: false
+    properties:
+      compares:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:  
+            id:
+              type: string
+            rna_id:
+              type: string
+            pool_id:
+              type: string
+            condition1:
+              "$ref": "#/definitions/Condition"
+            condition2:
+              "$ref": "#/definitions/Condition"
+          required:
+          - id
+          - rna_id
+          - pool_id
+          - condition1
+          - condition2
+      config:
+        type: object
+        additionalProperties: false
+        properties:
+        #  deviation_type:
+        #    type: string
+          ttest_pvalue_thres:
+            type: number
+          diff_thres:
+            type: number
+          ratio_thres:
+            type: number
+          plot_format:
+            type: string
+        required:
+        # - deviation_type
+        - ttest_pvalue_thres
+        - diff_thres
+        - ratio_thres
+        - plot_format
+    required:
+    - compares
+    - config
+    title: Footprint
+  Ipanemap:
+    type: object
+    additionalProperties: false
+    properties:
+      pools:
+        type: array
+        items:
+          "$ref": "#/definitions/Pool"
+      config:
+        type: object
+        items:
+          "$ref": "#/definitions/IpanemapConfig"
+    required:
+    - pools
+    - config
+    title: Ipanemap
+  IpanemapConfig:
+    type: object
+    additionalProperties: false
+    properties:
+      sampling:
+        "$ref": "#/definitions/Sampling"
+      clustering:
+        "$ref": "#/definitions/Clustering"
+      pareto:
+        "$ref": "#/definitions/Pareto"
+      visual:
+        "$ref": "#/definitions/Visual"
+    required:
+    - clustering
+    - pareto
+    - sampling
+    - visual
+    title: IpanemapConfig
+  Clustering:
+    type: object
+    additionalProperties: false
+    properties:
+      max_diam:
+        type: integer
+      max_avg_diam:
+        type: integer
+    required:
+    - max_avg_diam
+    - max_diam
+    title: Clustering
+  Pareto:
+    type: object
+    additionalProperties: false
+    properties:
+      percentage:
+        type: integer
+      zcutoff:
+        type: number
+    required:
+    - percentage
+    - zcutoff
+    title: Pareto
+  Pool:
+    type: object
+    additionalProperties: false
+    properties:
+      id:
+        type: string
+      rna_id:
+        type: string
+      conditions:
+        type: array
+        items:
+          "$ref": "#/definitions/Condition"
+      external_conditions:
+        type: array
+        items:
+          "$ref": "#/definitions/ExternalCondition"
+      alignements:
+        type: [object, null]
+        nullable: True
+        additionalProperties: true
+    required:
+    - conditions
+    - id
+    - rna_id
+    title: Pool
+  ExternalCondition:
+    type: object
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    title: ExternalConditions 
+    required:
+      - name
+      - path
+  Condition:
+    type: object
+    additionalProperties: true 
+    title: Condition
+  Conditions:
+    type: object
+    additionalProperties: false
+    patternProperties:
+      "^.*$":
+        type: array
+        items:
+          type: string
+    title: Conditions 
+  Sampling:
+    type: object
+    additionalProperties: false
+    properties:
+      enable:
+        type: boolean
+      nstructure:
+        type: integer
+      temperature:
+        type: integer
+      slope:
+        type: number
+      intercept:
+        type: number
+    required:
+    - slope
+    - enable
+    - intercept
+    - nstructure
+    - temperature
+    title: Sampling
+  Visual:
+    type: object
+    additionalProperties: false
+    properties:
+      models:
+        type: boolean
+      centroids:
+        type: boolean
+      probing:
+        type: boolean
+    required:
+    - centroids
+    - models
+    - probing
+    title: Visual
+  Normalization:
+    type: object
+    additionalProperties: false
+    properties:
+      plot:
+        type: boolean
+        default: True
+      reactive_nucleotides:
+        type: array
+        items:
+          type: string
+      stop_percentile:
+        type: integer
+      low_norm_reactivity_threshold:
+        type: number
+      norm_methods:
+        type: array
+        items:
+          type: string
+      simple_outlier_percentile:
+        type: integer
+      simple_norm_term_avg_percentile:
+        type: integer
+    required:
+    - plot
+    - low_norm_reactivity_threshold
+    - norm_methods
+    - reactive_nucleotides
+    - simple_norm_term_avg_percentile
+    - simple_outlier_percentile
+    - stop_percentile
+    title: Normalization
+  Probe:
+    type: object
+    additionalProperties: false
+    patternProperties:
+      "^.*$":
+        type: object
+        additionalProperties: false
+        properties:
+          reactive_nucleotides:
+            type: array
+            items:
+              type: string
+            title: ReactiveNucleotides
+        required:
+        - reactive_nucleotides 
+    title: Probe 
+  Qushape:
+    type: object
+    additionalProperties: false
+    properties:
+      channels:
+        "$ref": "#/definitions/Channels"
+      use_subsequence:
+        type: boolean
+        default: False
+      check_integrity:
+        type: boolean
+        default: True
+      run_qushape:
+        type: boolean
+        default: False
+      run_qushape_conda_env:
+        type: string
+        default: qushape
+
+    required:
+    - channels
+    - use_subsequence
+    - check_integrity
+    title: Qushape
+  Channels:
+    type: object
+    additionalProperties: false
+    properties:
+      RX:
+        type: integer
+      RXS1:
+        type: integer
+      BG:
+        type: integer
+      BGS1:
+        type: integer
+    required:
+    - BG
+    - BGS1
+    - RX
+    - RXS1
+    title: Channels
+  Rawdata:
+    type: object
+    additionalProperties: false
+    properties:
+      path_prefix:
+        type: string
+      type:
+        type: string
+      control:
+        type: string
+    required:
+    - control
+    - path_prefix
+    - type
+    title: Rawdata
+  Sequences:
+    type: object
+    additionalProperties:
+      type: string
+    title: Sequences
+  Varna:
+    type: object
+    additionalProperties: true
+    properties:
+      colormapstyle:
+        type: string
+    required:
+      - colormapstyle

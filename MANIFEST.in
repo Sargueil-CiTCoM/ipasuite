@@ -1,5 +1,5 @@
-recursive-include rnasique *.ipynb *.schema.yaml *.smk Snakefile *.yml *.tpl.tsv *.tpl.yaml 
-include rnasique/workflow/scripts/VARNAcmd.jar
+recursive-include ipasuite *.ipynb *.schema.yaml *.smk Snakefile *.yml *.tpl.tsv *.tpl.yaml 
+include ipasuite/workflow/scripts/VARNAcmd.jar
 prune .snakemake
 prune examples
 global-exclude *.ipynb_checkpoints/*

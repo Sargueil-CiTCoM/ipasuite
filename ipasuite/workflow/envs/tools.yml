@@ -1,0 +1,15 @@
+name: tools 
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+    - python
+    - fire
+    - pandas
+    - numpy
+    - matplotlib
+    - scikit-bio
+    - scipy
+    - pip
+    - pip: 
+      - bsddb3 
