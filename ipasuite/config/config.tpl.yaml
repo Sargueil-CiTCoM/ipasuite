@@ -31,7 +31,8 @@ sequences:
   CHANGEME: "resources/changeme.fa"
 
 ###
-# List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also putted into format -> condition
+# List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also put into format -> condition
+#
 # *Example:*
 #
 # ```yaml
@@ -65,9 +66,9 @@ allow_auto_import: True
 # Section to define filename and titles formatting
 format:
   ###
-  # Format of the conditions, will be use to identify sample and construct filename.
-  # All variable conditions should be referenced here
-  # Name of the conditions must correspond a column header in the samples.tsv file
+  # The condition format  is used to construct filenames that are unique
+  # for any combination of conditions.
+  # It must reference all variable condition, the condition names must correspond to column headers in the samples.tsv file
   #
   # *Example:*
   # ```yaml
