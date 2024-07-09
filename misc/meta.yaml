@@ -30,6 +30,7 @@ requirements:
     - pandas
     - numpy=1.23
     - matplotlib
+    - seaborn
     - scikit-bio
     - snakemake
     - wheel
