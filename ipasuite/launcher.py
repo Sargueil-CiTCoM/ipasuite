@@ -179,7 +179,7 @@ class Launcher(object):
                 'rt_begin_pos', 'rt_end_pos', 'replicate', 'probe_file', 'control_file', 'qushape_file','reference_qushape_file','map_file','discard'])
 
             template = ['{rna_id}_{probe_control_flag_unique_experiment_id}_{probe}_{magnesium}_{temperature}_{ddNTP}_{date}_{experimenter}.*.txt',\
-                '{rna_id}_{probe}_{magnesium}_{temperature}_{condition}_{replicate}.*.qushapey','{prefix}_{probe}_{magnesium}_{temperature}_{replicate}_{rna_id}.*.map']
+                '{rna_id}_{probe}_{magnesium}_{temperature}_{replicate}.*.qushapey','{rna_id}_{probe}_{magnesium}_{temperature}_{replicate}.*.map']
 
             def translate_template_to_re(template):
                 template = re.sub(r'\{([^}]+)\}', r'(?P<\1>[^_\.]+)',template)
