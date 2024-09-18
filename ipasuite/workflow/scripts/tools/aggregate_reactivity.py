@@ -153,7 +153,7 @@ def plot_aggregate(
 
     # ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
     plt.margins(0)
-    plt.title(title, loc="left")
+    plt.title(title, loc="left", fontsize=30)
     plt.legend(loc="upper left", ncol=14)
     # print(meanstdev.index.get_level_values("seqNum") - 1)
     try:
@@ -171,8 +171,8 @@ def plot_aggregate(
         logging.error("fail to generate error bar")
         # logging.error(e)
 
-    ax.set_xlabel("Sequence")
-    ax.set_ylabel("Aggregated reactivity")
+    ax.set_xlabel("Sequence", fontsize=20)
+    ax.set_ylabel("Aggregated reactivity", fontsize=20)
     try:
         plt.tight_layout()
         plt.savefig(fulloutput, format=format)
@@ -238,9 +238,9 @@ def plot_aggregate(
             Patch(facecolor=ReactivityThreshold.COLOR_INVALID, alpha = 0.5,edgecolor='black',label="Undetermined"),
             ]
             axes[j].legend(handles=legend_elements, loc="upper left", ncol=16)
-            axes[j].set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[j]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[j+1]-1]].split()[0]}",loc='left')
-            axes[j].set_xlabel("Sequence")
-            axes[j].set_ylabel("Average reactivity")
+            axes[j].set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[j]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[j+1]-1]].split()[0]}",loc='left', fontsize=20)
+            axes[j].set_xlabel("Sequence", fontsize=20)
+            axes[j].set_ylabel("Average reactivity", fontsize=20)
             axes[j].set_xlim([agg_index[regions[j]] - 1, agg_index[regions[j+1]-1] + 1])
             axes[j].set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
             ax2 = axes[j].twinx()
@@ -263,15 +263,16 @@ def plot_aggregate(
         Patch(facecolor=ReactivityThreshold.COLOR_INVALID, alpha = 0.5, edgecolor='black',label="Undetermined"),
         ]
         ax.legend(handles=legend_elements, loc="upper left", ncol=16)
-        ax.set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[0]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[1]-1]].split()[0]}",loc='left')
-        ax.set_xlabel("Sequence")
-        ax.set_ylabel("Average reactivity")
+        ax.set_title(f"Nucleotides {aggregated['xlabel'][aggregated.index[regions[0]]].split()[0]} - {aggregated['xlabel'][aggregated.index[regions[1]-1]].split()[0]}",loc='left', fontsize=20)
+        ax.set_xlabel("Sequence", fontsize=20)
+        ax.set_ylabel("Average reactivity", fontsize=20)
         ax.set_xlim([agg_index[regions[0]] - 1, agg_index[regions[1]-1] + 1])
         ax.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
         ax2 = ax.twinx()
         ax2.set_ylim([min(np.nanmin(aggregated["mean"]-aggregated["stdev"])*1.1,-0.15), np.nanmax(aggregated["mean"]+aggregated["stdev"])*1.2])
     plt.margins(0)
-    plt.suptitle(title)
+    plt.suptitle(title, fontsize=30)
+    plt.tight_layout()
 
     
     try:

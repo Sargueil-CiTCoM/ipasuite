@@ -246,15 +246,16 @@ def plot_reactivity(
                 unidstdev.iloc[:, 1] = 0
 
             axes[j].legend(handles=legend_elements, loc="upper left", ncol=14)
-            axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
+            axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left', fontsize=20)
             axes[j].set_xlim([unidmeans.index[regions[j]] - 1, unidmeans.index[regions[j+1]-1] + 1])
+            axes[j].set_xlabel("Sequence", fontsize=20)
             axes[j].set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
                 max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
             ax2 = axes[j].twinx()
             ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
                 max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
-            plt.tight_layout()
-        plt.suptitle(title)
+        plt.suptitle(title, fontsize=30)
+        plt.tight_layout()
         plt.savefig(output, format=format)
 
         fig, axes = plt.subplots(len(regions)-1, 1, figsize=(45, 4*(len(regions)-1)))
@@ -287,8 +288,9 @@ def plot_reactivity(
                 difference.iloc[:, 0] = 0
 
             axes[j].legend(handles=legend_elements, loc="upper left", ncol=14)
-            axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left')
+            axes[j].set_title(f"Nucleotides {unidmeans['xlabel'][regions[j]].split()[0]} - {unidmeans['xlabel'][regions[j+1]-1].split()[0]}",loc='left', fontsize=20)
             axes[j].set_xlim([difference.index[regions[j]] - 1, difference.index[regions[j+1]-1] + 1])
+            axes[j].set_xlabel("Sequence", fontsize=20)
             axes[j].set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
             ax2 = axes[j].twinx()
             ax2.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
@@ -324,7 +326,8 @@ def plot_reactivity(
             Line2D([0], [0], color="orange", label="Medium reactivity threshold"),
         ]
         ax.legend(handles=legend_elements, loc="upper left", ncol=14)
-        ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
+        ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left', fontsize=20)
+        ax.set_xlabel("Sequence", fontsize=20)
 
         if unidstdev.iloc[:, 0].isna().all():
             unidstdev.iloc[:, 0] = 0
@@ -337,8 +340,8 @@ def plot_reactivity(
         ax2 = ax.twinx()
         ax2.set_ylim([min(min(np.nanmin(unidmeans.iloc[:, 0]-unidstdev.iloc[:, 0]),np.nanmin(unidmeans.iloc[:, 1]-unidstdev.iloc[:, 1]))*1.1,-0.15), \
             max(np.nanmax(unidmeans.iloc[:, 0]+unidstdev.iloc[:, 0]),np.nanmax(unidmeans.iloc[:, 1]+unidstdev.iloc[:, 1]))*1.2])
+        plt.suptitle(title, fontsize=30)
         plt.tight_layout()
-        plt.suptitle(title)
         plt.savefig(output, format=format)
 
         fig, ax = plt.subplots(figsize=(45, 4*(len(regions)-1)))
@@ -370,13 +373,14 @@ def plot_reactivity(
            difference.iloc[:, 0] = 0
 
         ax.legend(handles=legend_elements, loc="upper left", ncol=14)
-        ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left')
+        ax.set_title(f"Nucleotides {unidmeans['xlabel'][regions[0]].split()[0]} - {unidmeans['xlabel'][regions[1]-1].split()[0]}",loc='left', fontsize=20)
         ax.set_xlim([difference.index[regions[0]] - 1, difference.index[regions[1]-1] + 1])
+        ax.set_xlabel("Sequence", fontsize=20)
         ax.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
         ax2 = ax.twinx()
         ax2.set_ylim([min(np.nanmin(difference.iloc[:, 0])*1.1, -0.15), np.nanmax(difference.iloc[:, 0])*1.1])
-        plt.tight_layout()
-    plt.suptitle(dif_title)
+    plt.suptitle(dif_title, fontsize=30)
+    plt.tight_layout()
     plt.savefig(diff_output, format=format)
 
 

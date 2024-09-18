@@ -39,10 +39,10 @@ def plot_norm_reactivity(
         x_compat=True,
         xticks=np.arange(0, len(df) + 1, 1)
     )
-    ax.set_xlabel("Sequence")
-    ax.set_ylabel("Normalized reactivity")
+    ax.set_xlabel("Sequence", fontsize=20)
+    ax.set_ylabel("Normalized reactivity", fontsize=20)
     plt.margins(0)
-    plt.title(title, loc="left")
+    plt.title(title, loc="left", fontsize=30)
     plt.legend(loc="upper left")
     plt.tight_layout()
     plt.savefig(output, format=format)
