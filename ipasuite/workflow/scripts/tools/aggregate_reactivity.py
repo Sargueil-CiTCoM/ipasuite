@@ -722,12 +722,14 @@ def aggregate(
         rel_output = rel_output.iloc[:,:rel_output.columns.get_loc('mean')]
         correlation_output = rel_output.corr(method='spearman')
         
-        sum_corre = {}
+        sp_sum_corre = {}
+        p_sum_corre = {}
         for replicat in correlation_output:
-            sum_corre[replicat] = []
+            sp_sum_corre[replicat] = []
+            p_sum_corre[replicat] = []
             for cv in correlation_output[replicat]:
-                if cv != 1:
-                    sum_corre[replicat].append(cv)
+                if cv < 0.7:
+                    sp_sum_corre[replicat].append(cv)
 
         rel_output = rel_output.dropna()
         linear_regression = {}
@@ -738,8 +740,9 @@ def aggregate(
                     try:
                         slope, intercept, r_value, p_value, std_err = linregress(rel_output.iloc[:,i],rel_output.iloc[:,j])
                         linear_regression[name] = {'slope':slope,'intercept':intercept,'r_value':r_value, 'r_squared':r_value**2,'p_value':p_value,'std_err':std_err}
-                        sum_corre[rel_output.columns[j]].append(r_value)
-                        sum_corre[rel_output.columns[i]].append(r_value)
+                        if r_value < 0.7:
+                            p_sum_corre[rel_output.columns[j]].append(r_value)
+                            p_sum_corre[rel_output.columns[i]].append(r_value)
 
                     except ValueError:
                         print(f"Warning: cannot compute linear regression {name}")
@@ -753,16 +756,27 @@ def aggregate(
             f.write("\nLinear Regression\n")
             linear_regression.to_csv(f, sep="\t", float_format="%.4f", mode='a')
 
-        warning_replicate = []
-        for r in sum_corre:
-            if any(v < 0.7 for v in sum_corre[r]):
-                warning_replicate.append(r)
+        sp_warning_replicate = []
+        for r in sp_sum_corre:
+            if len(sp_sum_corre[r]) > 0.5 * (len(sp_sum_corre)-1):
+                sp_warning_replicate.append(r.split('.')[0])
 
-        if warning_replicate != []:
-            print(f"Please check the input data for replicate(s) : \n{', '.join(warning_replicate)}")
+        p_warning_replicate = []
+        for r in p_sum_corre:
+            if len(p_sum_corre[r]) > 0.5 * (len(sp_sum_corre)-1):
+                p_warning_replicate.append(r.split('.')[0])
+
+        if sp_warning_replicate != []:
+            print(f"According to the Spearman correlation\n  Please check the input data for replicate(s) : \n{', '.join(sp_warning_replicate)}")
             with open(relation_output, 'a') as f:
                 f.write("\n\n\n")
-                f.write(f"Please check the input data for replicate(s) : \n{', '.join(warning_replicate)}\n\n")
+                f.write(f"According to the Spearman correlation\n  Please check the input data for replicate(s) : \n{', '.join(sp_warning_replicate)}\n\n")
+
+        if p_warning_replicate != []:
+            print(f"According to the Pearson correlation\n  Please check the input data for replicate(s) : \n{', '.join(p_warning_replicate)}")
+            with open(relation_output, 'a') as f:
+                f.write("\n\n\n")
+                f.write(f"According to the Pearson correlation\n  Please check the input data for replicate(s) : \n{', '.join(p_warning_replicate)}\n\n")
 
         # correlation_output.to_csv(relation_output, sep="\t", float_format="%.4f")
         # linear_regression.to_csv(relation_output, mode='a', sep="\t", float_format="%.4f")
