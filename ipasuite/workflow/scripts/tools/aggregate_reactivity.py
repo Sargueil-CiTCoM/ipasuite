@@ -750,8 +750,6 @@ def aggregate(
         with open(relation_output, 'w') as f:
             f.write("Spearman Correlation Matrice\n")
             correlation_output.to_csv(f, sep="\t", float_format="%.4f")
-
-        with open(relation_output, 'a') as f:
             f.write("\nLinear Regression\n")
             linear_regression.to_csv(f, sep="\t", float_format="%.4f", mode='a')
 
