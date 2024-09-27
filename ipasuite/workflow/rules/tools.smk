@@ -164,7 +164,7 @@ rule aggregate_reactivity:
         shape_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".shape"),
         shape_IP_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".ip.shape"),
         map_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".map"),
-        relation_file = construct_path("aggreact-ipanemap", show_replicate=False, ext=".csv"),
+        relation_file = construct_path("aggreact-ipanemap", show_replicate=False, ext="_consistency.csv"),
         plot =report(construct_path("aggreact", ext=".aggreact.svg",
             show_replicate=False, figure=True),
             category="4-Aggregated reactivity", subcategory=CONDITION) if config["aggregate"]["plot"] else [],

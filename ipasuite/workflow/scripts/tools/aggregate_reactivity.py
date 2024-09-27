@@ -721,6 +721,14 @@ def aggregate(
         rel_output.set_index(['sequence'],inplace=True, append=True)
         rel_output = rel_output.iloc[:,:rel_output.columns.get_loc('mean')]
         correlation_output = rel_output.corr(method='spearman')
+        
+        sum_corre = {}
+        for replicat in correlation_output:
+            sum_corre[replicat] = []
+            for cv in correlation_output[replicat]:
+                if cv != 1:
+                    sum_corre[replicat].append(cv)
+
         rel_output = rel_output.dropna()
         linear_regression = {}
         for i in range(len(rel_output.columns)):
@@ -730,11 +738,36 @@ def aggregate(
                     try:
                         slope, intercept, r_value, p_value, std_err = linregress(rel_output.iloc[:,i],rel_output.iloc[:,j])
                         linear_regression[name] = {'slope':slope,'intercept':intercept,'r_value':r_value, 'r_squared':r_value**2,'p_value':p_value,'std_err':std_err}
+                        sum_corre[rel_output.columns[j]].append(r_value)
+                        sum_corre[rel_output.columns[i]].append(r_value)
+
                     except ValueError:
                         print(f"Warning: cannot compute linear regression {name}")
+
         linear_regression = pd.DataFrame(linear_regression).T
-        correlation_output.to_csv(relation_output, sep="\t", float_format="%.4f")
-        linear_regression.to_csv(relation_output, mode='a', sep="\t", float_format="%.4f")
+                
+
+        with open(relation_output, 'w') as f:
+            f.write("Spearman Correlation Matrice\n")
+            correlation_output.to_csv(f, sep="\t", float_format="%.4f")
+
+        with open(relation_output, 'a') as f:
+            f.write("\nLinear Regression\n")
+            linear_regression.to_csv(f, sep="\t", float_format="%.4f", mode='a')
+
+        warning_replicate = []
+        for r in sum_corre:
+            if any(v < 0.7 for v in sum_corre[r]):
+                warning_replicate.append(r)
+
+        if warning_replicate != []:
+            print(f"Please check the input data for replicate(s) : \n{', '.join(warning_replicate)}")
+            with open(relation_output, 'a') as f:
+                f.write("\n\n\n")
+                f.write(f"Please check the input data for replicate(s) : \n{', '.join(warning_replicate)}\n\n")
+
+        # correlation_output.to_csv(relation_output, sep="\t", float_format="%.4f")
+        # linear_regression.to_csv(relation_output, mode='a', sep="\t", float_format="%.4f")
 
 
     if plot is not None or fullplot is not None:
