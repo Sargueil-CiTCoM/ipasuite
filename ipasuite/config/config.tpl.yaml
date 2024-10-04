@@ -28,7 +28,7 @@ resource_dir: resources
 #   sequence_id_3: "resources/sequence3.fa"
 #```
 sequences:
-  CHANGEME: "resources/changeme.fa"
+  RNA_id: "resources/RNAsequence.fa"
 
 ###
 # List each condition here, each item in this line must correspond to a column of the samples.tsv file, and be also put into format -> condition
@@ -355,8 +355,8 @@ aggregate:
 #
 ipanemap:
   pools:
-    - id: 1M7_Mg_none
-      rna_id: CHANGEME
+    - id: Pool_id
+      rna_id: RNA_id
       external_conditions:
         - name: 1M7_noMg_T37C_map
           path: path/to/shape
@@ -395,9 +395,9 @@ varna:
 
 footprint:
   compares:
-    - id: 1M7_Mg_noMg
-      rna_id: CHANGEME
-      pool_id: CHANGEME
+    - id: Output_file_name
+      rna_id: RNA_id
+      pool_id: Pool_id
       condition1:
         temperature: 37
         magnesium: Mg
