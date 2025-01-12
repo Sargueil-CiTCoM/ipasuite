@@ -156,11 +156,11 @@ rule structure:
             pc_pairs = sorted(pc_pairs,key=lambda x:-x[0])
             print(pc_pairs)
             return [ c for (p,c) in pc_pairs[:k] ]
-
+        
         source_dir = str(input.dir[0])
         target_dir = os.path.join(RESULTS_DIR,config["folders"]["structure"])
         for i,j in enumerate(kbest_centroids(source_dir,2)):
-            shutil.copy(os.path.join(source_dir,gen_centroid_name(j)),os.path.join(target_dir,gen_centroid_name(i+1,tag="")))
+            shutil.copy(os.path.join(source_dir,gen_centroid_name(j)),os.path.join(target_dir,gen_centroid_name(i+1,tag="")))        
 
 rule varna_color_by_condition:
     #conda:

@@ -21,3 +21,4 @@ dependencies:
   - pip: 
     - bsddb3 
     - ipanemap
+    - varnaapi

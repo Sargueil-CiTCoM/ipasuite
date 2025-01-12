@@ -73,27 +73,36 @@ definitions:
     type: object
     additionalProperties: false
     properties:
-      plot: 
+      plot:
         type: boolean
         default: True
       norm_method:
         type: string
-      min_ndata_perc:
+      min_std:
         type: number
-      min_nsubdata_perc:
+      reactivity_medium:
         type: number
-      max_mean_perc:
+      reactivity_high:
         type: number
-      min_dispersion:
-        type: number
+#      min_ndata_perc:
+#        type: number
+#      min_nsubdata_perc:
+#        type: number
+#      max_mean_perc:
+#        type: number
+#      min_dispersion:
+#        type: number
       err_on_dup:
         type: boolean
         default: False
     required:
-    - max_mean_perc
-    - min_dispersion
-    - min_ndata_perc
-    - min_nsubdata_perc
+#    - max_mean_perc
+#    - min_dispersion
+#    - min_ndata_perc
+#    - min_nsubdata_perc
+    - min_std
+    - reactivity_medium
+    - reactivity_high
     - norm_method
     - err_on_dup
     - plot

@@ -26,8 +26,8 @@ class ReactivityThreshold:
     INVALID = -0.3
 
  #   LOW = 0.5
-    MEDIUM = 0.4
-    HIGH = 0.7
+ #   MEDIUM = 0.4
+ #   HIGH = 0.7
 
     COLOR_INVALID = "grey"
     COLOR_NONE = "white"
@@ -112,11 +112,13 @@ def plot_aggregation_infos(aggregated: pd.DataFrame, ax):
 
 def plot_aggregate(
     aggregated: pd.DataFrame,
+    reactivity_medium,
+    reactivity_high,
     fulloutput="fig.full.svg",
     output="fig.svg",
     title: str = "Aggregated reactivity",
     format="svg",
-):
+    ):
     aggregated = copy.deepcopy(aggregated)
     aggregated["xlabel"] = (
         aggregated.index.get_level_values("seqNum").astype(str)
@@ -189,18 +191,18 @@ def plot_aggregate(
 
     aggregated["color"] = ReactivityThreshold.COLOR_NONE
     aggregated.loc[
-        (aggregated["mean"] > ReactivityThreshold.HIGH), "color"
+        (aggregated["mean"] > reactivity_high), "color"
     ] = ReactivityThreshold.COLOR_HIGH
     aggregated.loc[
         (
-            (aggregated["mean"] <= ReactivityThreshold.HIGH)
-            & (aggregated["mean"] > ReactivityThreshold.MEDIUM)
+            (aggregated["mean"] <= reactivity_high)
+            & (aggregated["mean"] > reactivity_medium)
         ),
         "color",
     ] = ReactivityThreshold.COLOR_MEDIUM
     aggregated.loc[
         (
-            (aggregated["mean"] <= ReactivityThreshold.MEDIUM)
+            (aggregated["mean"] <= reactivity_medium)
             & (aggregated["mean"] > ReactivityThreshold.INVALID)
         ),
         "color",
@@ -482,7 +484,10 @@ def most_uniform_subsample_mean_std(sample):
 
 
 def aggregate_replicates(
-    row
+    row,
+    min_std,
+    reactivity_medium,
+    reactivity_high
 ):
     mean = np.NaN
     stdev = np.NaN
@@ -515,19 +520,19 @@ def aggregate_replicates(
             for u in range(len(nvalid_values)):
                 if u > v:
                     mean_uv = (nvalid_values[v] + nvalid_values[u])/2
-                    if 0 <= mean < 0.4:
-                        if mean_uv >= 0.4:
+                    if 0 <= mean < reactivity_medium:
+                        if mean_uv >= reactivity_medium:
                             mean_values.append(mean_uv)
-                    elif 0.4 <= mean < 0.7:
-                        if 0.4 > mean_uv or mean_uv >= 0.7:
+                    elif reactivity_medium <= mean < reactivity_high:
+                        if reactivity_medium > mean_uv or mean_uv >= reactivity_high:
                             mean_values.append(mean_uv)
-                    elif mean >= 0.7:
-                        if 0.7 > mean_uv:
+                    elif mean >= reactivity_high:
+                        if reactivity_high > mean_uv:
                             mean_values.append(mean_uv)
-        if mean_values == [] or stdev <= 0.15:
+        if mean_values == [] or stdev <= min_std:
             desc = "accepted"
             used_values = nvalues
-        elif all(0 <= m < 0.4 for m in mean_values) or all(0.4 <= m < 0.7 for m in mean_values) or all(0.7 <= m for m in mean_values):
+        elif all(0 <= m < reactivity_medium for m in mean_values) or all(reactivity_medium <= m < reactivity_high for m in mean_values) or all(reactivity_high <= m for m in mean_values):
             desc = 'warning'
             used_values = nvalues
         else:
@@ -573,6 +578,9 @@ def aggregate(
     map_output=None,
     relation_output=None,
     normcol="simple_norm_reactivity",
+    min_std,
+    reactivity_medium,
+    reactivity_high,
 #    min_ndata_perc: float = 0.5,
 #    min_nsubdata_perc: float = 0.66,
 #    max_mean_perc: float = 0.682,
@@ -651,7 +659,10 @@ def aggregate(
         ["mean", "stdev", "sem", "mad", "used_values", "desc"]
     ] = aggregated.apply(
         lambda row: aggregate_replicates(
-            row
+            row,
+            min_std,
+            reactivity_medium,
+            reactivity_high
 #            max_mean_perc,
 #            min_ndata_perc,
 #            min_nsubdata_perc,
@@ -786,7 +797,7 @@ def aggregate(
         aggregated.set_index(['sequence'],inplace=True, append=True)
         try:
             title = plot_title if plot_title is not None else output
-            plot_aggregate(aggregated, fulloutput=fullplot, output=plot, title=title)
+            plot_aggregate(aggregated, reactivity_medium, reactivity_high, fulloutput=fullplot, output=plot, title=title)
         except ValueError as e:
             logging.error(f"Unable to save plot: {e}")
             open(fullplot, "a").close()

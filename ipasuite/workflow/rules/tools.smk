@@ -176,6 +176,9 @@ rule aggregate_reactivity:
     log: construct_path('aggreact', ext=".log", log_dir=True, show_replicate=False)
     params:
         norm_method= construct_normcol(),
+        min_std = construct_param(config["aggregate"], "min_std"),
+        reactivity_medium = construct_param(config["aggregate"], "reactivity_medium"),
+        reactivity_high = construct_param(config["aggregate"], "reactivity_high"),
 #        minndp = construct_param(config["aggregate"], "min_ndata_perc"),
 #        mindndp = construct_param(config["aggregate"], "min_nsubdata_perc"),
 #        maxmp = construct_param(config["aggregate"], "max_mean_perc"),

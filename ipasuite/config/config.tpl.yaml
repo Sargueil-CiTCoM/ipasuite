@@ -279,13 +279,16 @@ normalization:
 aggregate:
   plot: True
   norm_method: simple # or interquartile
+  min_std: 0.15
+  reactivity_medium: 0.4
+  reactivity_high: 0.7
 
   # You can specify the name of the column used for normalization instead of the normalization method
   #norm_column: "simple_norm_reactivity" #
-  min_ndata_perc: 0.5
-  min_nsubdata_perc: 0.66
-  max_mean_perc: 0.682
-  min_dispersion: 0.05
+  #  min_ndata_perc: 0.5
+  #  min_nsubdata_perc: 0.66
+  #  max_mean_perc: 0.682
+  #  min_dispersion: 0.05
 
 ###
 # IPANEMAP configuration
@@ -448,6 +451,6 @@ folders:
   aggreact-ipanemap: 4.aggregated-reactivity
   ipanemap-config: 5.1-ipanemap-config
   ipanemap-out: 5.2-ipanemap-temp
-  structure: 5.3-structure
-  varna: 5.4-varna
-  footprint: 5.5-footprint
+  structure: 5.2-structure
+  varna: 5.3-varna
+  footprint: 5.4-footprint

@@ -19,6 +19,8 @@ import traceback
 
 import csv
 import re
+import RNA
+import varnaapi
 
 LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
 DATE_FORMAT = "%b %d %H:%M:%S"
@@ -384,6 +386,7 @@ class Launcher(object):
             logger.error(traceback.format_exc())
             logger.error(e)
             logger.error("to get more information, type : ipasuite log")
+        shutil.rmtree('./results/5.2-ipanemap-temp')
 
     def unlock(self):
         """
@@ -476,6 +479,107 @@ class Launcher(object):
                     os.remove(file)
                 if len(gl) > 0:
                     logger.info(f"{folder} logs cleaned")
+
+
+    def comparison(self):
+        if 'results' in os.listdir('./'):
+            folder = './results/5.2-structure'
+            file_names = os.listdir('./results/5.2-structure')
+        else:
+            folder = './'
+            file_names = os.listdir('./')
+
+        def get_sequence_structure(filename):
+            with open(f'{filename}', 'r') as file:
+                    content = file.read()
+            lines = content.split('\n')
+            sequence = lines[1]
+            structure = lines[2]
+            mfe_base_pair = []
+            mfe_bp = list(RNA.ptable(structure))[1:]
+            for j in range(len(mfe_bp)):
+                if mfe_bp[j] != 0:
+                    mfe_base_pair.append([j,mfe_bp[j]-1])
+            model = {'sequence': sequence, 'secondary_structure':structure, 'mfe_base_pair':mfe_base_pair}
+            return model
+        
+        def model_vs_model(model1, model2):
+            identical_bases = []
+            different_bps = []
+            for n, i in enumerate(model1['secondary_structure']):
+                if i == model2['secondary_structure'][n] and model2['secondary_structure'][n] not in ['(',')']:
+                    identical_bases.append(1)
+                    different_bps.append(1)
+                elif i in ['(',')'] and model2['secondary_structure'][n] in ['(',')']:
+                    bp = [bp for bp in model1['mfe_base_pair'] if bp[0] == n]
+                    if bp[0] in model2['mfe_base_pair']:
+                        identical_bases.append(1)
+                        different_bps.append(1)
+                    else:
+                        identical_bases.append(0)
+                        different_bps.append(-1)
+                elif i == '.' and model2['secondary_structure'][n] == '-':
+                    identical_bases.append(1)
+                    different_bps.append(1)
+                else:
+                    identical_bases.append(0)
+                    different_bps.append(0)
+            model = {'sequence' : model1['sequence'], 'secondary_structure' : model1['secondary_structure'], 'identical_bases':identical_bases, 'different_bps':different_bps}
+            return model
+        
+        def varnaplot(model_info, color, path):
+            conda_prefix = os.environ.get("CONDA_PREFIX")
+            varnaapi.set_VARNA(f'{conda_prefix}/lib/varna/VARNA.jar')
+            v = varnaapi.Structure(sequence=model_info['sequence'], structure=model_info['secondary_structure'])
+            v.set_algorithm('radiate')
+            v.update(bpStyle="lw", spaceBetweenBases=0.75, bpIncrement=1.3)
+            v.add_colormap(values = color, vMin=-1, vMax=1, caption='', style={-1: '#fc0303',-0.9: '#ffffff', 0.9:'#ffffff',1:'#1d05f5'})
+            tmpname = path
+            v.savefig(tmpname)
+
+        file_list = '\n      '.join(file_names)
+        print(f'\nModel DBN filename : \n      {file_list}')
+        response1 = input("Please enter DBM filename of the first model : ")
+        while response1 not in file_names:
+            print(f'\nModel DBN filename : \n      {file_list}')
+            response1 = input("Please enter DBM filename of the first model : ")
+        
+        if response1 in file_names:
+            filename1 = f'{folder}/{response1}'
+            file_names.remove(response1)
+            file_list = '\n      '.join(file_names)
+            print(f'\nModel DBN filename : \n      {file_list}')
+            response2 = input("Please enter DBM filename of the second model : ")
+            while response2 not in file_names:
+                print(f'\nModel DBN filename : \n      {file_list}')
+                response2 = input("Please enter DBM filename of the second model : ")
+            if response2 in file_names:
+                filename2 = f'{folder}/{response2}'
+                
+                model1 = get_sequence_structure(filename1)
+                model2 = get_sequence_structure(filename2)
+                if model1['sequence'].upper().replace('T','U') != model2['sequence'].upper().replace('T','U') :
+                    print('\n*** Please verify the input DBN files, the sequences differ between the two DBN files. ***')
+
+                elif len(model1['secondary_structure']) != len(model2['secondary_structure']):
+                    print('\n*** Please verify the input DBN files, the secondary structures in the two DBN files have different lengths. ***')
+                
+                else:
+                    output_name = input("Please enter the output folder name : ")
+                    while output_name == '' or output_name == ' ':
+                        output_name = input("Please enter the output folder name : ")
+                    if output_name != '' and output_name != ' ':
+                        output_name = output_name
+                        model_vs = model_vs_model(model1, model2)
+
+                        os.makedirs(f'./comparaison_models/{output_name}', exist_ok=True)
+                        file_paths = {}
+                        for j in model_vs:
+                            if j not in ['sequence', 'secondary_structure']:
+                                file_paths[f'{j}_file_path'] = f'./comparaison_models/{output_name}/{j}.txt'
+                                varnaplot_path = f'./comparaison_models/{output_name}/{j}.varna'
+                                varnaplot(model_vs, model_vs[j], varnaplot_path)
+            
 
     def _check_dup(self, path):
         path = pathlib.Path(path)
