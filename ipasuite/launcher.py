@@ -482,6 +482,9 @@ class Launcher(object):
 
 
     def comparison(self):
+        """
+        Compare secondary structures.
+        """
         if 'results' in os.listdir('./'):
             folder = './results/5.2-structure'
             file_names = os.listdir('./results/5.2-structure')
