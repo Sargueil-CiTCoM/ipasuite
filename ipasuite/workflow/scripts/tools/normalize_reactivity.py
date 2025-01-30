@@ -256,7 +256,7 @@ def normalize_one_path(
     norm_df = intensity_area_df.copy(deep=True)
 
     if "simple" in norm_methods:
-        df = prepare_normalization_df(norm_df)
+        df = prepare_normalization_df(norm_df, reactive_nucleotides)
         simple_norm_term = compute_simple_norm_term(
             df,
             outlier_percentile=simple_outlier_percentile,
@@ -276,7 +276,7 @@ def normalize_one_path(
         ]
 
     if "interquartile" in norm_methods:
-        df = prepare_normalization_df(norm_df)
+        df = prepare_normalization_df(norm_df, reactive_nucleotides)
         inter_norm_term = compute_interquart_norm_term(df)
         df["interquartile_norm_reactivity"] = (
             df["corr_areaRX"] / inter_norm_term

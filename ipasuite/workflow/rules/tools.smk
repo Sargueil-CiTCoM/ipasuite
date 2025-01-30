@@ -124,14 +124,14 @@ rule normalize_reactivity:
              f" - replicate {{wildcards.replicate}}"
     log: construct_path('normreact', ext=".log", log_dir=True, split_seq=True)
     params:
-        react_nuc = get_reactive_nucleotides,
-        st_perc = construct_param(CNORM, "stop_percentile"),
-        low_norm_reac_thres = construct_param(CNORM, "low_norm_reactivity_threshold"),
+        reactive_nucleotides = get_reactive_nucleotides,
+        stop_percentile = construct_param(CNORM, "stop_percentile"),
+        low_norm_reactivity_threshold = construct_param(CNORM, "low_norm_reactivity_threshold"),
         norm_methods = construct_list_param(CNORM, "norm_methods"),
         shape_file_normcol = construct_normcol(),
         snorm_out_perc= construct_param(CNORM, "simple_outlier_percentile"),
-        snorm_term_avg_perc= construct_param(CNORM, "simple_norm_term_avg_percentile"),
-        plot =  lambda wildcards, output: f"--plot={output.plot}" if config["normalization"]["plot"] else "",
+        simple_norm_term_avg_percentile = construct_param(CNORM, "simple_norm_term_avg_percentile"),
+        plot = lambda wildcards, output: f"--plot={output.plot}" if config["normalization"]["plot"] else "",
         plot_title=lambda wildcards: f"--plot_title='Normalized Reactivity of {MESSAGE.format(wildcards=wildcards)} - replicate {wildcards.replicate}'"
     shell:
         f"normalize_reactivity {{params}} {{input}}"
