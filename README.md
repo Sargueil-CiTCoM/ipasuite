@@ -1,5 +1,8 @@
 # IPANEMAP Suite
 
+[![DOI](https://zenodo.org/badge/385251818.svg)](https://doi.org/10.5281/zenodo.14936736)
+
+
 IPANEMAP Suite workflow intend to provide automation in the data treatment of SHAPE Capillary Electrophorese.
 
 The workflow will enable you to generate structure data for an RNA fragment analysed by potentially several SHAPE experiments under different conditions (Temperature, Magnesium, Probes, etc).
