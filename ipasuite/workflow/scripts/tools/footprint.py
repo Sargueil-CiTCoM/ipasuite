@@ -109,15 +109,15 @@ def footprint_ttest(
         if row.loc[cond1_name]["desc"] in ("accepted", "warning", "one-value-available") and row.loc[
             cond2_name]["desc"] in ("accepted", "warning", "one-value-available"):
             # get reactivities of the replicates
-            rs1 = list(row.loc[cond1_name].iloc[:row.loc[cond1_name].index.get_loc("mean")])
-            rs2 = list(row.loc[cond2_name].iloc[:row.loc[cond2_name].index.get_loc("mean")])
+            rs1 = np.array(list(row.loc[cond1_name].iloc[:row.loc[cond1_name].index.get_loc("mean")]))
+            rs2 = np.array(list(row.loc[cond2_name].iloc[:row.loc[cond2_name].index.get_loc("mean")]))
             # compare by ttest only if at least one condition has more than
             # 1 replicates
-            if len(rs1)>1 or len(rs2)>1:
+            if len(rs1[~np.isnan(rs1)])>1 or len(rs2[~np.isnan(rs2)])>1:
                 _, pvalue = scipy.stats.ttest_ind(
                     rs1, rs2,
                     equal_var=True,
-                    alternative="two-sided",)
+                    alternative="two-sided",nan_policy='omit')
             else:
                 pvalue = 0 # set to 0 in order to leave decision to other criteria
 
