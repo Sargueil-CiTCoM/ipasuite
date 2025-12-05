@@ -21,6 +21,7 @@ import csv
 import re
 import RNA
 import varnaapi
+from collections import Counter
 
 LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(message)s"
 DATE_FORMAT = "%b %d %H:%M:%S"
@@ -532,8 +533,13 @@ class Launcher(object):
                 else:
                     identical_bases.append(0)
                     different_bps.append(0)
+            counter_1 = dict(Counter(identical_bases))
+            counter_2 = dict(Counter(different_bps))
+            ratio_counter_1 = {('Different' if s == 0 else 'Identical' if s == 1 else 'Paired with a different partner'): counter_1[s]/len(model1['sequence']) for s in counter_1}
+            ratio_counter_2 = {('Different' if s == 0 else 'Identical' if s == 1 else 'Paired with a different partner'): counter_2[s]/len(model1['sequence']) for s in counter_2} 
             model = {'sequence' : model1['sequence'], 'secondary_structure' : model1['secondary_structure'], 'identical_bases':identical_bases, 'different_bps':different_bps}
-            return model
+            proportion = {'proportion_identical_bases':ratio_counter_1, 'proportion_different_bps':ratio_counter_2}
+            return model, proportion
         
         def varnaplot(model_info, color, path):
             conda_prefix = os.environ.get("CONDA_PREFIX")
@@ -578,7 +584,7 @@ class Launcher(object):
                         output_name = input("Please enter the output folder name : ")
                     if output_name != '' and output_name != ' ':
                         output_name = output_name
-                        model_vs = model_vs_model(model1, model2)
+                        model_vs, proportion_vs = model_vs_model(model1, model2)
 
                         os.makedirs(f'./comparaison_models/{output_name}', exist_ok=True)
                         file_paths = {}
@@ -587,6 +593,11 @@ class Launcher(object):
                                 file_paths[f'{j}_file_path'] = f'./comparaison_models/{output_name}/{j}.txt'
                                 varnaplot_path = f'./comparaison_models/{output_name}/{j}.varna'
                                 varnaplot(model_vs, model_vs[j], varnaplot_path)
+                        for pp in proportion_vs:
+                            with open(f'./comparaison_models/{output_name}/{pp}.txt', "w", encoding="utf-8") as f:
+                                f.write('Proportion :\n')
+                                for key, value in proportion_vs[pp].items():
+                                    f.write(f"{key}: {value}\n")
             
 
     def _check_dup(self, path):
