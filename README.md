@@ -44,13 +44,13 @@ Main parameters of `config.yaml` and their default values:
 | `aggregate` | `min_std` | `0.15` | Max standard deviation to accept a position directly |
 | `aggregate` | `reactivity_medium` | `0.4` | Lower bound of the medium reactivity class |
 | `aggregate` | `reactivity_high` | `0.7` | Lower bound of the high reactivity class |
-| `ipanemap.config` | `nstructures` | `1000` | Number of sampled structures |
-| `ipanemap.config` | `temperature` | `37` | Folding temperature (°C) |
-| `ipanemap.config` | `slope` | `1.3` | Pseudo-energy slope (kcal/mol) |
-| `ipanemap.config` | `intercept` | `-0.4` | Pseudo-energy intercept (kcal/mol) |
-| `footprint.config` | `diff_thres` | `0.2` | Absolute difference threshold |
-| `footprint.config` | `ratio_thres` | `0.2` | Relative difference threshold |
-| `footprint.config` | `ttest_pvalue_thres` | `0.05` | t-test p-value threshold |
+| `ipanemap:config` | `nstructures` | `1000` | Number of sampled structures |
+| `ipanemap:config` | `temperature` | `37` | Folding temperature (°C) |
+| `ipanemap:config` | `slope` | `1.3` | Pseudo-energy slope (kcal/mol) |
+| `ipanemap:config` | `intercept` | `-0.4` | Pseudo-energy intercept (kcal/mol) |
+| `footprint:config` | `diff_thres` | `0.2` | Absolute difference threshold |
+| `footprint:config` | `ratio_thres` | `0.2` | Relative difference threshold |
+| `footprint:config` | `ttest_pvalue_thres` | `0.05` | t-test p-value threshold |
 
 ## Commands
 
